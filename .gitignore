@@ -1,0 +1,14 @@
+# Global ignores
+node_modules/
+**/node_modules/
+*.log
+.DS_Store
+.env
+
+# Build outputs
+/dist/
+**/dist/
+
+# IDE
+.vscode/
+.idea/
