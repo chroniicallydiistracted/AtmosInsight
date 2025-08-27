@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { Timeline } from './Timeline';
 
 function mockFetch(data: string[]) {
-  global.fetch = vi.fn().mockResolvedValue({ json: async () => data });
+  globalThis.fetch = vi.fn().mockResolvedValue({ json: async () => data });
 }
 
 describe('Timeline', () => {
