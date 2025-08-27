@@ -1,0 +1,10 @@
+# Node
+node_modules
+*.log
+
+# Build outputs
+dist
+*.zip
+
+# Terraform
+infra/.terraform/
