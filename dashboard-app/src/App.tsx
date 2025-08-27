@@ -3,6 +3,7 @@ import maplibregl from 'maplibre-gl'
 import { PMTiles, Protocol } from 'pmtiles'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import './App.css'
+import { Timeline } from './components/Timeline'
 
 const protocol = new Protocol()
 maplibregl.addProtocol('pmtiles', protocol.tile)
@@ -22,5 +23,10 @@ export default function App() {
     return () => map.remove()
   }, [])
 
-  return <div ref={mapRef} className="map-container" />
+  return (
+    <div>
+      <div ref={mapRef} className="map-container" />
+      <Timeline layerId="goes-east" />
+    </div>
+  )
 }

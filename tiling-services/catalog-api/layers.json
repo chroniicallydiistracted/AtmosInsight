@@ -1,0 +1,11 @@
+[
+  {
+    "id": "goes-east",
+    "name": "GOES-East Full Disk",
+    "format": "pmtiles",
+    "zmin": 0,
+    "zmax": 8,
+    "legend": "/legend/goes-east",
+    "attribution": "NOAA"
+  }
+]

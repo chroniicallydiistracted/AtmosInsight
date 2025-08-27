@@ -25,3 +25,7 @@ output "rds_endpoint" {
 output "cloudfront_domain" {
   value = module.cdn.domain_name
 }
+
+output "catalog_api_url" {
+  value = aws_apigatewayv2_api.catalog.api_endpoint
+}
