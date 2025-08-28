@@ -39,9 +39,9 @@ This file instructs autonomous coding agents (Codex or equivalent) exactly what 
 - [x] ~~Integration tests hit 2–3 representative layers (geo color, aerosol/infrared) with **200** responses.~~
 
 ### 1.2 Add WMTS Redirect Helper
-- Provide `/api/gibs/redirect?...` that 302-redirects from a short query to the canonical REST URL, minimizing client complexity.  
-- [ ] 302 from `?layer=...&epsg=3857&time=default&tms=GoogleMapsCompatible_Level6&z=..&x=..&y=..` to canonical REST.  
-- [ ] CSP/safe redirect checks (only to `gibs.earthdata.nasa.gov`).
+- [x] ~~Provide `/api/gibs/redirect?...` that 302-redirects from a short query to the canonical REST URL, minimizing client complexity.~~
+- [x] ~~302 from `?layer=...&epsg=3857&time=default&tms=GoogleMapsCompatible_Level6&z=..&x=..&y=..` to canonical REST.~~
+- [x] ~~CSP/safe redirect checks (only to `gibs.earthdata.nasa.gov`).~~
 
 ### 1.3 OpenWeatherMap (OWM) tiles
 - Implement proxy pass-through for OWM map layers (e.g., `clouds_new`, `precipitation_new`) using the **official** format:  
