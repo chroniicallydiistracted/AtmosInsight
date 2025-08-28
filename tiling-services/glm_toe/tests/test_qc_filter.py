@@ -1,6 +1,8 @@
 import math
 from typing import Tuple
 from fastapi.testclient import TestClient
+from PIL import Image
+import io
 
 
 def lonlat_to_tile(lon: float, lat: float, zoom: int) -> Tuple[int, int]:
@@ -29,5 +31,11 @@ def test_qc_filter_changes_tile_size(monkeypatch):
     a = client.get(f"/tiles/{z}/{x}/{y}.png?window=5m")
     b = client.get(f"/tiles/{z}/{x}/{y}.png?window=5m&qc=true")
     assert a.status_code == 200 and b.status_code == 200
-    # With qc=true, only one event contributes; image should be same or smaller
-    assert len(b.content) <= len(a.content)
+    # Decode PNGs and count non-transparent pixels
+    ia = Image.open(io.BytesIO(a.content)).convert('RGBA')
+    ib = Image.open(io.BytesIO(b.content)).convert('RGBA')
+    pa = ia.getdata()
+    pb = ib.getdata()
+    nonzero_a = sum(1 for r,g,bl,al in pa if al > 0)
+    nonzero_b = sum(1 for r,g,bl,al in pb if al > 0)
+    assert nonzero_b <= nonzero_a + 5

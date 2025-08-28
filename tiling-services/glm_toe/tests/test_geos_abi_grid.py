@@ -65,3 +65,57 @@ def test_render_tile_abi_mode_single_event(monkeypatch, z):
     assert r2.headers.get("content-type", "").startswith("image/png")
     assert len(r2.content) > 200
 
+
+
+def test_geos_cell_size_mid_latitude():
+    from app.main import _GEOS_FWD
+
+    lon0 = -75.0
+    lat = 35.0
+    # East-west distance per degree at latitude ~ cos(lat)*111.32 km
+    deglon = 2.0 / (111.32 * math.cos(math.radians(lat)))
+    x1, y1 = _GEOS_FWD.transform(lon0, lat)
+    x2, y2 = _GEOS_FWD.transform(lon0 + deglon, lat)
+    dx = abs(x2 - x1)
+    # Allow 25% tolerance around 2 km
+    assert 1500.0 <= dx <= 2500.0
+
+@pytest.mark.parametrize("lat", [0.0, 15.0, 30.0, 45.0])
+def test_geos_cell_size_across_latitudes(lat):
+    from app.main import _GEOS_FWD
+
+    lon0 = -75.0
+    # East-west distance per degree at latitude ~ cos(lat)*111.32 km
+    deglon = 2.0 / (111.32 * math.cos(math.radians(lat)))
+    x1, y1 = _GEOS_FWD.transform(lon0, lat)
+    x2, y2 = _GEOS_FWD.transform(lon0 + deglon, lat)
+    dx = abs(x2 - x1)
+    # Projection / Earth model differences warrant a generous tolerance
+    assert 1300.0 <= dx <= 3000.0
+
+
+@pytest.mark.parametrize('lat', [20.0, 35.0, 50.0])
+@pytest.mark.parametrize('z', [3, 4])
+def test_render_tile_abi_mode_various_lats(monkeypatch, lat, z):
+    monkeypatch.setenv("GLM_USE_ABI_GRID", "true")
+    from fastapi.testclient import TestClient
+    from app.main import app
+
+    client = TestClient(app)
+
+    evt = {"lat": float(lat), "lon": -75.0, "energy_fj": 2000.0}
+    r = client.post("/ingest", json=[evt])
+    assert r.status_code == 200
+
+    def lonlat_to_tile(lon: float, lat: float, zoom: int):
+        n = 2 ** zoom
+        xtile = int((lon + 180.0) / 360.0 * n)
+        lat_rad = math.radians(lat)
+        ytile = int((1.0 - math.log(math.tan(lat_rad) + 1 / math.cos(lat_rad)) / math.pi) / 2.0 * n)
+        return xtile, ytile
+
+    x, y = lonlat_to_tile(evt["lon"], evt["lat"], z)
+    r2 = client.get(f"/tiles/{z}/{x}/{y}.png?window=5m")
+    assert r2.status_code == 200
+    assert r2.headers.get("content-type", "").startswith("image/png")
+    assert len(r2.content) > 200

@@ -21,6 +21,7 @@ class Event(BaseModel):
     lon: float
     energy_fj: float
     timeMs: int | None = None
+    qc_ok: bool | None = None
 
 
 DEFAULT_WINDOW_MS = 5 * 60 * 1000  # 5 minutes default per guide
@@ -165,26 +166,36 @@ def render_tile(z: int, x: int, y: int, *, window_ms: int, t_end_ms: int | None 
         for e in _events:
             if e.timeMs is None or e.timeMs < start_ms or e.timeMs > end_ms:
                 continue
+            if qc and (e.qc_ok is False):
+                continue
             X, Y = _GEOS_FWD.transform(e.lon, e.lat)
             if not (math.isfinite(X) and math.isfinite(Y)):
                 continue
-            gx = int(round(X / cell_m))
-            gy = int(round(Y / cell_m))
+            gx = int(math.floor(X / cell_m))
+            gy = int(math.floor(Y / cell_m))
             grid_bins[(gx, gy)] = grid_bins.get((gx, gy), 0.0) + float(e.energy_fj)
         for (gx, gy), toe in grid_bins.items():
-            cx = gx * cell_m
-            cy = gy * cell_m
+            cx = (gx + 0.5) * cell_m
+            cy = (gy + 0.5) * cell_m
             lonc, latc = _GEOS_INV.transform(cx, cy)
             xpix, ypix = lonlat_to_pixel(lonc, latc, z, x, y)
             if xpix < 0 or ypix < 0 or xpix >= tile_size or ypix >= tile_size:
                 continue
             sx = int(xpix)
             sy = int(ypix)
-            px[sx, sy] = color_for(toe)
+            r, g, b, a = color_for(toe)
+            for dy in (-1, 0, 1):
+                for dx in (-1, 0, 1):
+                    px_i = sx + dx
+                    py_i = sy + dy
+                    if 0 <= px_i < tile_size and 0 <= py_i < tile_size:
+                        px[px_i, py_i] = (r, g, b, a)
     else:
         bins = {}
         for e in _events:
             if e.timeMs is None or e.timeMs < start_ms or e.timeMs > end_ms:
+                continue
+            if qc and (e.qc_ok is False):
                 continue
             mpp = meters_per_pixel(e.lat, z)
             # Guard against poles / invalid latitudes where cos(lat) -> 0
@@ -254,11 +265,16 @@ def ingest_files(body: IngestFilesRequest):
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"failed to read {p}: {e}")
         now = int(time.time() * 1000)
-        for la, lo, en, t in events:
+        for item in events:
+            if len(item) == 5:
+                la, lo, en, t, qc_ok = item  # type: ignore[misc]
+            else:
+                la, lo, en, t = item  # type: ignore[misc]
+                qc_ok = None
             # ensure window pruning relative to now
             if t > now:
                 t = now
-            _events.append(Event(lat=la, lon=lo, energy_fj=en, timeMs=t))
+            _events.append(Event(lat=la, lon=lo, energy_fj=en, timeMs=t, qc_ok=qc_ok))
             total += 1
     prune()
     return {"ok": True, "ingested": total}
