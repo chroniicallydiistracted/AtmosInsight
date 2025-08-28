@@ -139,6 +139,9 @@ def render_tile(z: int, x: int, y: int, *, window_ms: int, t_end_ms: int | None 
         if e.timeMs is None or e.timeMs < start_ms or e.timeMs > end_ms:
             continue
         mpp = meters_per_pixel(e.lat, z)
+        # Guard against poles / invalid latitudes where cos(lat) -> 0
+        if not math.isfinite(mpp) or mpp <= 0:
+            continue
         step = max(1, round(2000.0 / mpp))
         xpix, ypix = lonlat_to_pixel(e.lon, e.lat, z, x, y)
         if xpix < 0 or ypix < 0 or xpix >= tile_size or ypix >= tile_size:
