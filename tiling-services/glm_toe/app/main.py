@@ -10,6 +10,7 @@ from .ingest_glm import read_glm_events_from_file
 import asyncio
 import datetime as dt
 import fsspec
+from collections import OrderedDict
 
 app = FastAPI(title="GLM TOE Service", version="0.1.0")
 
@@ -24,6 +25,25 @@ class Event(BaseModel):
 DEFAULT_WINDOW_MS = 5 * 60 * 1000  # 5 minutes default per guide
 _events: List[Event] = []
 _ingested_keys: Set[str] = set()
+
+# Simple LRU cache for rendered tiles
+class _LRU:
+    def __init__(self, max_items: int = 128):
+        self.max = max_items
+        self.map: OrderedDict[str, bytes] = OrderedDict()
+    def get(self, k: str) -> bytes | None:
+        v = self.map.get(k)
+        if v is not None:
+            self.map.move_to_end(k)
+        return v
+    def set(self, k: str, v: bytes):
+        if k in self.map:
+            self.map.move_to_end(k)
+        self.map[k] = v
+        while len(self.map) > self.max:
+            self.map.popitem(last=False)
+
+_tile_cache = _LRU(max_items=int(os.environ.get('GLM_TILE_CACHE_SIZE', '128')))
 
 
 @app.get("/health")
@@ -157,8 +177,16 @@ def tiles(
         except Exception:
             t_end_ms = None
     w_ms = _parse_window(window)
+    cache_key = f"{z}/{x}/{y}?w={w_ms}&t={t_end_ms or 0}&qc={int(qc)}"
+    cached = _tile_cache.get(cache_key)
+    if cached is not None:
+        return Response(content=cached, media_type="image/png", headers={"X-Cache": "HIT"})
     content = render_tile(z, x, y, window_ms=w_ms, t_end_ms=t_end_ms, qc=qc)
-    return Response(content=content, media_type="image/png")
+    _tile_cache.set(cache_key, content)
+    headers = {"X-Cache": "MISS"}
+    if t_end_ms is not None:
+        headers["Cache-Control"] = "public, max-age=300"
+    return Response(content=content, media_type="image/png", headers=headers)
 
 
 class IngestFilesRequest(BaseModel):
