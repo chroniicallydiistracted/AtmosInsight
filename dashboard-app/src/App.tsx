@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import maplibregl from 'maplibre-gl'
 import { PMTiles, Protocol } from 'pmtiles'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -6,23 +6,35 @@ import './App.css'
 import { Timeline } from './components/Timeline'
 import { GlmLegend } from './components/GlmLegend'
 import { AstroPanel } from './components/AstroPanel'
+import { AlertsLegend } from './components/AlertsLegend'
+import { RainviewerLayer } from './components/RainviewerLayer'
 
 const protocol = new Protocol()
 maplibregl.addProtocol('pmtiles', protocol.tile)
 
 export default function App() {
   const mapRef = useRef<HTMLDivElement | null>(null)
+  const [mapObj, setMapObj] = useState<maplibregl.Map | null>(null)
 
   useEffect(() => {
     const url = 'https://protomaps.github.io/basemaps/pmtiles/protomaps_2024-07-22-v4.pmtiles'
     protocol.add(new PMTiles(url))
+    const styleE2E = {
+      version: 8 as const,
+      sources: {},
+      layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#111820' } }]
+    }
+    const styleUrlOrSpec: any = import.meta.env.VITE_E2E === '1'
+      ? styleE2E
+      : 'https://protomaps.github.io/basemaps/style.json'
     const map = new maplibregl.Map({
       container: mapRef.current as HTMLDivElement,
-      style: 'https://protomaps.github.io/basemaps/style.json',
+      style: styleUrlOrSpec,
       center: [0, 0],
       zoom: 1
     })
     ;(window as any).__map = map
+    setMapObj(map)
 
     function addAlertsLayer() {
       fetch('/api/nws/alerts/active')
@@ -144,7 +156,9 @@ export default function App() {
       <div ref={mapRef} className="map-container" />
       <Timeline layerId="goes-east" />
       <AstroPanel />
-      <GlmLegend map={(window as any).__map ?? null} />
+      <GlmLegend map={mapObj} />
+      <AlertsLegend />
+      <RainviewerLayer map={mapObj} />
     </div>
   )
 }

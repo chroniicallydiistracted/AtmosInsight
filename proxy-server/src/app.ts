@@ -91,6 +91,17 @@ app.get('/api/owm/:layer/:z/:x/:y.png', shortLived60, async (req, res) => {
 // -----------------
 // RainViewer
 // -----------------
+app.get('/api/rainviewer/index.json', shortLived60, async (_req, res) => {
+  try {
+    const index = await getRainviewerIndex();
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).send(JSON.stringify(index));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('proxy error');
+  }
+});
+
 app.get('/api/rainviewer/:ts/:size/:z/:x/:y/:color/:options.png', shortLived60, async (req, res) => {
   try {
     if (process.env.RAINVIEWER_ENABLED && process.env.RAINVIEWER_ENABLED.toLowerCase() === 'false') {

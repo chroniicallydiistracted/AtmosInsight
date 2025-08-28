@@ -23,6 +23,9 @@ This commit establishes Milestone M1: foundational infrastructure configuration 
 - `GIBS_ENABLED` – `true|false` to enable/disable GIBS proxy (if implemented).
 - Mapbox/Cesium tokens as required by your chosen basemap providers.
 - `GLM_TOE_ENABLED` – `true|false` to enable experimental GLM TOE tile endpoint.
+- `GLM_TOE_PY_URL` – If set, proxy `/api/glm-toe/:z/:x/:y.png` to the Python FastAPI service (`tiling-services/glm_toe`).
+- `GLM_USE_ABI_GRID` – When running the Python service, enable precise ABI 2×2 km grid accumulation.
+- `GLM_TILE_CACHE_SIZE` – Python service tile LRU size (default 128).
 
 ## Basemap Tokens
 
