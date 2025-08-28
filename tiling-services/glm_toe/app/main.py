@@ -11,6 +11,7 @@ import asyncio
 import datetime as dt
 import fsspec
 from collections import OrderedDict
+from pyproj import CRS, Transformer
 
 app = FastAPI(title="GLM TOE Service", version="0.1.0")
 
@@ -44,6 +45,23 @@ class _LRU:
             self.map.popitem(last=False)
 
 _tile_cache = _LRU(max_items=int(os.environ.get('GLM_TILE_CACHE_SIZE', '128')))
+
+# ABI fixed-grid settings (optional high-quality mode)
+GLM_USE_ABI_GRID = os.environ.get('GLM_USE_ABI_GRID', 'false').lower() == 'true'
+GLM_ABI_LON0 = float(os.environ.get('GLM_ABI_LON0', '-75.0'))  # GOES-East default
+
+def _make_geos_transformers(lon0: float):
+    # GOES-R nominal: height ~35786023m, GRS80 ellipsoid
+    crs_geos = CRS.from_proj4(
+        f"+proj=geos +lon_0={lon0} +h=35786023 +a=6378137 +b=6356752.31414 +units=m +sweep=x +no_defs"
+    )
+    crs_wgs84 = CRS.from_epsg(4326)
+    fwd = Transformer.from_crs(crs_wgs84, crs_geos, always_xy=True)
+    inv = Transformer.from_crs(crs_geos, crs_wgs84, always_xy=True)
+    return fwd, inv
+
+_GEOS_FWD, _GEOS_INV = _make_geos_transformers(GLM_ABI_LON0)
+
 
 
 @app.get("/health")
@@ -140,27 +158,50 @@ def render_tile(z: int, x: int, y: int, *, window_ms: int, t_end_ms: int | None 
     end_ms = t_end_ms if t_end_ms is not None else now_ms
     start_ms = end_ms - window_ms
 
-    bins = {}
-    for e in _events:
-        if e.timeMs is None or e.timeMs < start_ms or e.timeMs > end_ms:
-            continue
-        mpp = meters_per_pixel(e.lat, z)
-        # Guard against poles / invalid latitudes where cos(lat) -> 0
-        if not math.isfinite(mpp) or mpp <= 0:
-            continue
-        step = max(1, round(2000.0 / mpp))
-        xpix, ypix = lonlat_to_pixel(e.lon, e.lat, z, x, y)
-        if xpix < 0 or ypix < 0 or xpix >= tile_size or ypix >= tile_size:
-            continue
-        sx = min(tile_size - 1, max(0, (int(xpix) // step) * step))
-        sy = min(tile_size - 1, max(0, (int(ypix) // step) * step))
-        key = sy * tile_size + sx
-        bins[key] = bins.get(key, 0.0) + float(e.energy_fj)
-
-    for key, toe in bins.items():
-        sy = key // tile_size
-        sx = key % tile_size
-        px[sx, sy] = color_for(toe)
+    if GLM_USE_ABI_GRID:
+        # Accumulate on ABI fixed grid (~2km cells), then render onto Web Mercator tile
+        grid_bins = {}
+        cell_m = 2000.0
+        for e in _events:
+            if e.timeMs is None or e.timeMs < start_ms or e.timeMs > end_ms:
+                continue
+            X, Y = _GEOS_FWD.transform(e.lon, e.lat)
+            if not (math.isfinite(X) and math.isfinite(Y)):
+                continue
+            gx = int(round(X / cell_m))
+            gy = int(round(Y / cell_m))
+            grid_bins[(gx, gy)] = grid_bins.get((gx, gy), 0.0) + float(e.energy_fj)
+        for (gx, gy), toe in grid_bins.items():
+            cx = gx * cell_m
+            cy = gy * cell_m
+            lonc, latc = _GEOS_INV.transform(cx, cy)
+            xpix, ypix = lonlat_to_pixel(lonc, latc, z, x, y)
+            if xpix < 0 or ypix < 0 or xpix >= tile_size or ypix >= tile_size:
+                continue
+            sx = int(xpix)
+            sy = int(ypix)
+            px[sx, sy] = color_for(toe)
+    else:
+        bins = {}
+        for e in _events:
+            if e.timeMs is None or e.timeMs < start_ms or e.timeMs > end_ms:
+                continue
+            mpp = meters_per_pixel(e.lat, z)
+            # Guard against poles / invalid latitudes where cos(lat) -> 0
+            if not math.isfinite(mpp) or mpp <= 0:
+                continue
+            step = max(1, round(2000.0 / mpp))
+            xpix, ypix = lonlat_to_pixel(e.lon, e.lat, z, x, y)
+            if xpix < 0 or ypix < 0 or xpix >= tile_size or ypix >= tile_size:
+                continue
+            sx = min(tile_size - 1, max(0, (int(xpix) // step) * step))
+            sy = min(tile_size - 1, max(0, (int(ypix) // step) * step))
+            key = sy * tile_size + sx
+            bins[key] = bins.get(key, 0.0) + float(e.energy_fj)
+        for key, toe in bins.items():
+            sy = key // tile_size
+            sx = key % tile_size
+            px[sx, sy] = color_for(toe)
 
     buf = io.BytesIO()
     img.save(buf, format="PNG")
