@@ -14,6 +14,8 @@ This file instructs autonomous coding agents (Codex or equivalent) exactly what 
 - **A11y:** Keyboard nav, contrast, reduced-motion fallback.  
 - **Definition of done (DoD):** Code + tests + docs + reproducible local runs + CI green + demo GIF where indicated.
 
+- **Implementation log discipline:** Maintain `Implementation_Checklist_and_Status.md` at the repo root. For every change going forward, add a dated entry describing what was implemented, why, linked files/paths, and mark it “production ready” only when verified. This document must be kept current and is part of the DoD.
+
 Additional directive (2025-08-28): Prioritize highest quality. When trade-offs arise, choose correctness, reliability, and maintainability (e.g., dedicated Python service for GLM NetCDF4 ingestion and precise ABI 2×2 km grid mapping) even if that increases complexity.
 
 ---
@@ -271,3 +273,10 @@ Implementation note: A high-quality Python FastAPI microservice (`tiling-service
 ---
 
 **Status discipline:** Keep this file authoritative. As tasks land, **check the box and strike through the exact line(s)**. Add new bullets only with clear DoD and tests.
+
+
+## Backlog Churn (Revisit Later)
+
+- NOAA fixed-grid line/element mapping using scanning angles (xi/eta) for ABI: current GEOS-based 2 km grid implementation is validated and performing as expected; revisit only if strict line/element parity is required for downstream interoperability.
+- Palette themes for GLM ramp (bright/muted), with server-rendered ramp selection.
+- Keyboard shortcut help overlay and more advanced A11y pass.
