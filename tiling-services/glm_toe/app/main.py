@@ -77,6 +77,12 @@ def lonlat_to_pixel(lon: float, lat: float, z: int, x: int, y: int):
     scale = tile_size * (2 ** z)
     world_x = ((lon + 180.0) / 360.0) * scale
     sin_lat = math.sin(math.radians(lat))
+    # Clamp to avoid division by zero / log domain errors at the poles
+    eps = 1e-12
+    if sin_lat >= 1.0 - eps:
+        sin_lat = 1.0 - eps
+    elif sin_lat <= -1.0 + eps:
+        sin_lat = -1.0 + eps
     world_y = (0.5 - math.log((1 + sin_lat) / (1 - sin_lat)) / (4 * math.pi)) * scale
     px = world_x - x * tile_size
     py = world_y - y * tile_size
