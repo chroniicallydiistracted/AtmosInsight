@@ -1,10 +1,12 @@
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Response, HTTPException
 from pydantic import BaseModel
 from typing import List
 import time
 import math
 import io
 from PIL import Image
+import os
+from .ingest_glm import read_glm_events_from_file
 
 app = FastAPI(title="GLM TOE Service", version="0.1.0")
 
@@ -110,3 +112,27 @@ def tiles(z: int, x: int, y: int):
     content = render_tile(z, x, y)
     return Response(content=content, media_type="image/png")
 
+
+class IngestFilesRequest(BaseModel):
+    paths: List[str]
+
+
+@app.post("/ingest_files")
+def ingest_files(body: IngestFilesRequest):
+    if not body.paths:
+        raise HTTPException(status_code=400, detail="paths required")
+    total = 0
+    for p in body.paths:
+        try:
+            events = read_glm_events_from_file(p)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"failed to read {p}: {e}")
+        now = int(time.time() * 1000)
+        for la, lo, en, t in events:
+            # ensure window pruning relative to now
+            if t > now:
+                t = now
+            _events.append(Event(lat=la, lon=lo, energy_fj=en, timeMs=t))
+            total += 1
+    prune()
+    return {"ok": True, "ingested": total}

@@ -7,6 +7,7 @@ A FastAPI microservice that ingests GOES-R GLM Level-2 data and renders Total Op
 - `GET /health` — service health
 - `POST /ingest` — dev-only synthetic events `[ {lat, lon, energy_fj, timeMs?} ]`
 - `GET /tiles/{z}/{x}/{y}.png` — TOE PNG tile
+- `POST /ingest_files` — ingest GLM L2 NetCDF file paths (local or s3:// URIs)
 
 ## Run locally
 
@@ -31,3 +32,18 @@ GLM_TOE_PY_URL=http://localhost:8080
 - Implement exact ABI 2×2 km grid mapping via pyproj/geostationary transform.
 - On-demand tile rendering with caching, configurable color ramp.
 - Integration test with sample GLM files.
+
+## Background/headless runs (avoid blocking the terminal)
+
+Run uvicorn in the background when developing:
+
+```bash
+nohup uvicorn app.main:app --port 8080 > glm_toe.log 2>&1 & disown
+```
+
+Similarly, you can run the Node proxy without blocking your shell:
+
+```bash
+cd ../../../proxy-server
+nohup npm start > proxy.log 2>&1 & disown
+```
