@@ -71,3 +71,22 @@ describe('GIBS domains proxy', () => {
     expect(res.headers['cache-control']).toBe('public, max-age=60');
   }, 20000);
 });
+
+describe('GIBS redirect helper', () => {
+  it('redirects to canonical REST URL', async () => {
+    const res = await request(app)
+      .get('/api/gibs/redirect')
+      .query({
+        layer: 'BlueMarble_ShadedRelief',
+        epsg: '3857',
+        tms: 'GoogleMapsCompatible_Level8',
+        z: '3',
+        y: '1',
+        x: '2',
+        ext: 'jpeg',
+      });
+    expect(res.status).toBe(302);
+    expect(res.headers['location']).toBe('https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief/default/GoogleMapsCompatible_Level8/3/1/2.jpeg');
+    expect(res.headers['cache-control']).toBe('public, max-age=60');
+  });
+});

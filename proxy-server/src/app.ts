@@ -94,8 +94,32 @@ async function proxyGibsDomains(req: express.Request, res: express.Response) {
   }
 }
 
+function redirectGibs(req: express.Request, res: express.Response) {
+  const { layer, epsg, time, tms, z, y, x, ext } = req.query as Record<string, string>;
+  if (!layer || !epsg || !tms || !z || !y || !x) {
+    res.status(400).send('missing params');
+    return;
+  }
+  const url = buildGibsTileUrl({
+    layer,
+    epsg,
+    time,
+    tms,
+    z,
+    y,
+    x,
+    ext: ext || 'png',
+  });
+  if (!url.startsWith('https://gibs.earthdata.nasa.gov/')) {
+    res.status(400).send('invalid redirect');
+    return;
+  }
+  res.redirect(302, url);
+}
+
 app.get('/api/gibs/tile/:epsg/:layer/:time/:tms/:z/:y/:x.:ext', shortLived60, proxyGibsTile);
 app.get('/api/gibs/tile/:epsg/:layer/:tms/:z/:y/:x.:ext', shortLived60, proxyGibsTile);
 app.get('/api/gibs/domains/:epsg/:layer/:tms/:range.xml', shortLived60, proxyGibsDomains);
+app.get('/api/gibs/redirect', shortLived60, redirectGibs);
 
 export { app };
