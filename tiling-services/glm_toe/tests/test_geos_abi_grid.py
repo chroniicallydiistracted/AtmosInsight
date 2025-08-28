@@ -94,7 +94,7 @@ def test_geos_cell_size_across_latitudes(lat):
     assert 1300.0 <= dx <= 3000.0
 
 
-@pytest.mark.parametrize('lat', [20.0, 35.0, 50.0])
+@pytest.mark.parametrize('lat', [20.0, 35.0, 50.0, 60.0])
 @pytest.mark.parametrize('z', [3, 4])
 def test_render_tile_abi_mode_various_lats(monkeypatch, lat, z):
     monkeypatch.setenv("GLM_USE_ABI_GRID", "true")
