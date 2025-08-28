@@ -6,5 +6,18 @@ node_modules
 dist
 *.zip
 
+# Playwright
+playwright-report/
+test-results/
+dashboard-app/playwright-report/
+dashboard-app/test-results/
+
+# Env files (never commit secrets)
+.env
+.env.local
+.env.*.local
+proxy-server/.env
+dashboard-app/.env
+
 # Terraform
 infra/.terraform/

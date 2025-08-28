@@ -39,6 +39,12 @@ export default tseslint.config([
 ])
 ```
 
+## App Environment Variables
+
+- `VITE_PLAYBACK_FPS` — Desired playback FPS (clamped to 2–8; default 4).
+- `VITE_ENABLE_TILE_CACHE` — `true|false` to enable in-memory tile prefetch cache (default false).
+- `VITE_TILE_CACHE_SIZE` — Max cached images when cache is enabled (default 64).
+
 You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
 ```js

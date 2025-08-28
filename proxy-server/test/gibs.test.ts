@@ -50,8 +50,8 @@ describe('GIBS tile proxy', () => {
     expect(res.headers['cache-control']).toBe('public, max-age=60');
   }, 20000);
 
-  it('serves MODIS Aqua tile', async () => {
-    const res = await request(app).get('/api/gibs/tile/3857/MODIS_Aqua_CorrectedReflectance_TrueColor/GoogleMapsCompatible_Level9/3/1/2.jpeg');
+  it('serves BlueMarble bathymetry tile', async () => {
+    const res = await request(app).get('/api/gibs/tile/3857/BlueMarble_ShadedRelief_Bathymetry/GoogleMapsCompatible_Level8/3/1/2.jpeg');
     expect(res.status).toBe(200);
     expect(res.headers['content-type']).toBe('image/jpeg');
   }, 20000);
