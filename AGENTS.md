@@ -33,10 +33,10 @@ This file instructs autonomous coding agents (Codex or equivalent) exactly what 
   - Unit: URL builder yields exact strings for EPSG:3857/4326, time omitted vs `default`, and DescribeDomains requests.  
   - Integration: Known public layer returns **200** PNG/JPEG for **z=3, x=2, y=1** and today’s **default** date.
 
-- [ ] Implement `/api/gibs/tile/:epsg/:layer/:time/:tms/:z/:y/:x.:ext` (time optional; default if omitted).  
-- [ ] Implement `/api/gibs/domains/:epsg/:layer/:tms/:range.xml` pass-through (e.g., `all`, `YYYY-MM-DD--YYYY-MM-DD`).  
-- [ ] Unit tests coverage ≥95% for URL formation edge cases.  
-- [ ] Integration tests hit 2–3 representative layers (geo color, aerosol/infrared) with **200** responses.
+- [x] ~~Implement `/api/gibs/tile/:epsg/:layer/:time/:tms/:z/:y/:x.:ext` (time optional; default if omitted).~~
+- [x] ~~Implement `/api/gibs/domains/:epsg/:layer/:tms/:range.xml` pass-through (e.g., `all`, `YYYY-MM-DD--YYYY-MM-DD`).~~
+- [x] ~~Unit tests coverage ≥95% for URL formation edge cases.~~
+- [x] ~~Integration tests hit 2–3 representative layers (geo color, aerosol/infrared) with **200** responses.~~
 
 ### 1.2 Add WMTS Redirect Helper
 - Provide `/api/gibs/redirect?...` that 302-redirects from a short query to the canonical REST URL, minimizing client complexity.  
