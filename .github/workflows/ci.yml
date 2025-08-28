@@ -59,3 +59,24 @@ jobs:
       - name: E2E tests
         working-directory: dashboard-app
         run: npm run e2e
+
+  glm-toe-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        working-directory: tiling-services/glm_toe
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+          pip install pytest
+      - name: Run tests
+        working-directory: tiling-services/glm_toe
+        run: |
+          source .venv/bin/activate
+          pytest -q

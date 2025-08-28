@@ -14,6 +14,8 @@ This file instructs autonomous coding agents (Codex or equivalent) exactly what 
 - **A11y:** Keyboard nav, contrast, reduced-motion fallback.  
 - **Definition of done (DoD):** Code + tests + docs + reproducible local runs + CI green + demo GIF where indicated.
 
+Additional directive (2025-08-28): Prioritize highest quality. When trade-offs arise, choose correctness, reliability, and maintainability (e.g., dedicated Python service for GLM NetCDF4 ingestion and precise ABI 2×2 km grid mapping) even if that increases complexity.
+
 ---
 
 ## 1) Proxy & Tile Services — Fix 400s, Normalize WMTS/XYZ
@@ -119,6 +121,8 @@ This file instructs autonomous coding agents (Codex or equivalent) exactly what 
 - [x] ~~README: exact data source URLs and operational notes.~~  
 - [x] ~~Feature flag to disable if data source unavailable.~~
 
+Implementation note: A high-quality Python FastAPI microservice (`tiling-services/glm_toe`) is being added for GLM L2 NetCDF ingestion and precise ABI grid mapping. The Node proxy (`proxy-server`) proxies `/api/glm-toe` to this service via `GLM_TOE_PY_URL` when configured; otherwise, it falls back to the Node MVP renderer.
+
 ---
 
 ## 6) Sun/Moon Positions, Phases, Distance
@@ -126,8 +130,8 @@ This file instructs autonomous coding agents (Codex or equivalent) exactly what 
 **Goal:** Deterministic, offline-capable astronomy panel.
 
 - Use a vetted algorithm (e.g., NOAA SPA or equivalent OSS library) to compute Sun/Moon azimuth, elevation, phases, and Earth-Moon distance for the current/selected time.  
-- [ ] Pure function returning values in SI units, tested against known ephemerides.  
-- [ ] UI widget with tooltips and “Learn” link.
+- [x] ~~Pure function returning values in SI units, tested against known ephemerides.~~  
+- [x] ~~UI widget with tooltips and “Learn” link.~~
 
 ---
 

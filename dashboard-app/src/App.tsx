@@ -4,6 +4,7 @@ import { PMTiles, Protocol } from 'pmtiles'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import './App.css'
 import { Timeline } from './components/Timeline'
+import { AstroPanel } from './components/AstroPanel'
 
 const protocol = new Protocol()
 maplibregl.addProtocol('pmtiles', protocol.tile)
@@ -118,6 +119,7 @@ export default function App() {
     <div>
       <div ref={mapRef} className="map-container" />
       <Timeline layerId="goes-east" />
+      <AstroPanel />
     </div>
   )
 }

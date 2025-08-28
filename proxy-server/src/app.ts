@@ -198,6 +198,7 @@ export { app };
 // GLM TOE Tiles (feature-flagged)
 // --------------
 const TOE_ENABLED = String(process.env.GLM_TOE_ENABLED || '').toLowerCase() === 'true';
+const TOE_PROXY = process.env.GLM_TOE_PY_URL; // Optional Python microservice for high-quality ingestion/tiling
 const toeAgg = new GlmToeAggregator();
 if (TOE_ENABLED) {
   // Ingest synthetic data endpoint (dev support)
@@ -207,8 +208,28 @@ if (TOE_ENABLED) {
     res.json({ ok: true, count: batch.length });
   });
 
-  app.get('/api/glm-toe/:z/:x/:y.png', shortLived60, (req, res) => {
+  // If a Python microservice is provided, proxy to it for tile rendering; else fallback to local MVP
+  app.get('/api/glm-toe/:z/:x/:y.png', shortLived60, async (req, res) => {
     const { z, x, y } = req.params as Record<string, string>;
+    if (TOE_PROXY) {
+      try {
+        const upstream = await fetchWithRetry(`${TOE_PROXY.replace(/\/$/, '')}/tiles/${z}/${x}/${y}.png`, {});
+        const buffer = Buffer.from(await upstream.arrayBuffer());
+        res.status(upstream.status);
+        upstream.headers.forEach((value, key) => {
+          const k = key.toLowerCase();
+          if (k === 'content-encoding' || k === 'content-length' || k === 'transfer-encoding' || k === 'cache-control') {
+            return;
+          }
+          res.setHeader(key, value);
+        });
+        res.send(buffer);
+        return;
+      } catch (e) {
+        console.error('GLM TOE Python proxy error:', e);
+        // fall back to local MVP below
+      }
+    }
     try {
       const buf = renderTilePng(toeAgg, Number(z), Number(x), Number(y));
       res.setHeader('Content-Type', 'image/png');
