@@ -4,6 +4,7 @@ import { PMTiles, Protocol } from 'pmtiles'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import './App.css'
 import { Timeline } from './components/Timeline'
+import { GlmLegend } from './components/GlmLegend'
 import { AstroPanel } from './components/AstroPanel'
 
 const protocol = new Protocol()
@@ -143,6 +144,7 @@ export default function App() {
       <div ref={mapRef} className="map-container" />
       <Timeline layerId="goes-east" />
       <AstroPanel />
+      <GlmLegend map={(window as any).__map ?? null} />
     </div>
   )
 }
