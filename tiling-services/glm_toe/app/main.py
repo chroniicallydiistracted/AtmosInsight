@@ -51,10 +51,18 @@ _tile_cache = _LRU(max_items=int(os.environ.get('GLM_TILE_CACHE_SIZE', '128')))
 GLM_USE_ABI_GRID = os.environ.get('GLM_USE_ABI_GRID', 'false').lower() == 'true'
 GLM_ABI_LON0 = float(os.environ.get('GLM_ABI_LON0', '-75.0'))  # GOES-East default
 
+# Locked ABI geostationary constants per GOES-R documentation
+ABI_A = 6378137.0            # GRS80 semi-major (meters)
+ABI_B = 6356752.31414        # GRS80 semi-minor (meters)
+ABI_H = 35786023.0           # Perspective point height above ellipsoid (meters)
+ABI_SWEEP = 'x'              # GOES-R sweep axis
+
+
+
 def _make_geos_transformers(lon0: float):
     # GOES-R nominal: height ~35786023m, GRS80 ellipsoid
     crs_geos = CRS.from_proj4(
-        f"+proj=geos +lon_0={lon0} +h=35786023 +a=6378137 +b=6356752.31414 +units=m +sweep=x +no_defs"
+        f"+proj=geos +lon_0={lon0} +h={ABI_H} +a={ABI_A} +b={ABI_B} +units=m +sweep={ABI_SWEEP} +no_defs"
     )
     crs_wgs84 = CRS.from_epsg(4326)
     fwd = Transformer.from_crs(crs_wgs84, crs_geos, always_xy=True)
