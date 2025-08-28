@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest run"
+    "preview:e2e": "vite build && vite preview --port=5173 --strictPort",
+    "test": "vitest run",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "maplibre-gl": "^5.7.0",
@@ -30,6 +32,7 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
     "vite": "^7.1.2",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@playwright/test": "^1.48.2"
   }
 }

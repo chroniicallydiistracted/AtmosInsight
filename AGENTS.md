@@ -47,19 +47,19 @@ This file instructs autonomous coding agents (Codex or equivalent) exactly what 
 - Implement proxy pass-through for OWM map layers (e.g., `clouds_new`, `precipitation_new`) using the **official** format:  
   `https://tile.openweathermap.org/map/{layer}/{z}/{x}/{y}.png?appid={API key}`. citeturn2view0
 - Add `OWM_API_KEY` env; blocklist unknown `layer` names; cache **60s**.  
-- [ ] `/api/owm/:layer/:z/:x/:y.png` → upstream; returns **200** for baseline layers with valid key.
+- [x] ~~`/api/owm/:layer/:z/:x/:y.png` → upstream; returns **200** for baseline layers with valid key.~~
 
 ### 1.4 RainViewer radar frames
 - Use **Weather Maps API** index JSON: `https://api.rainviewer.com/public/weather-maps.json` to obtain `host` and per-frame `path` entries. citeturn3view0
 - Construct tiles with:  
   `{host}{path}/{size}/{z}/{x}/{y}/{color}/{options}.png` (e.g., size 256 or 512; options `smooth_snow` like `1_0`). Note RainViewer’s 2025–2026 transition and zoom limits; handle gracefully. citeturn3view0
-- [ ] `/api/rainviewer/:ts/:size/:z/:x/:y/:color/:options.png` → rewrites to `{host}{path}...` for `ts` found in `past`/`nowcast`.  
-- [ ] Fallback logic when frames deprecate (per transition notes).
+- [x] ~~`/api/rainviewer/:ts/:size/:z/:x/:y/:color/:options.png` → rewrites to `{host}{path}...` for `ts` found in `past`/`nowcast`.~~  
+- [x] ~~Fallback logic when frames deprecate (per transition notes).~~
 
 ### 1.5 Cache middleware & headers (normalize)
 - Use existing `immutable1h` and `shortLived60` middlewares.  
 - GIBS tiles → **short-lived (60s)**; OWM → **60s**; RainViewer → **60s**; static assets/icons → **immutable**.  
-- [ ] Verify `Cache-Control` values via integration tests.
+- [x] ~~Verify `Cache-Control` values via integration tests.~~
 
 ---
 
@@ -73,7 +73,7 @@ This file instructs autonomous coding agents (Codex or equivalent) exactly what 
 - Add automatic `Accept: application/geo+json` and robust retry on 429 with backoff.
 - [x] ~~Proxy route `/api/nws/alerts/*` adds required headers and passes query through.~~
 - [x] ~~Integration test: `/alerts/active?area=AZ` returns **200** with features array.~~
-- [ ] Map layer renders polygons/lines with severity styling and click popovers.
+- [x] ~~Map layer renders polygons/lines with severity styling and click popovers.~~
 
 ---
 
@@ -86,7 +86,7 @@ This file instructs autonomous coding agents (Codex or equivalent) exactly what 
   - **Play gating** (disable play if <2 timestamps or last fetch errored)  
   - **FPS clamp** between 2–8 (default **4**)  
   - Optional tile cache sizing via `VITE_ENABLE_TILE_CACHE` flag  
-- [ ] Unit tests confirm FPS clamp bounds, gating logic, and prefetch scheduling.  
+- [x] ~~Unit tests confirm FPS clamp bounds, gating logic, and prefetch scheduling.~~  
 - [ ] Demo GIF in PR showing stable FPS and no jank on 2G throttling.
 
 ---
@@ -95,9 +95,9 @@ This file instructs autonomous coding agents (Codex or equivalent) exactly what 
 
 **Goal:** Basemap always shows in both `pnpm dev` and production build.
 
-- [ ] E2E test boots app and asserts Mapbox style load event fired and base tiles painted.  
-- [ ] Confirm no stray `/cesium` network fetches (CESIUM_BASE_URL removed).  
-- [ ] Document any required tokens/env for base maps; ensure no hard-coded keys.
+- [x] ~~E2E test boots app and asserts Mapbox style load event fired and base tiles painted.~~  
+- [x] ~~Confirm no stray `/cesium` network fetches (CESIUM_BASE_URL removed).~~  
+- [x] ~~Document any required tokens/env for base maps; ensure no hard-coded keys.~~
 
 ---
 
@@ -113,11 +113,11 @@ This file instructs autonomous coding agents (Codex or equivalent) exactly what 
 - Ingest recent L2 files for GOES-E/W (configurable time window, e.g., last 20–30 min), parse NetCDF, transform to 2×2 km grid, aggregate TOE per cell.
 - Output a **server-rendered tile service** (XYZ or WMTS) producing PNG tiles with continuous or stepped color ramp.
 - [ ] Implement `services/glm-toe/ingest.ts` (NetCDF reader + rolling window).  
-- [ ] Implement `services/glm-toe/tiles.ts` (XYZ endpoint).  
-- [ ] Unit tests: TOE aggregation for synthetic events; tile color mapping snapshot test.  
+- [x] ~~Implement `services/glm-toe/tiles.ts` (XYZ endpoint).~~  
+- [x] ~~Unit tests: TOE aggregation for synthetic events; tile color mapping snapshot test.~~  
 - [ ] Integration: Tile `z=5,x=9,y=12` returns **200** with non-empty PNG when sample GLM files are present.  
-- [ ] README: exact data source URLs and operational notes.  
-- [ ] Feature flag to disable if data source unavailable.
+- [x] ~~README: exact data source URLs and operational notes.~~  
+- [x] ~~Feature flag to disable if data source unavailable.~~
 
 ---
 
