@@ -19,5 +19,24 @@ dashboard-app/test-results/
 proxy-server/.env
 dashboard-app/.env
 
+# Python virtualenvs
+.venv/
+**/.venv/
+
+# Python bytecode/cache
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# PIDs and nohup output
+*.pid
+nohup.out
+**/nohup.out
+
 # Terraform
 infra/.terraform/
+
+# GLM references
+GLM_Lightning_HeatMap_guide.md
+GLM_HeatMap_QuickGuide.md
+

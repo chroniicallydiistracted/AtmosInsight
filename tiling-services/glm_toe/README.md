@@ -47,3 +47,16 @@ Similarly, you can run the Node proxy without blocking your shell:
 cd ../../../proxy-server
 nohup npm start > proxy.log 2>&1 & disown
 ```
+
+## Windowing and deterministic tiles
+
+The tiles endpoint supports a time window and an optional end time:
+
+```
+GET /tiles/{z}/{x}/{y}.png?window=5m&t=2025-08-28T08:30:00Z
+```
+
+- `window`: `1m`, `5m`, `300s`, `180000ms` (default `5m`)
+- `t`: ISO8601 UTC; if omitted, uses now.
+
+Use these parameters to produce deterministic tiles and set caching in front of the service.

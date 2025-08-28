@@ -1,12 +1,15 @@
-from fastapi import FastAPI, Response, HTTPException
+from fastapi import FastAPI, Response, HTTPException, Query
 from pydantic import BaseModel
-from typing import List
+from typing import List, Set, Tuple
 import time
 import math
 import io
 from PIL import Image
 import os
 from .ingest_glm import read_glm_events_from_file
+import asyncio
+import datetime as dt
+import fsspec
 
 app = FastAPI(title="GLM TOE Service", version="0.1.0")
 
@@ -18,8 +21,9 @@ class Event(BaseModel):
     timeMs: int | None = None
 
 
-WINDOW_MS = 30 * 60 * 1000
+DEFAULT_WINDOW_MS = 5 * 60 * 1000  # 5 minutes default per guide
 _events: List[Event] = []
+_ingested_keys: Set[str] = set()
 
 
 @app.get("/health")
@@ -40,9 +44,10 @@ def ingest(batch: List[Event]):
     return {"ok": True, "count": len(batch)}
 
 
-def prune():
+def prune(window_ms: int | None = None):
     now = int(time.time() * 1000)
-    cutoff = now - WINDOW_MS
+    w = window_ms if window_ms is not None else DEFAULT_WINDOW_MS
+    cutoff = now - w
     global _events
     _events = [e for e in _events if (e.timeMs or 0) >= cutoff]
 
@@ -63,8 +68,27 @@ def meters_per_pixel(lat: float, z: int):
     return (mpp_equator * math.cos(math.radians(lat))) / (2 ** z)
 
 
-def render_tile(z: int, x: int, y: int) -> bytes:
-    prune()
+def _parse_window(s: str | None) -> int:
+    if not s:
+        return DEFAULT_WINDOW_MS
+    s = s.strip().lower()
+    try:
+        # raw ms
+        if s.isdigit():
+            return max(60_000, int(s))
+    except Exception:
+        pass
+    if s.endswith('ms') and s[:-2].isdigit():
+        return max(60_000, int(s[:-2]))
+    if s.endswith('s') and s[:-1].isdigit():
+        return max(60_000, int(s[:-1]) * 1000)
+    if s.endswith('m') and s[:-1].isdigit():
+        return max(60_000, int(s[:-1]) * 60_000)
+    return DEFAULT_WINDOW_MS
+
+
+def render_tile(z: int, x: int, y: int, *, window_ms: int, t_end_ms: int | None = None, qc: bool = False) -> bytes:
+    prune(max(window_ms, DEFAULT_WINDOW_MS))
     tile_size = 256
     img = Image.new("RGBA", (tile_size, tile_size), (0, 0, 0, 0))
     px = img.load()
@@ -85,8 +109,15 @@ def render_tile(z: int, x: int, y: int) -> bytes:
             return (255, 140, 0, 255)
         return (220, 20, 60, 255)
 
+    # Time window selection
+    now_ms = int(time.time() * 1000)
+    end_ms = t_end_ms if t_end_ms is not None else now_ms
+    start_ms = end_ms - window_ms
+
     bins = {}
     for e in _events:
+        if e.timeMs is None or e.timeMs < start_ms or e.timeMs > end_ms:
+            continue
         mpp = meters_per_pixel(e.lat, z)
         step = max(1, round(2000.0 / mpp))
         xpix, ypix = lonlat_to_pixel(e.lon, e.lat, z, x, y)
@@ -108,8 +139,25 @@ def render_tile(z: int, x: int, y: int) -> bytes:
 
 
 @app.get("/tiles/{z}/{x}/{y}.png")
-def tiles(z: int, x: int, y: int):
-    content = render_tile(z, x, y)
+def tiles(
+    z: int,
+    x: int,
+    y: int,
+    window: str | None = Query(None, description="Window e.g., 1m, 5m, 300s, 180000ms"),
+    t: str | None = Query(None, description="End time ISO8601 (UTC) for window end; default now"),
+    qc: bool = Query(False, description="Enable strict QC filtering (reserved)"),
+):
+    t_end_ms = None
+    if t:
+        try:
+            if t.endswith('Z'):
+                t_end_ms = int(dt.datetime.fromisoformat(t.replace('Z','+00:00')).timestamp()*1000)
+            else:
+                t_end_ms = int(dt.datetime.fromisoformat(t).timestamp()*1000)
+        except Exception:
+            t_end_ms = None
+    w_ms = _parse_window(window)
+    content = render_tile(z, x, y, window_ms=w_ms, t_end_ms=t_end_ms, qc=qc)
     return Response(content=content, media_type="image/png")
 
 
@@ -136,3 +184,69 @@ def ingest_files(body: IngestFilesRequest):
             total += 1
     prune()
     return {"ok": True, "ingested": total}
+
+
+# ----------------
+# Background S3 poller (env-gated)
+# ----------------
+GLM_POLL_ENABLED = os.environ.get('GLM_POLL_ENABLED', 'false').lower() == 'true'
+GLM_POLL_BUCKET = os.environ.get('GLM_POLL_BUCKET', 'noaa-goes16')
+GLM_POLL_PREFIX = os.environ.get('GLM_POLL_PREFIX', 'GLM-L2-LCFA')
+GLM_POLL_INTERVAL_SEC = int(os.environ.get('GLM_POLL_INTERVAL_SEC', '60'))
+GLM_POLL_GRANULES_MAX = int(os.environ.get('GLM_POLL_GRANULES_MAX', '12'))  # ~4 minutes
+
+async def _poll_once():
+    try:
+        fs = fsspec.filesystem('s3', anon=True)
+        now = dt.datetime.utcnow()
+        # Consider last two hours across day boundary
+        hours: List[Tuple[int,int,int]] = []  # (year, doy, hour)
+        for delta_h in range(0, 2):
+            t = now - dt.timedelta(hours=delta_h)
+            year = t.year
+            doy = int(t.strftime('%j'))
+            hour = t.hour
+            hours.append((year, doy, hour))
+        candidates: List[str] = []
+        for year, doy, hour in hours:
+            prefix = f"s3://{GLM_POLL_BUCKET}/{GLM_POLL_PREFIX}/{year}/{doy:03d}/{hour:02d}/"
+            try:
+                files = fs.glob(prefix + 'OR_GLM-L2-LCFA_*.nc')
+            except Exception:
+                files = []
+            files.sort(reverse=True)
+            for k in files:
+                if k not in _ingested_keys:
+                    candidates.append(k)
+                    if len(candidates) >= GLM_POLL_GRANULES_MAX:
+                        break
+            if len(candidates) >= GLM_POLL_GRANULES_MAX:
+                break
+        added = 0
+        for path in candidates:
+            try:
+                events = read_glm_events_from_file(path)
+            except Exception:
+                continue
+            now_ms = int(__import__('time').time() * 1000)
+            for la, lo, en, tms in events:
+                if tms > now_ms:
+                    tms = now_ms
+                _events.append(Event(lat=la, lon=lo, energy_fj=en, timeMs=tms))
+            _ingested_keys.add(path)
+            added += len(events)
+        if added:
+            prune()
+    except Exception:
+        # swallow errors; best effort
+        pass
+
+@app.on_event('startup')
+async def _startup_poller():
+    if not GLM_POLL_ENABLED:
+        return
+    async def loop():
+        while True:
+            await _poll_once()
+            await asyncio.sleep(max(10, GLM_POLL_INTERVAL_SEC))
+    asyncio.create_task(loop())
