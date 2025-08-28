@@ -12,3 +12,7 @@ Atmospheric Weather and Planetary Science Education App
 ## Milestones
 
 This commit establishes Milestone M1: foundational infrastructure configuration and a minimal app shell with a self-hosted PMTiles basemap.
+
+## Environment Variables
+
+- `NWS_USER_AGENT` – Required User-Agent string for National Weather Service API requests.

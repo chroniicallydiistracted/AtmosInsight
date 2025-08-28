@@ -71,8 +71,8 @@ This file instructs autonomous coding agents (Codex or equivalent) exactly what 
   `User-Agent: (Vortexa, chroniicallydiistracted@gmail.com)`. citeturn0search0turn0search3
 - Base URL: `https://api.weather.gov/alerts` (e.g., `/active`, or queries by area, status, zone). citeturn0search17
 - Add automatic `Accept: application/geo+json` and robust retry on 429 with backoff.
-- [ ] Proxy route `/api/nws/alerts/*` adds required headers and passes query through.  
-- [ ] Integration test: `/alerts/active?area=AZ` returns **200** with features array.  
+- [x] ~~Proxy route `/api/nws/alerts/*` adds required headers and passes query through.~~
+- [x] ~~Integration test: `/alerts/active?area=AZ` returns **200** with features array.~~
 - [ ] Map layer renders polygons/lines with severity styling and click popovers.
 
 ---
