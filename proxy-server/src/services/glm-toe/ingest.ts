@@ -45,11 +45,14 @@ export class GlmToeAggregator {
 
   // Aggregate TOE into approximate 2km bins by snapping to pixel grid sized to ~2km
   aggregateTile(z: number, x: number, y: number) {
+    // Enforce rolling window relative to now to prevent unbounded growth and stale contributions
+    this.prune(Date.now());
     const tileSize = 256;
     const bins = new Map<number, number>(); // key = py*tileSize + px
     for (const e of this.events) {
       // Compute pixel step ~ 2km at event latitude
       const mpp = this.metersPerPixel(e.lat, z);
+      if (!Number.isFinite(mpp) || mpp <= 0) continue;
       const step = Math.max(1, Math.round(2000 / mpp));
       const { px, py } = this.lonLatToPixel(e.lon, e.lat, z, x, y);
       if (px < 0 || py < 0 || px >= tileSize || py >= tileSize) continue;
@@ -61,4 +64,3 @@ export class GlmToeAggregator {
     return { bins, tileSize };
   }
 }
-

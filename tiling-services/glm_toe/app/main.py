@@ -10,6 +10,8 @@ from .ingest_glm import read_glm_events_from_file
 import asyncio
 import datetime as dt
 import fsspec
+from collections import OrderedDict
+from pyproj import CRS, Transformer
 
 app = FastAPI(title="GLM TOE Service", version="0.1.0")
 
@@ -19,11 +21,56 @@ class Event(BaseModel):
     lon: float
     energy_fj: float
     timeMs: int | None = None
+    qc_ok: bool | None = None
 
 
 DEFAULT_WINDOW_MS = 5 * 60 * 1000  # 5 minutes default per guide
 _events: List[Event] = []
 _ingested_keys: Set[str] = set()
+
+# Simple LRU cache for rendered tiles
+class _LRU:
+    def __init__(self, max_items: int = 128):
+        self.max = max_items
+        self.map: OrderedDict[str, bytes] = OrderedDict()
+    def get(self, k: str) -> bytes | None:
+        v = self.map.get(k)
+        if v is not None:
+            self.map.move_to_end(k)
+        return v
+    def set(self, k: str, v: bytes):
+        if k in self.map:
+            self.map.move_to_end(k)
+        self.map[k] = v
+        while len(self.map) > self.max:
+            self.map.popitem(last=False)
+
+_tile_cache = _LRU(max_items=int(os.environ.get('GLM_TILE_CACHE_SIZE', '128')))
+
+# ABI fixed-grid settings (optional high-quality mode)
+GLM_USE_ABI_GRID = os.environ.get('GLM_USE_ABI_GRID', 'false').lower() == 'true'
+GLM_ABI_LON0 = float(os.environ.get('GLM_ABI_LON0', '-75.0'))  # GOES-East default
+
+# Locked ABI geostationary constants per GOES-R documentation
+ABI_A = 6378137.0            # GRS80 semi-major (meters)
+ABI_B = 6356752.31414        # GRS80 semi-minor (meters)
+ABI_H = 35786023.0           # Perspective point height above ellipsoid (meters)
+ABI_SWEEP = 'x'              # GOES-R sweep axis
+
+
+
+def _make_geos_transformers(lon0: float):
+    # GOES-R nominal: height ~35786023m, GRS80 ellipsoid
+    crs_geos = CRS.from_proj4(
+        f"+proj=geos +lon_0={lon0} +h={ABI_H} +a={ABI_A} +b={ABI_B} +units=m +sweep={ABI_SWEEP} +no_defs"
+    )
+    crs_wgs84 = CRS.from_epsg(4326)
+    fwd = Transformer.from_crs(crs_wgs84, crs_geos, always_xy=True)
+    inv = Transformer.from_crs(crs_geos, crs_wgs84, always_xy=True)
+    return fwd, inv
+
+_GEOS_FWD, _GEOS_INV = _make_geos_transformers(GLM_ABI_LON0)
+
 
 
 @app.get("/health")
@@ -57,6 +104,12 @@ def lonlat_to_pixel(lon: float, lat: float, z: int, x: int, y: int):
     scale = tile_size * (2 ** z)
     world_x = ((lon + 180.0) / 360.0) * scale
     sin_lat = math.sin(math.radians(lat))
+    # Clamp to avoid division by zero / log domain errors at the poles
+    eps = 1e-12
+    if sin_lat >= 1.0 - eps:
+        sin_lat = 1.0 - eps
+    elif sin_lat <= -1.0 + eps:
+        sin_lat = -1.0 + eps
     world_y = (0.5 - math.log((1 + sin_lat) / (1 - sin_lat)) / (4 * math.pi)) * scale
     px = world_x - x * tile_size
     py = world_y - y * tile_size
@@ -114,24 +167,60 @@ def render_tile(z: int, x: int, y: int, *, window_ms: int, t_end_ms: int | None 
     end_ms = t_end_ms if t_end_ms is not None else now_ms
     start_ms = end_ms - window_ms
 
-    bins = {}
-    for e in _events:
-        if e.timeMs is None or e.timeMs < start_ms or e.timeMs > end_ms:
-            continue
-        mpp = meters_per_pixel(e.lat, z)
-        step = max(1, round(2000.0 / mpp))
-        xpix, ypix = lonlat_to_pixel(e.lon, e.lat, z, x, y)
-        if xpix < 0 or ypix < 0 or xpix >= tile_size or ypix >= tile_size:
-            continue
-        sx = min(tile_size - 1, max(0, (int(xpix) // step) * step))
-        sy = min(tile_size - 1, max(0, (int(ypix) // step) * step))
-        key = sy * tile_size + sx
-        bins[key] = bins.get(key, 0.0) + float(e.energy_fj)
-
-    for key, toe in bins.items():
-        sy = key // tile_size
-        sx = key % tile_size
-        px[sx, sy] = color_for(toe)
+    if GLM_USE_ABI_GRID:
+        # Accumulate on ABI fixed grid (~2km cells), then render onto Web Mercator tile
+        grid_bins = {}
+        cell_m = 2000.0
+        for e in _events:
+            if e.timeMs is None or e.timeMs < start_ms or e.timeMs > end_ms:
+                continue
+            if qc and (e.qc_ok is False):
+                continue
+            X, Y = _GEOS_FWD.transform(e.lon, e.lat)
+            if not (math.isfinite(X) and math.isfinite(Y)):
+                continue
+            gx = int(math.floor(X / cell_m))
+            gy = int(math.floor(Y / cell_m))
+            grid_bins[(gx, gy)] = grid_bins.get((gx, gy), 0.0) + float(e.energy_fj)
+        for (gx, gy), toe in grid_bins.items():
+            cx = (gx + 0.5) * cell_m
+            cy = (gy + 0.5) * cell_m
+            lonc, latc = _GEOS_INV.transform(cx, cy)
+            xpix, ypix = lonlat_to_pixel(lonc, latc, z, x, y)
+            if xpix < 0 or ypix < 0 or xpix >= tile_size or ypix >= tile_size:
+                continue
+            sx = int(xpix)
+            sy = int(ypix)
+            r, g, b, a = color_for(toe)
+            for dy in (-1, 0, 1):
+                for dx in (-1, 0, 1):
+                    px_i = sx + dx
+                    py_i = sy + dy
+                    if 0 <= px_i < tile_size and 0 <= py_i < tile_size:
+                        px[px_i, py_i] = (r, g, b, a)
+    else:
+        bins = {}
+        for e in _events:
+            if e.timeMs is None or e.timeMs < start_ms or e.timeMs > end_ms:
+                continue
+            if qc and (e.qc_ok is False):
+                continue
+            mpp = meters_per_pixel(e.lat, z)
+            # Guard against poles / invalid latitudes where cos(lat) -> 0
+            if not math.isfinite(mpp) or mpp <= 0:
+                continue
+            step = max(1, round(2000.0 / mpp))
+            xpix, ypix = lonlat_to_pixel(e.lon, e.lat, z, x, y)
+            if xpix < 0 or ypix < 0 or xpix >= tile_size or ypix >= tile_size:
+                continue
+            sx = min(tile_size - 1, max(0, (int(xpix) // step) * step))
+            sy = min(tile_size - 1, max(0, (int(ypix) // step) * step))
+            key = sy * tile_size + sx
+            bins[key] = bins.get(key, 0.0) + float(e.energy_fj)
+        for key, toe in bins.items():
+            sy = key // tile_size
+            sx = key % tile_size
+            px[sx, sy] = color_for(toe)
 
     buf = io.BytesIO()
     img.save(buf, format="PNG")
@@ -157,8 +246,16 @@ def tiles(
         except Exception:
             t_end_ms = None
     w_ms = _parse_window(window)
+    cache_key = f"{z}/{x}/{y}?w={w_ms}&t={t_end_ms or 0}&qc={int(qc)}"
+    cached = _tile_cache.get(cache_key)
+    if cached is not None:
+        return Response(content=cached, media_type="image/png", headers={"X-Cache": "HIT"})
     content = render_tile(z, x, y, window_ms=w_ms, t_end_ms=t_end_ms, qc=qc)
-    return Response(content=content, media_type="image/png")
+    _tile_cache.set(cache_key, content)
+    headers = {"X-Cache": "MISS"}
+    if t_end_ms is not None:
+        headers["Cache-Control"] = "public, max-age=300"
+    return Response(content=content, media_type="image/png", headers=headers)
 
 
 class IngestFilesRequest(BaseModel):
@@ -176,11 +273,16 @@ def ingest_files(body: IngestFilesRequest):
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"failed to read {p}: {e}")
         now = int(time.time() * 1000)
-        for la, lo, en, t in events:
+        for item in events:
+            if len(item) == 5:
+                la, lo, en, t, qc_ok = item  # type: ignore[misc]
+            else:
+                la, lo, en, t = item  # type: ignore[misc]
+                qc_ok = None
             # ensure window pruning relative to now
             if t > now:
                 t = now
-            _events.append(Event(lat=la, lon=lo, energy_fj=en, timeMs=t))
+            _events.append(Event(lat=la, lon=lo, energy_fj=en, timeMs=t, qc_ok=qc_ok))
             total += 1
     prune()
     return {"ok": True, "ingested": total}

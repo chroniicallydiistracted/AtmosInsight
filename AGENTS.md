@@ -121,6 +121,12 @@ Additional directive (2025-08-28): Prioritize highest quality. When trade-offs a
 - [x] ~~README: exact data source URLs and operational notes.~~  
 - [x] ~~Feature flag to disable if data source unavailable.~~
 
+Ongoing quality improvements:
+- [x] Optional ABI fixed-grid accumulation (`GLM_USE_ABI_GRID`) + tests
+- [x] QC filtering via `qc=true` using per-event `qc_ok` when available
+- [x] Tile LRU cache + deterministic caching when `t` provided
+- [x] Mid-latitude ABI validation test (cell size ≈2 km at ~35°N)
+
 Implementation note: A high-quality Python FastAPI microservice (`tiling-services/glm_toe`) is being added for GLM L2 NetCDF ingestion and precise ABI grid mapping. The Node proxy (`proxy-server`) proxies `/api/glm-toe` to this service via `GLM_TOE_PY_URL` when configured; otherwise, it falls back to the Node MVP renderer.
 
 ---

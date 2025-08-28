@@ -4,6 +4,7 @@ import { PMTiles, Protocol } from 'pmtiles'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import './App.css'
 import { Timeline } from './components/Timeline'
+import { GlmLegend } from './components/GlmLegend'
 import { AstroPanel } from './components/AstroPanel'
 
 const protocol = new Protocol()
@@ -106,6 +107,29 @@ export default function App() {
 
     map.on('load', () => {
       addAlertsLayer()
+
+      // GLM TOE raster tiles (from proxy)
+      const glmSourceId = 'glm_toe'
+      if (!map.getSource(glmSourceId)) {
+        map.addSource(glmSourceId, {
+          type: 'raster',
+          tiles: [
+            `${location.origin}/api/glm-toe/{z}/{x}/{y}.png?window=5m`
+          ],
+          tileSize: 256,
+          minzoom: 0,
+          maxzoom: 10
+        } as any)
+        map.addLayer({
+          id: 'glm_toe_layer',
+          type: 'raster',
+          source: glmSourceId,
+          paint: {
+            'raster-opacity': 0.85,
+            'raster-resampling': 'linear'
+          }
+        } as any)
+      }
     })
 
     const interval = window.setInterval(addAlertsLayer, 5 * 60 * 1000)
@@ -120,6 +144,7 @@ export default function App() {
       <div ref={mapRef} className="map-container" />
       <Timeline layerId="goes-east" />
       <AstroPanel />
+      <GlmLegend map={(window as any).__map ?? null} />
     </div>
   )
 }
