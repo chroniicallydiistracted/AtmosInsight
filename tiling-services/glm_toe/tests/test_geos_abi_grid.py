@@ -119,3 +119,16 @@ def test_render_tile_abi_mode_various_lats(monkeypatch, lat, z):
     assert r2.status_code == 200
     assert r2.headers.get("content-type", "").startswith("image/png")
     assert len(r2.content) > 200
+
+
+def test_geos_north_south_displacement_high_lat():
+    from app.main import _GEOS_FWD
+
+    lon0 = -75.0
+    lat = 60.0
+    # North-south ~2 km -> degrees latitude ~ 2 / 111.32
+    deglat = 2.0 / 111.32
+    x1, y1 = _GEOS_FWD.transform(lon0, lat)
+    x2, y2 = _GEOS_FWD.transform(lon0, lat + deglat)
+    dy = abs(y2 - y1)
+    assert 100.0 <= dy <= 5000.0
