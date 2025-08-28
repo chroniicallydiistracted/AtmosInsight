@@ -209,7 +209,9 @@ if (TOE_ENABLED) {
   });
 
   // If a Python microservice is provided, proxy to it for tile rendering; else fallback to local MVP
-  app.get('/api/glm-toe/:z/:x/:y.png', shortLived60, async (req, res) => {
+  app.get('/api/glm-toe/:z/:x/:y.png', async (req, res) => {
+    const hasT = typeof req.query.t === 'string' && (req.query.t as string).length > 0;
+    const cacheVal = hasT ? 'public, max-age=300' : 'public, max-age=60';
     const { z, x, y } = req.params as Record<string, string>;
     if (TOE_PROXY) {
       try {
@@ -223,6 +225,7 @@ if (TOE_ENABLED) {
           }
           res.setHeader(key, value);
         });
+        res.setHeader('Cache-Control', cacheVal);
         res.send(buffer);
         return;
       } catch (e) {
@@ -233,6 +236,7 @@ if (TOE_ENABLED) {
     try {
       const buf = renderTilePng(toeAgg, Number(z), Number(x), Number(y));
       res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', cacheVal);
       res.status(200).send(buf);
     } catch (e) {
       console.error(e);
