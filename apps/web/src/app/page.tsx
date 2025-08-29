@@ -7,7 +7,6 @@ import type {
   RasterSourceSpecification,
   RasterLayerSpecification
 } from '@maplibre/maplibre-gl-style-spec';
-import { PMTiles, Protocol } from 'pmtiles';
 import type { BackgroundLayerSpecification } from '@maplibre/maplibre-gl-style-spec';
 import type { GeoJSONSource } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -17,38 +16,43 @@ import { AstroPanel } from '@/components/AstroPanel';
 import { AlertsLegend } from '@/components/AlertsLegend';
 import { RainviewerLayer } from '@/components/RainviewerLayer';
 
-const protocol = new Protocol();
-maplibregl.addProtocol('pmtiles', protocol.tile);
-
 export default function Home() {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const [mapObj, setMapObj] = useState<maplibregl.Map | null>(null);
 
   useEffect(() => {
-    const url = 'https://protomaps.github.io/basemaps/pmtiles/protomaps_2024-07-22-v4.pmtiles';
-    protocol.add(new PMTiles(url));
-    
-    const bgLayer = {
-      id: 'bg',
-      type: 'background',
-      paint: { 'background-color': '#111820' }
-    } satisfies BackgroundLayerSpecification;
-
-    const styleE2E: StyleSpecification = {
+    // Create a custom style with OpenStreetMap CyclOSM basemap via proxy
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+    const style: StyleSpecification = {
       version: 8,
-      sources: {},
-      layers: [bgLayer]
+      sources: {
+        'osm-cyclosm': {
+          type: 'raster',
+          tiles: [
+            `${apiBase}/api/osm/cyclosm/{z}/{x}/{y}.png`
+          ],
+          tileSize: 256,
+          attribution: '© OpenStreetMap contributors, © CyclOSM'
+        }
+      },
+      layers: [
+        {
+          id: 'osm-cyclosm-layer',
+          type: 'raster',
+          source: 'osm-cyclosm',
+          minzoom: 0,
+          maxzoom: 18
+        }
+      ]
     };
 
-    const styleUrlOrSpec: string | StyleSpecification = process.env.NODE_ENV === 'development'
-      ? styleE2E
-      : 'https://protomaps.github.io/basemaps/style.json';
-      
     const map = new maplibregl.Map({
       container: mapRef.current as HTMLDivElement,
-      style: styleUrlOrSpec,
-      center: [0, 0],
-      zoom: 1
+      style: style,
+      center: [-112.074037, 33.448376], // Phoenix, AZ coordinates
+      zoom: 8,
+      maxZoom: 18,
+      minZoom: 0
     });
 
     // Store map reference globally for debugging
@@ -116,14 +120,14 @@ export default function Home() {
               map.on('click', id, (e) => {
                 const f = e.features?.[0];
                 if (!f) return;
-                
+
                 type AlertProps = {
                   event?: string;
                   severity?: string;
                   headline?: string;
                   areaDesc?: string;
                 };
-                
+
                 const p = f.properties as unknown as AlertProps;
                 const html = `
                   <strong>${p?.event ?? 'Alert'}</strong><br/>
@@ -131,7 +135,7 @@ export default function Home() {
                   ${p?.headline ? `<em>${p.headline}</em><br/>` : ''}
                   ${p?.areaDesc ?? ''}
                 `;
-                
+
                 new maplibregl.Popup()
                   .setLngLat(e.lngLat)
                   .setHTML(html)
@@ -165,7 +169,7 @@ export default function Home() {
           minzoom: 0,
           maxzoom: 10
         } as RasterSourceSpecification);
-        
+
         map.addLayer({
           id: 'glm_toe_layer',
           type: 'raster',
@@ -179,7 +183,7 @@ export default function Home() {
     });
 
     const interval = window.setInterval(addAlertsLayer, 5 * 60 * 1000);
-    
+
     return () => {
       clearInterval(interval);
       map.remove();

@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import { setDefaultResultOrder } from 'node:dns';
 import { ProxyAgent, setGlobalDispatcher } from 'undici';
 import { NWS_API_BASE, DEFAULT_NWS_USER_AGENT } from '@atmos/proxy-constants';
@@ -17,6 +18,28 @@ if (proxy) {
 }
 
 const app = express();
+app.use(cors());
+
+app.use('/api/catalog', async (req, res) => {
+  const catalogPort = 3001;
+  const targetUrl = `http://localhost:${catalogPort}${req.originalUrl.replace('/api', '')}`;
+  try {
+    const upstream = await fetchWithRetry(targetUrl, {
+      method: req.method,
+      headers: req.headers as Record<string, string>,
+      body: req.body,
+    });
+    const body = await upstream.text();
+    res.status(upstream.status);
+    upstream.headers.forEach((value, key) => {
+      res.setHeader(key, value);
+    });
+    res.send(body);
+  } catch (err) {
+    console.error(err);
+    res.status(502).send('proxy error');
+  }
+});
 
 
 app.use('/api/nws/alerts', shortLived60, async (req, res) => {
@@ -40,6 +63,54 @@ app.use('/api/nws/alerts', shortLived60, async (req, res) => {
     res.send(body);
   } catch (err) {
     console.error(err);
+    res.status(500).send('proxy error');
+  }
+});
+
+// -----------------
+// OpenStreetMap CyclOSM Tiles
+// -----------------
+app.get('/api/osm/cyclosm/:z/:x/:y.png', shortLived60, async (req, res) => {
+  try {
+    const { z, x, y } = req.params as Record<string, string>;
+    
+    // Use multiple tile servers for redundancy
+    const tileServers = ['a', 'b', 'c'];
+    
+    // Try each server until one works
+    for (const server of tileServers) {
+      try {
+        const targetUrl = `https://${server}.tile.openstreetmap.fr/cyclosm/${z}/${x}/${y}.png`;
+        
+        console.log(`Trying OpenStreetMap tile from ${server}: ${targetUrl}`);
+        
+        const upstream = await fetch(targetUrl, {
+          headers: {
+            'User-Agent': 'Vortexa/1.0 (https://github.com/your-repo)',
+            'Accept': 'image/png,image/*,*/*'
+          },
+          signal: AbortSignal.timeout(5000) // 5 second timeout
+        });
+        
+        if (upstream.ok) {
+          const buffer = Buffer.from(await upstream.arrayBuffer());
+          res.status(200);
+          res.setHeader('Content-Type', 'image/png');
+          res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minutes for basemap tiles
+          return res.send(buffer);
+        }
+      } catch (serverErr) {
+        console.warn(`Server ${server} failed for tile ${z}/${x}/${y}:`, serverErr);
+        continue; // Try next server
+      }
+    }
+    
+    // All servers failed, return a fallback tile or error
+    console.error(`All OpenStreetMap servers failed for tile ${z}/${x}/${y}`);
+    res.status(503).send('OpenStreetMap tile servers temporarily unavailable');
+    
+  } catch (err) {
+    console.error('OpenStreetMap tile proxy error:', err);
     res.status(500).send('proxy error');
   }
 });
@@ -115,6 +186,38 @@ app.get('/api/rainviewer/:ts/:size/:z/:x/:y/:color/:options.png', shortLived60, 
       res.setHeader(key, value);
     });
     res.send(buffer);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('proxy error');
+  }
+});
+
+// Stub RainViewer tile endpoint to prevent 404s (fallback)
+app.get('/api/rainviewer/:z/:x/:y.png', shortLived60, async (req, res) => {
+  try {
+    // For now, return a transparent 1x1 PNG to prevent 404 errors
+    // TODO: Implement real RainViewer tile fetching
+    const transparentPng = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
+    
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=60');
+    res.status(200).send(transparentPng);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('proxy error');
+  }
+});
+
+// Additional RainViewer tile route for the frontend's expected pattern
+app.get('/api/rainviewer/:z/:x/:y/:size/:color/:options.png', shortLived60, async (req, res) => {
+  try {
+    // For now, return a transparent 1x1 PNG to prevent 404 errors
+    // TODO: Implement real RainViewer tile fetching
+    const transparentPng = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
+    
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=60');
+    res.status(200).send(transparentPng);
   } catch (err) {
     console.error(err);
     res.status(500).send('proxy error');

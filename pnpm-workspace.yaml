@@ -6,6 +6,7 @@ onlyBuiltDependencies:
   - '@bundled-es-modules/glob'
   - '@vaadin/vaadin-usage-statistics'
   - chromedriver
+  - esbuild
   - sharp
   - style-dictionary
   - unrs-resolver

@@ -14,6 +14,7 @@ NC='\033[0m' # No Color
 
 # Port configuration
 PROXY_PORT=3000
+CATALOG_PORT=3001
 WEB_PORT=3002
 
 echo -e "${BLUE}🚀 AtmosInsight Universal Startup Script${NC}"
@@ -172,6 +173,11 @@ if check_port $PROXY_PORT; then
     wait_for_port $PROXY_PORT
 fi
 
+if check_port $CATALOG_PORT; then
+    kill_port $CATALOG_PORT "catalog-api"
+    wait_for_port $CATALOG_PORT
+fi
+
 if check_port $WEB_PORT; then
     kill_port $WEB_PORT "Next.js web app"
     wait_for_port $WEB_PORT
@@ -180,21 +186,23 @@ fi
 echo -e "${GREEN}✅ All ports are free${NC}"
 echo ""
 
-# Start proxy-server first
+# Start services in order
 echo -e "${BLUE}📋 Starting services in order:${NC}"
 echo "1. Proxy Server (port $PROXY_PORT)"
-echo "2. Next.js Web App (port $WEB_PORT)"
+echo "2. Catalog API (port $CATALOG_PORT)"
+echo "3. Next.js Web App (port $WEB_PORT)"
 echo ""
 
 start_service "proxy-server" $PROXY_PORT "pnpm run dev" "proxy-server"
+start_service "catalog-api" $CATALOG_PORT "pnpm run start" "tiling-services/catalog-api"
 
-# Wait a moment for proxy-server to fully initialize
+# Wait a moment for services to fully initialize
 sleep 2
 
 # Start Next.js web app
 start_service "Next.js web app" $WEB_PORT "pnpm run dev" "apps/web"
 
-# Wait for both services to be ready
+# Wait for all services to be ready
 sleep 3
 
 echo ""
@@ -202,12 +210,14 @@ echo -e "${GREEN}🎉 Startup complete! Services are running in the background.$
 echo "================================================"
 echo -e "${BLUE}📱 Web App:${NC}     http://localhost:$WEB_PORT"
 echo -e "${BLUE}🔌 Proxy Server:${NC} http://localhost:$PROXY_PORT"
+echo -e "${BLUE}📚 Catalog API:${NC}  http://localhost:$CATALOG_PORT"
 echo ""
 echo -e "${YELLOW}📋 Logs:${NC}"
 echo -e "${BLUE}   Proxy Server:${NC} proxy-server/proxy-server.log"
+echo -e "${BLUE}   Catalog API:${NC}  tiling-services/catalog-api/catalog-api.log"
 echo -e "${BLUE}   Web App:${NC}     apps/web/Next.js\ web\ app.log"
 echo ""
-echo -e "${GREEN}✅ Both services are running successfully!${NC}"
+echo -e "${GREEN}✅ All services are running successfully!${NC}"
 echo -e "${BLUE}🌐 Open your browser to: http://localhost:$WEB_PORT${NC}"
 echo ""
 echo -e "${YELLOW}💡 To stop all services, run: ./stop-atmosinsight.sh${NC}"
