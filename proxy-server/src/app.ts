@@ -1,6 +1,8 @@
 import express from 'express';
 import { setDefaultResultOrder } from 'node:dns';
 import { ProxyAgent, setGlobalDispatcher } from 'undici';
+import { NWS_API_BASE, DEFAULT_NWS_USER_AGENT } from '@atmos/proxy-constants';
+import { fetchWithRetry } from '@atmos/fetch-client';
 import { shortLived60 } from './cache.js';
 import { buildGibsTileUrl, buildGibsDomainsUrl } from './gibs.js';
 import { buildOwmTileUrl, isAllowedOwmLayer } from './owm.js';
@@ -16,23 +18,10 @@ if (proxy) {
 
 const app = express();
 
-async function fetchWithRetry(url: string, init: RequestInit, retries = 3): Promise<Response> {
-  let attempt = 0;
-  let delay = 500;
-  while (true) {
-    const res = await fetch(url, init);
-    if (res.status !== 429 || attempt >= retries) {
-      return res;
-    }
-    await new Promise((r) => setTimeout(r, delay));
-    delay *= 2;
-    attempt++;
-  }
-}
 
-app.use('/api/nws/alerts', async (req, res) => {
-  const userAgent = process.env.NWS_USER_AGENT || '(Vortexa, contact@example.com)';
-  const targetUrl = 'https://api.weather.gov/alerts' + req.originalUrl.replace(/^\/api\/nws\/alerts/, '');
+app.use('/api/nws/alerts', shortLived60, async (req, res) => {
+  const userAgent = process.env.NWS_USER_AGENT || DEFAULT_NWS_USER_AGENT;
+  const targetUrl = NWS_API_BASE + req.originalUrl.replace(/^\/api\/nws\/alerts/, '');
   const headers: Record<string, string> = {
     'User-Agent': userAgent,
     'Accept': 'application/geo+json'
@@ -198,10 +187,18 @@ function redirectGibs(req: express.Request, res: express.Response) {
   res.redirect(302, url);
 }
 
-app.get('/api/gibs/tile/:epsg/:layer/:time/:tms/:z/:y/:x.:ext', shortLived60, proxyGibsTile);
-app.get('/api/gibs/tile/:epsg/:layer/:tms/:z/:y/:x.:ext', shortLived60, proxyGibsTile);
-app.get('/api/gibs/domains/:epsg/:layer/:tms/:range.xml', shortLived60, proxyGibsDomains);
-app.get('/api/gibs/redirect', shortLived60, redirectGibs);
+function ensureGibsEnabled(req: express.Request, res: express.Response, next: express.NextFunction) {
+  if (process.env.GIBS_ENABLED && process.env.GIBS_ENABLED.toLowerCase() === 'false') {
+    res.status(503).send('GIBS disabled');
+    return;
+  }
+  next();
+}
+
+app.get('/api/gibs/tile/:epsg/:layer/:time/:tms/:z/:y/:x.:ext', ensureGibsEnabled, shortLived60, proxyGibsTile);
+app.get('/api/gibs/tile/:epsg/:layer/:tms/:z/:y/:x.:ext', ensureGibsEnabled, shortLived60, proxyGibsTile);
+app.get('/api/gibs/domains/:epsg/:layer/:tms/:range.xml', ensureGibsEnabled, shortLived60, proxyGibsDomains);
+app.get('/api/gibs/redirect', ensureGibsEnabled, shortLived60, redirectGibs);
 
 export { app };
 

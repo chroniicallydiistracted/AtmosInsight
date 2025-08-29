@@ -12,7 +12,9 @@
     "express": "^4.19.2",
     "undici": "^6.19.8",
     "pngjs": "^7.0.0",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "@atmos/proxy-constants": "workspace:*",
+    "@atmos/fetch-client": "workspace:*"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

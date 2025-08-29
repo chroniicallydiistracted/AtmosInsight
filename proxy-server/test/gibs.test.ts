@@ -90,3 +90,13 @@ describe('GIBS redirect helper', () => {
     expect(res.headers['cache-control']).toBe('public, max-age=60');
   });
 });
+
+describe('GIBS env gating', () => {
+  it('returns 503 when disabled', async () => {
+    const prev = process.env.GIBS_ENABLED;
+    process.env.GIBS_ENABLED = 'false';
+    const res = await request(app).get('/api/gibs/tile/3857/BlueMarble_ShadedRelief/GoogleMapsCompatible_Level8/3/1/2.jpeg');
+    expect(res.status).toBe(503);
+    process.env.GIBS_ENABLED = prev;
+  });
+});
