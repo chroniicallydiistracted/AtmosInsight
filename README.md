@@ -74,3 +74,37 @@ Serverless production proxy for `/api/*` using API Gateway HTTP API + Lambda, fr
 Notes
 - GLM TOE: `/api/glm-toe/:z/:x/:y.png` returns 503 until `glm_toe_py_url` points at the Python tiles service.
 - Health check: `/api/healthz` is available for quick probes and monitoring.
+
+## apps/web
+
+A Next.js 15 App Router prototype lives in `apps/web`. Install dependencies and start the dev server:
+
+```bash
+pnpm install
+pnpm dev
+```
+
+### Design tokens
+
+Tokens are built with Style Dictionary in `packages/tokens` and emitted as CSS variables and a typed map. Key tokens:
+
+- Accent Teal `#1BC7B5`
+- Accent Coral `#FF7A66`
+- Radius: 8, 10, 12, 14
+- Spacing: 4, 8, 12, 16
+- Shadows: `sm`, `md`
+- Motion timings: fast 150ms, slow 300ms
+
+### Keyboard shortcuts
+
+- `Space` – play/pause
+- `←`/`→` – step frame
+- `Shift+←`/`Shift+→` – major tick
+- `N` – jump to now
+- `R` – open run picker
+
+### Deep-link example
+
+```
+/app?bbox=-10,30,10,40&zoom=5&timeISO=2025-08-28T00:00:00Z
+```

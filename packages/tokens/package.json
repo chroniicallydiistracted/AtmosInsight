@@ -1,0 +1,13 @@
+{
+  "name": "@atmos/tokens",
+  "version": "0.0.0",
+  "private": true,
+  "main": "dist/tokens.ts",
+  "types": "dist/tokens.ts",
+  "scripts": {
+    "build": "style-dictionary build --config style-dictionary.config.js"
+  },
+  "devDependencies": {
+    "style-dictionary": "4.4.0"
+  }
+}

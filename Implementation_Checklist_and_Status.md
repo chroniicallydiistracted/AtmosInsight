@@ -70,3 +70,13 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Prevented "Style is not done loading" runtime errors by deferring source/layer mutations until `map.isStyleLoaded()` or `load` fires for GLM and Radar layers.
   - Files: `dashboard-app/src/components/GlmLegend.tsx`, `dashboard-app/src/components/RainviewerLayer.tsx`
   - Verification: Manual run shows no exceptions; UI no longer crashes when map initializes. Marked production ready.
+
+- [x] 2025-08-29 — Next.js monorepo scaffold
+  - Summary: Added pnpm workspace with Next.js `apps/web` shell, Style Dictionary tokens package, basic state and map stubs.
+  - Files: `package.json`, `pnpm-workspace.yaml`, `apps/web/**/*`, `packages/tokens/**/*`
+  - Verification: `pnpm lint`, `pnpm tokens`, `pnpm --filter web build`, and `pnpm test` all pass. Marked production ready.
+
+- [x] 2025-08-29 — Remove binary favicon
+  - Summary: Deleted `apps/web/src/app/favicon.ico` to avoid binary diff issues.
+  - Files: `apps/web/src/app/favicon.ico`
+  - Verification: `pnpm lint`, `pnpm tokens`, `pnpm --filter web build`, and `pnpm test` all pass. Marked production ready.

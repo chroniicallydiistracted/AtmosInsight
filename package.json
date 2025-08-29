@@ -1,0 +1,13 @@
+{
+  "name": "atmosinsight",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@10.11.0",
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm --filter web dev",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "tokens": "pnpm --filter tokens build"
+  }
+}
