@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
+import type { Express } from 'express';
+import type { GlmEvent } from '../src/services/glm-toe/ingest.js';
 import request from 'supertest';
 
 // Ensure flag is set before importing app
@@ -7,7 +9,7 @@ beforeAll(() => {
 });
 
 // Dynamic import after env is set
-let app: any;
+let app: Express;
 beforeAll(async () => {
   ({ app } = await import('../src/app.js'));
 });
@@ -15,7 +17,7 @@ beforeAll(async () => {
 describe('GLM TOE API (feature-flagged)', () => {
   it('ingests synthetic events and serves a non-empty PNG tile', async () => {
     const now = Date.now();
-    const events = [] as any[];
+    const events: GlmEvent[] = [];
     for (let i = 0; i < 25; i++) {
       events.push({
         lon: -110.97 + (i % 5) * 0.01,

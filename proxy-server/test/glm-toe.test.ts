@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { GlmToeAggregator } from '../src/services/glm-toe/ingest.js';
+import { GlmToeAggregator, type GlmEvent } from '../src/services/glm-toe/ingest.js';
 import { renderTilePng } from '../src/services/glm-toe/tiles.js';
 
 function tileFromLonLat(lon: number, lat: number, z: number) {
@@ -18,7 +18,7 @@ describe('GLM TOE aggregator and tile renderer', () => {
     const now = Date.now();
     // Synthetic cluster near Tucson, AZ
     const center = { lon: -110.97, lat: 32.22 };
-    const events = [] as any[];
+    const events: GlmEvent[] = [];
     for (let i = 0; i < 50; i++) {
       events.push({
         lon: center.lon + (Math.random() - 0.5) * 0.05,

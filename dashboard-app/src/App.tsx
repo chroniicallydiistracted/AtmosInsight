@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import maplibregl from 'maplibre-gl'
+import type {
+  StyleSpecification,
+  GeoJSONSourceSpecification,
+  RasterSourceSpecification,
+  RasterLayerSpecification
+} from '@maplibre/maplibre-gl-style-spec'
 import { PMTiles, Protocol } from 'pmtiles'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import './App.css'
@@ -24,7 +30,7 @@ export default function App() {
       sources: {},
       layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#111820' } }]
     }
-    const styleUrlOrSpec: any = import.meta.env.VITE_E2E === '1'
+    const styleUrlOrSpec: string | StyleSpecification = import.meta.env.VITE_E2E === '1'
       ? styleE2E
       : 'https://protomaps.github.io/basemaps/style.json'
     const map = new maplibregl.Map({
@@ -33,7 +39,7 @@ export default function App() {
       center: [0, 0],
       zoom: 1
     })
-    ;(window as any).__map = map
+    window.__map = map
     setMapObj(map)
 
     function addAlertsLayer() {
@@ -43,8 +49,8 @@ export default function App() {
           if (!map.getSource('nws-alerts')) {
             map.addSource('nws-alerts', {
               type: 'geojson',
-              data: geojson
-            } as any)
+              data: geojson as unknown as GeoJSON.GeoJSON
+            } as GeoJSONSourceSpecification)
 
             // Fill polygons by severity
             map.addLayer({
@@ -63,7 +69,7 @@ export default function App() {
                 ],
                 'fill-opacity': 0.35
               }
-            } as any)
+            })
 
             // Outline
             map.addLayer({
@@ -75,7 +81,7 @@ export default function App() {
                 'line-color': '#444',
                 'line-width': 1
               }
-            } as any)
+            })
 
             // Points (if any)
             map.addLayer({
@@ -89,29 +95,37 @@ export default function App() {
                 'circle-stroke-color': '#fff',
                 'circle-stroke-width': 1
               }
-            } as any)
+            })
 
             const clickTargets = ['nws-alerts-fill', 'nws-alerts-line', 'nws-alerts-point']
             clickTargets.forEach((id) => {
               map.on('click', id, (e) => {
                 const f = e.features?.[0]
                 if (!f) return
-                const p = f.properties as any
+                type AlertProps = {
+                  event?: string
+                  severity?: string
+                  headline?: string
+                  areaDesc?: string
+                }
+                const p = f.properties as unknown as AlertProps
                 const html = `
                   <strong>${p?.event ?? 'Alert'}</strong><br/>
                   Severity: ${p?.severity ?? 'Unknown'}<br/>
                   ${p?.headline ? `<em>${p.headline}</em><br/>` : ''}
                   ${p?.areaDesc ?? ''}
                 `
-                new maplibregl.Popup().setLngLat((e.lngLat as any)).setHTML(html).addTo(map)
+                new maplibregl.Popup().setLngLat(e.lngLat).setHTML(html).addTo(map)
               })
 
               map.on('mouseenter', id, () => (map.getCanvas().style.cursor = 'pointer'))
               map.on('mouseleave', id, () => (map.getCanvas().style.cursor = ''))
             })
           } else {
-            const src = map.getSource('nws-alerts') as any
-            src.setData(geojson)
+            const src = map.getSource('nws-alerts')
+            if (src && typeof (src as { setData?: unknown }).setData === 'function') {
+              ;(src as { setData: (d: GeoJSON.GeoJSON | string) => void }).setData(geojson as unknown as GeoJSON.GeoJSON)
+            }
           }
         })
         .catch(() => {})
@@ -131,7 +145,7 @@ export default function App() {
           tileSize: 256,
           minzoom: 0,
           maxzoom: 10
-        } as any)
+        } as RasterSourceSpecification)
         map.addLayer({
           id: 'glm_toe_layer',
           type: 'raster',
@@ -140,7 +154,7 @@ export default function App() {
             'raster-opacity': 0.85,
             'raster-resampling': 'linear'
           }
-        } as any)
+        } as RasterLayerSpecification)
       }
     })
 

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type maplibregl from 'maplibre-gl';
+import type { RasterLayerSpecification, RasterSourceSpecification } from '@maplibre/maplibre-gl-style-spec';
 import { clampFps, frameDelayMs, isPlayable, nextIndex, prefetchSchedule, DEFAULT_FPS } from '../utils/playback';
 import { createTileCache, loadImage } from '../utils/tileCache';
 
@@ -43,7 +44,7 @@ export function RainviewerLayer({ map }: RainviewerLayerProps) {
         const json: RadarIndex = await res.json();
         const list = [...(json.radar.past || []), ...((json.radar.nowcast || []))].map((f) => f.time);
         if (!cancelled) setFrames(list);
-      } catch {}
+      } catch { void 0; }
     }
     load();
     const interval = window.setInterval(load, 60_000);
@@ -68,27 +69,27 @@ export function RainviewerLayer({ map }: RainviewerLayerProps) {
     const tiles = [`${location.origin}/api/rainviewer/${ts}/${size}/{z}/{x}/{y}/${color}/${options}.png`];
     const vis = visible ? 'visible' : 'none';
     const apply = () => {
-      const source = map.getSource(srcId) as any;
+      const source = map.getSource(srcId) as unknown;
       try {
-        if (source && typeof source.setTiles === 'function') {
-          source.setTiles(tiles);
+        if (source && typeof (source as { setTiles?: unknown }).setTiles === 'function') {
+          (source as { setTiles: (t: string[]) => void }).setTiles(tiles);
           if (map.getLayer(layerId)) map.setLayoutProperty(layerId, 'visibility', vis);
           return;
         }
-      } catch {}
+      } catch { void 0; }
       try {
         if (map.getLayer(layerId)) map.removeLayer(layerId);
-      } catch {}
+      } catch { void 0; }
       try {
         if (map.getSource(srcId)) map.removeSource(srcId);
-      } catch {}
+      } catch { void 0; }
       try {
-        map.addSource(srcId, { type: 'raster', tiles, tileSize: 256, minzoom: 0, maxzoom: 12 } as any);
-        map.addLayer({ id: layerId, type: 'raster', source: srcId, paint: { 'raster-opacity': 0.8, 'raster-resampling': 'linear' } } as any);
+        map.addSource(srcId, { type: 'raster', tiles, tileSize: 256, minzoom: 0, maxzoom: 12 } as RasterSourceSpecification);
+        map.addLayer({ id: layerId, type: 'raster', source: srcId, paint: { 'raster-opacity': 0.8, 'raster-resampling': 'linear' } } as RasterLayerSpecification);
         map.setLayoutProperty(layerId, 'visibility', vis);
-      } catch {}
+      } catch { void 0; }
     };
-    if (typeof (map as any).isStyleLoaded === 'function' && !map.isStyleLoaded()) {
+    if (typeof (map as unknown as { isStyleLoaded?: () => boolean }).isStyleLoaded === 'function' && !map.isStyleLoaded()) {
       map.once('load', apply);
       return;
     }

@@ -53,7 +53,7 @@ export async function loadImage(url: string, cache: ReturnType<typeof createTile
   try {
     await p;
     cache.set(url, img);
-  } catch (e) {
+  } catch {
     // Do not cache failures
   }
   return img;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { GlmToeAggregator } from '../src/services/glm-toe/ingest.js';
+import { GlmToeAggregator, type GlmEvent } from '../src/services/glm-toe/ingest.js';
 import { renderTilePng } from '../src/services/glm-toe/tiles.js';
 import { createHash } from 'node:crypto';
 
@@ -21,7 +21,7 @@ describe('GLM TOE tile color mapping snapshot', () => {
     const agg = new GlmToeAggregator(20 * 60 * 1000);
     const now = Date.now();
     const center = { lon: -97.7431, lat: 30.2672 }; // Austin, TX
-    const events = [] as any[];
+    const events: GlmEvent[] = [];
     for (let i = 0; i < 100; i++) {
       events.push({
         lon: center.lon + (rng() - 0.5) * 0.1,
