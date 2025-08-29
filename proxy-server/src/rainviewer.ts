@@ -1,3 +1,5 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
+
 type Frame = { time: number; path: string };
 type RadarIndex = {
   version: string;
@@ -16,7 +18,7 @@ const TTL_MS = 60_000;
 export async function getRainviewerIndex(): Promise<RadarIndex> {
   const now = Date.now();
   if (cachedIndex && now - cachedAt < TTL_MS) return cachedIndex;
-  const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
+  const res = await fetchWithRetry('https://api.rainviewer.com/public/weather-maps.json');
   if (!res.ok) throw new Error(`rainviewer index fetch failed: ${res.status}`);
   const json = (await res.json()) as RadarIndex;
   cachedIndex = json;

@@ -1,3 +1,12 @@
+import {
+  NWS_API_BASE,
+  DEFAULT_NWS_USER_AGENT,
+  GIBS_BASE,
+  OWM_BASE,
+  OWM_ALLOW,
+} from '@atmos/proxy-constants';
+import { fetchWithRetry } from '@atmos/fetch-client';
+
 // Lightweight Lambda proxy for /api/* endpoints.
 // Runtime: nodejs20.x (fetch available)
 
@@ -28,20 +37,10 @@ function bin(status, bodyBuf, contentType, headers = {}) {
   };
 }
 
-async function fetchWithRetry(url, init = {}, retries = 3) {
-  let delay = 500;
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    const res = await fetch(url, init);
-    if (res.status !== 429 || attempt === retries) return res;
-    await new Promise((r) => setTimeout(r, delay));
-    delay *= 2;
-  }
-}
 
 // -----------------
 // GIBS helpers
 // -----------------
-const GIBS_BASE = 'https://gibs.earthdata.nasa.gov/wmts';
 function buildGibsTileUrl({ epsg, layer, time, tms, z, y, x, ext }) {
   const timePart = time ? `${time}/` : '';
   return `${GIBS_BASE}/epsg${epsg}/best/${layer}/default/${timePart}${tms}/${z}/${y}/${x}.${ext}`;
@@ -53,16 +52,6 @@ function buildGibsDomainsUrl({ epsg, layer, tms, range }) {
 // -----------------
 // OWM helpers
 // -----------------
-const OWM_BASE = 'https://tile.openweathermap.org/map';
-const OWM_ALLOW = new Set([
-  'clouds_new',
-  'precipitation_new',
-  'pressure_new',
-  'wind_new',
-  'temp_new',
-  'rain',
-  'snow',
-]);
 function buildOwmTileUrl({ layer, z, x, y, apiKey }) {
   return `${OWM_BASE}/${layer}/${z}/${x}/${y}.png?appid=${encodeURIComponent(apiKey)}`;
 }
@@ -74,7 +63,7 @@ let rvCache = null; let rvAt = 0; const RV_TTL = 60_000;
 async function getRainviewerIndex() {
   const now = Date.now();
   if (rvCache && (now - rvAt) < RV_TTL) return rvCache;
-  const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
+  const res = await fetchWithRetry('https://api.rainviewer.com/public/weather-maps.json');
   if (!res.ok) throw new Error(`rainviewer index ${res.status}`);
   rvCache = await res.json();
   rvAt = now;
@@ -111,8 +100,8 @@ export const handler = async (event) => {
 
     // NWS Alerts
     if (path.startsWith('/api/nws/alerts')) {
-      const userAgent = process.env.NWS_USER_AGENT || '(Vortexa, contact@example.com)';
-      const url = 'https://api.weather.gov/alerts' + path.replace('/api/nws/alerts', '') + qs;
+      const userAgent = process.env.NWS_USER_AGENT || DEFAULT_NWS_USER_AGENT;
+      const url = NWS_API_BASE + path.replace('/api/nws/alerts', '') + qs;
       const upstream = await fetchWithRetry(url, { headers: { 'User-Agent': userAgent, 'Accept': 'application/geo+json' } });
       const textBody = await upstream.text();
       return {
