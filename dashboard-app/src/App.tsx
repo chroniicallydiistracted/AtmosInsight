@@ -7,6 +7,8 @@ import type {
   RasterLayerSpecification
 } from '@maplibre/maplibre-gl-style-spec'
 import { PMTiles, Protocol } from 'pmtiles'
+import type { BackgroundLayerSpecification } from '@maplibre/maplibre-gl-style-spec'
+import type { GeoJSONSource } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import './App.css'
 import { Timeline } from './components/Timeline'
@@ -25,11 +27,18 @@ export default function App() {
   useEffect(() => {
     const url = 'https://protomaps.github.io/basemaps/pmtiles/protomaps_2024-07-22-v4.pmtiles'
     protocol.add(new PMTiles(url))
-    const styleE2E = {
-      version: 8 as const,
+    const bgLayer = {
+      id: 'bg',
+      type: 'background',
+      paint: { 'background-color': '#111820' }
+    } satisfies BackgroundLayerSpecification
+
+    const styleE2E: StyleSpecification = {
+      version: 8,
       sources: {},
-      layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#111820' } }]
+      layers: [bgLayer]
     }
+
     const styleUrlOrSpec: string | StyleSpecification = import.meta.env.VITE_E2E === '1'
       ? styleE2E
       : 'https://protomaps.github.io/basemaps/style.json'
@@ -122,10 +131,8 @@ export default function App() {
               map.on('mouseleave', id, () => (map.getCanvas().style.cursor = ''))
             })
           } else {
-            const src = map.getSource('nws-alerts')
-            if (src && typeof (src as { setData?: unknown }).setData === 'function') {
-              ;(src as { setData: (d: GeoJSON.GeoJSON | string) => void }).setData(geojson as unknown as GeoJSON.GeoJSON)
-            }
+            const src = map.getSource('nws-alerts') as GeoJSONSource | undefined
+            src?.setData(geojson as unknown as GeoJSON.GeoJSON)
           }
         })
         .catch(() => {})

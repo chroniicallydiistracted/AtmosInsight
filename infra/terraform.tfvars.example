@@ -1,0 +1,27 @@
+########################################################
+# Terraform variables
+# 
+# Do NOT commit terraform.tfvars — it is .gitignored.
+########################################################
+
+# AWS region
+# region = "us-east-1"
+
+# NWS header (required by api.weather.gov)
+nws_user_agent = "AtmosInsight/v0.1.0 (you@example.com)"
+
+# API Keys
+
+airnow_api_key =
+nasa_api_key =
+openaq_api_key =
+purpleair_api_key =
+firms_api_key =
+az511_api_key =
+earthdata_api_key =
+owm_api_key =
+mapy_api_key =
+
+# Optional GLM TOE Python service URL. Leave empty to disable proxying.
+glm_toe_py_url = ""
+

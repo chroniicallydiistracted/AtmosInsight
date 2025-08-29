@@ -50,4 +50,5 @@ module "database" {
 module "cdn" {
   source        = "./modules/cloudfront"
   origin_domain = "${module.app_bucket.bucket_id}.s3.amazonaws.com"
+  api_origin_domain = replace(aws_apigatewayv2_api.proxy.api_endpoint, "https://", "")
 }

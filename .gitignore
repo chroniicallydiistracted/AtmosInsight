@@ -35,8 +35,10 @@ nohup.out
 
 # Terraform
 infra/.terraform/
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
+infra/terraform.tfvars
 
 # GLM references
 GLM_Lightning_HeatMap_guide.md
 GLM_HeatMap_QuickGuide.md
-
