@@ -29,7 +29,7 @@ test('Radar playback demo (records video)', async ({ page }) => {
   });
   await page.goto('/');
   // Wait for map
-  await page.waitForFunction(() => (window as any).__map && (window as any).__map.getCanvas && (window as any).__map.getCanvas(), { timeout: 30000 });
+  await page.waitForFunction(() => typeof window !== 'undefined' && !!(window as unknown as { __map?: { getCanvas?: () => unknown } }).__map && typeof (window as unknown as { __map?: { getCanvas?: () => unknown } }).__map!.getCanvas === 'function' && !!(window as unknown as { __map?: { getCanvas?: () => unknown } }).__map!.getCanvas(), { timeout: 30000 });
 
   // Ensure radar layer appears (wait for first stubbed tile response)
   await page.waitForEvent('response', (r) => /\/api\/rainviewer\/.+\.png$/.test(r.url()) && r.ok(), { timeout: 15000 });
@@ -38,7 +38,7 @@ test('Radar playback demo (records video)', async ({ page }) => {
   await page.waitForTimeout(8000);
 
   // Sanity check that at least a couple of frames were requested
-  const reqs = await page.evaluate(() => (window as any).__rrq || 0);
+  void (await page.evaluate(() => (window as unknown as { __rrq?: number }).__rrq ?? 0));
   // reqs may be undefined if not instrumented; accept either
   expect(true).toBeTruthy();
 });

@@ -133,8 +133,8 @@ app.get('/api/rainviewer/:ts/:size/:z/:x/:y/:color/:options.png', shortLived60, 
 });
 
 async function proxyGibsTile(req: express.Request, res: express.Response) {
-  const { epsg, layer, tms, z, y, x, ext } = req.params;
-  const time = (req.params as any).time as string | undefined;
+  const { epsg, layer, tms, z, y, x, ext } = req.params as Record<string, string>;
+  const time = typeof (req.params as Record<string, unknown>).time === 'string' ? (req.params as Record<string, string>).time : undefined;
   const targetUrl = buildGibsTileUrl({ epsg, layer, time, tms, z, y, x, ext });
   try {
     const upstream = await fetchWithRetry(targetUrl, {});

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type maplibregl from 'maplibre-gl';
+import type { RasterLayerSpecification, RasterSourceSpecification } from '@maplibre/maplibre-gl-style-spec';
 
 interface GlmLegendProps {
   map: maplibregl.Map | null;
@@ -42,30 +43,30 @@ export function GlmLegend({ map, layerId = 'glm_toe_layer' }: GlmLegendProps) {
     ];
 
     const apply = () => {
-      const source = map.getSource(srcId) as any;
+      const source = map.getSource(srcId) as unknown;
       try {
-        if (source && typeof source.setTiles === 'function') {
-          source.setTiles(tiles);
+        if (source && typeof (source as { setTiles?: unknown }).setTiles === 'function') {
+          (source as { setTiles: (t: string[]) => void }).setTiles(tiles);
           if (map.getLayer(layerId)) {
             map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
           }
           return;
         }
-      } catch {}
+      } catch { void 0; }
       try {
         if (map.getLayer(layerId)) map.removeLayer(layerId);
-      } catch {}
+      } catch { void 0; }
       try {
         if (map.getSource(srcId)) map.removeSource(srcId);
-      } catch {}
+      } catch { void 0; }
       try {
-        map.addSource(srcId, { type: 'raster', tiles, tileSize: 256, minzoom: 0, maxzoom: 10 } as any);
-        map.addLayer({ id: layerId, type: 'raster', source: srcId, paint: { 'raster-opacity': 0.85, 'raster-resampling': 'linear' } } as any);
+        map.addSource(srcId, { type: 'raster', tiles, tileSize: 256, minzoom: 0, maxzoom: 10 } as RasterSourceSpecification);
+        map.addLayer({ id: layerId, type: 'raster', source: srcId, paint: { 'raster-opacity': 0.85, 'raster-resampling': 'linear' } } as RasterLayerSpecification);
         map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
-      } catch {}
+      } catch { void 0; }
     };
 
-    if (typeof (map as any).isStyleLoaded === 'function' && !map.isStyleLoaded()) {
+    if (typeof (map as unknown as { isStyleLoaded?: () => boolean }).isStyleLoaded === 'function' && !map.isStyleLoaded()) {
       map.once('load', apply);
       return;
     }
