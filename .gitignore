@@ -38,6 +38,8 @@ infra/.terraform/
 infra/terraform.tfstate
 infra/terraform.tfstate.backup
 infra/terraform.tfvars
+infra/proxy-only/.terraform
+
 
 # GLM references
 GLM_Lightning_HeatMap_guide.md
