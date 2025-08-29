@@ -8,6 +8,10 @@
     "dev": "pnpm --filter web dev",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
-    "tokens": "pnpm --filter tokens build"
+    "tokens": "pnpm --filter tokens build",
+    "start": "./start-atmosinsight.sh",
+    "stop": "./stop-atmosinsight.sh",
+    "status": "./status-atmosinsight.sh",
+    "restart": "./stop-atmosinsight.sh && ./start-atmosinsight.sh"
   }
 }
