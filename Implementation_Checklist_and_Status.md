@@ -80,3 +80,38 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Deleted `apps/web/src/app/favicon.ico` to avoid binary diff issues.
   - Files: `apps/web/src/app/favicon.ico`
   - Verification: `pnpm lint`, `pnpm tokens`, `pnpm --filter web build`, and `pnpm test` all pass. Marked production ready.
+
+- [x] 2025-08-29 — Audit documentation
+  - Summary: Added `Findings.md`, `SuggestedFixes.patch`, and `Followups.md` summarizing repository audit and recommended fixes.
+  - Files: `Findings.md`, `SuggestedFixes.patch`, `Followups.md`
+  - Verification: Documentation only; no runtime changes. Marked production ready.
+
+- [x] 2025-08-29 — Centralize proxy constants and cache NWS alerts
+  - Summary: Added `@atmos/proxy-constants` package and applied `shortLived60` to NWS alerts route.
+  - Files: `packages/proxy-constants/*`, `proxy-server/src/app.ts`, `proxy-server/src/gibs.ts`, `proxy-server/src/owm.ts`, `tiling-services/proxy-api/index.mjs`, `proxy-server/package.json`, `pnpm-lock.yaml`
+  - Verification: `pnpm lint`, `pnpm test`. Marked production ready.
+
+- [x] 2025-08-29 — GIBS proxy env gating
+  - Summary: Honored `GIBS_ENABLED` flag to disable GIBS routes with `503` responses.
+  - Files: `proxy-server/src/app.ts`, `proxy-server/test/gibs.test.ts`, `Followups.md`, `Findings.md`
+  - Verification: `pnpm lint`, `pnpm test`. Marked production ready.
+
+- [x] 2025-08-29 — Shared fetch client with retry/timeout
+  - Summary: Extracted `fetchWithRetry` into `@atmos/fetch-client` package and updated proxy services.
+  - Files: `packages/fetch-client/*`, `proxy-server/src/app.ts`, `proxy-server/src/rainviewer.ts`, `tiling-services/proxy-api/index.mjs`, `proxy-server/package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`
+  - Verification: `pnpm lint`, `pnpm test`, `cd proxy-server && pnpm test`. Marked production ready.
+
+- [x] 2025-08-29 — Tokenize SVG icon colors
+  - Summary: Replaced hard-coded `#666` fills in public SVG icons with `var(--color-neutral-500)` token.
+  - Files: `apps/web/public/globe.svg`, `apps/web/public/file.svg`, `apps/web/public/window.svg`, `Findings.md`, `Followups.md`
+  - Verification: `pnpm lint`, `pnpm test`. Marked production ready.
+
+- [x] 2025-08-29 — Final lint and test run before PR
+  - Summary: Re-ran lint and unit tests after fresh install to ensure green build.
+  - Files: `Implementation_Checklist_and_Status.md`
+  - Verification: `pnpm lint`, `pnpm test`
+
+- [x] 2025-08-29 — Align proxy tsconfig module resolution
+  - Summary: Switched `proxy-server` to `moduleResolution: bundler` to match workspace defaults and eliminate config drift.
+  - Files: `proxy-server/tsconfig.json`, `Findings.md`, `Followups.md`
+  - Verification: `pnpm lint`, `pnpm test`, `cd proxy-server && pnpm test`

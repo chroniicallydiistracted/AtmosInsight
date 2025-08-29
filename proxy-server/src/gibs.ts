@@ -1,4 +1,5 @@
-const BASE = 'https://gibs.earthdata.nasa.gov/wmts';
+import { GIBS_BASE } from '@atmos/proxy-constants';
+const BASE = GIBS_BASE;
 
 export interface TileParams {
   epsg: string;

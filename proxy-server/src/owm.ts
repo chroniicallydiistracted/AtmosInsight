@@ -1,15 +1,7 @@
-const BASE = 'https://tile.openweathermap.org/map';
+import { OWM_BASE, OWM_ALLOW } from '@atmos/proxy-constants';
+const BASE = OWM_BASE;
 
-const ALLOWLIST = new Set<string>([
-  // Common official layers; keep minimal and safe
-  'clouds_new',
-  'precipitation_new',
-  'pressure_new',
-  'wind_new',
-  'temp_new',
-  'rain',
-  'snow',
-]);
+const ALLOWLIST = OWM_ALLOW;
 
 export function isAllowedOwmLayer(layer: string): boolean {
   return ALLOWLIST.has(layer);
