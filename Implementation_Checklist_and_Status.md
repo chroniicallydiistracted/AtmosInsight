@@ -110,3 +110,9 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Re-ran lint and unit tests after fresh install to ensure green build.
   - Files: `Implementation_Checklist_and_Status.md`
   - Verification: `pnpm lint`, `pnpm test`
+
+- [x] 2025-08-29 — Align proxy tsconfig module resolution
+  - Summary: Switched `proxy-server` to `moduleResolution: bundler` to match workspace defaults and eliminate config drift.
+  - Files: `proxy-server/tsconfig.json`, `Findings.md`, `Followups.md`
+  - Verification: `pnpm lint`, `pnpm test`, `cd proxy-server && pnpm test`
+

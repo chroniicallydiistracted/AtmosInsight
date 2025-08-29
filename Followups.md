@@ -24,6 +24,6 @@
   - Manual verification that icons respond to CSS `--color-neutral-500` token.
 
 ## Bundle 5: tsconfig alignment
-- Evaluate migrating `proxy-server` to `moduleResolution: bundler` or document divergence.
+- [x] ~~Evaluate migrating `proxy-server` to `moduleResolution: bundler` or document divergence.~~
 - **Tests:**
-  - `pnpm lint` and `pnpm test` across repo still pass after config change.
+  - [x] `pnpm lint` and `pnpm test` across repo still pass after config change.
