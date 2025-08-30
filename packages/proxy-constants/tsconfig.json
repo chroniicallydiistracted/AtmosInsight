@@ -9,10 +9,9 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
-    "rootDir": "./"
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["index.ts"],
   "exclude": ["node_modules", "dist"]
 }
+

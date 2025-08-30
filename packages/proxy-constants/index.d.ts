@@ -23,3 +23,4 @@ export interface GibsDomainsParams {
   range: string;
 }
 export function buildGibsDomainsUrl(params: GibsDomainsParams): string;
+

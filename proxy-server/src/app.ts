@@ -203,13 +203,16 @@ app.get('/api/osm/cyclosm/:z/:x/:y.png', shortLived60, async (req, res) => {
 
         console.log(`Trying OpenStreetMap tile from ${server}: ${targetUrl}`);
 
-        const upstream = await fetch(targetUrl, {
-          headers: {
-            'User-Agent': 'AtmosInsight/1.0 (https://github.com/your-repo)',
-            Accept: 'image/png,image/*,*/*',
-          },
-          signal: AbortSignal.timeout(5000), // 5 second timeout
-        });
+        const upstream = await fetchWithRetry(
+          targetUrl,
+          {
+            headers: {
+              'User-Agent': 'AtmosInsight/1.0 (https://github.com/your-repo)',
+              Accept: 'image/png,image/*,*/*',
+            },
+            signal: AbortSignal.timeout(5000), // 5 second timeout
+          }
+        );
 
         if (upstream.ok) {
           const buffer = Buffer.from(await upstream.arrayBuffer());
@@ -600,12 +603,26 @@ app.get('/api/gibs/redirect', ensureGibsEnabled, shortLived60, redirectGibs);
 app.get('/api/tracestrack/:style/:z/:x/:y.webp', shortLived60, async (req, res) => {
   try {
     const { style, z, x, y } = req.params as Record<string, string>;
-    const apiKey = process.env.TTRACK_API_KEY || 'de6a88653d450364eaf72fd0320291b1';
-    
-    const targetUrl = `https://tile.tracestrack.com/${style}/{z}/{x}/{y}.webp?key=${apiKey}&style=outrun`;
-    
+    const apiKey = process.env.TTRACK_API_KEY;
+    if (!apiKey) {
+      res
+        .status(HTTP_STATUS.SERVICE_UNAVAILABLE)
+        .json(
+          createErrorResponse(
+            HTTP_STATUS.SERVICE_UNAVAILABLE,
+
+            'TTRACK_API_KEY not configured'
+            
+          )
+        );
+      return;
+    }
+
+    const targetUrl = `https://tile.tracestrack.com/${style}/${z}/${x}/${y}.webp?key=${apiKey}`;
+
+
     console.log(`Fetching Tracestrack tile from: ${targetUrl}`);
-    
+
     const upstream = await fetchWithRetry(targetUrl, {});
     const buffer = Buffer.from(await upstream.arrayBuffer());
     

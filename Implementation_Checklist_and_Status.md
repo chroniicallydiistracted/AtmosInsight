@@ -120,3 +120,4 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Moved `buildGibsTileUrl` and `buildGibsDomainsUrl` into `@atmos/proxy-constants` and refactored proxy services to import the shared helpers.
   - Files: `packages/proxy-constants/*`, `proxy-server/src/app.ts`, `proxy-server/test/gibs.test.ts`, `tiling-services/proxy-api/index.ts`, `pnpm-lock.yaml`
   - Verification: `pnpm build`, `pnpm test` — marked production ready.
+
