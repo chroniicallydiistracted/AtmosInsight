@@ -156,3 +156,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
   - Files: `packages/providers/*`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
+- [ ] 2025-08-30 — XWeather provider module
+  - Summary: Added XWeather provider using Aeris API with client credentials and canonical query ordering.
+  - Files: `packages/providers/xweather.ts`, `packages/providers/xweather.js`, `packages/providers/xweather.d.ts`, `packages/providers/index.ts`, `packages/providers/index.js`, `packages/providers/index.d.ts`, `packages/providers/test/xweather.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers test`
