@@ -178,3 +178,7 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 - [x] 2025-08-30 — OpenAQ v3 provider module
   - Summary: Added OpenAQ v3 provider with optional API key header and unit tests.
   - Files: `packages/providers/openaq.ts`, `packages/providers/test/openaq.test.ts`, `packages/providers/index.ts`, `providers.json`
+- [ ] 2025-08-30 — WAQI provider module and tile builder
+  - Summary: Added WAQI feed and tile URL builders with tests and manifest/index updates.
+  - Files: `packages/providers/waqi.ts`, `packages/providers/index.ts`, `packages/providers/test/waqi.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.

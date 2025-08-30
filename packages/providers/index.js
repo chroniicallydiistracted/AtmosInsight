@@ -21,3 +21,4 @@ export * as usgs from './usgs.js';
 export * as nwm from './nwm.js';
 export * as airnow from './airnow.js';
 export * as openaq from './openaq.js';
+export * as waqi from './waqi.js';
