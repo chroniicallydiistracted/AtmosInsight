@@ -156,3 +156,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
   - Files: `packages/providers/*`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
+- [x] 2025-08-30 — NWS radar tiles provider
+  - Summary: Added NWS radar tile provider with canonical XYZ path builder and binary fetch function.
+  - Files: `packages/providers/nws-radar-tiles.ts`, `packages/providers/nws-radar-tiles.js`, `packages/providers/nws-radar-tiles.d.ts`, `packages/providers/index.ts`, `packages/providers/index.js`, `packages/providers/index.d.ts`, `packages/providers/test/nws-radar-tiles.test.ts`, `providers.json`
+  - Verification: `pnpm lint` (fails in apps/web), `pnpm --filter @atmos/providers test`
