@@ -82,5 +82,11 @@
     "category": "weather",
     "accessRoute": "WMTS",
     "baseUrl": "https://mesonet.agron.iastate.edu"
+  },
+  {
+    "slug": "jma-himawari8",
+    "category": "satellite",
+    "accessRoute": "REST",
+    "baseUrl": "https://himawari8.s3.amazonaws.com"
   }
 ]

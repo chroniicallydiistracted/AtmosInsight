@@ -12,3 +12,4 @@ export * as gibs from './gibs.js';
 export * as nexrad from './nexrad.js';
 export * as nwsRadarTiles from './nws-radar-tiles.js';
 export * as iem from './iem.js';
+export * as himawari8 from './himawari8.js';
