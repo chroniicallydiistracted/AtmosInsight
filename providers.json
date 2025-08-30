@@ -130,5 +130,11 @@
     "category": "air-quality",
     "accessRoute": "REST",
     "baseUrl": "https://www.airnowapi.org"
+  },
+  {
+    "slug": "openaq-v3",
+    "category": "air quality",
+    "accessRoute": "REST",
+    "baseUrl": "https://api.openaq.org/v3"
   }
 ]

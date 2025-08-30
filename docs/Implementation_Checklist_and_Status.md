@@ -175,3 +175,6 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 - [x] 2025-08-30 — EPA AirNow provider module
   - Summary: Added `epa-airnow` provider with request builder, fetch helper, manifest entry, and tests.
   - Files: `packages/providers/airnow.ts`, `packages/providers/index.ts`, `providers.json`, `packages/providers/test/airnow.test.ts`
+- [x] 2025-08-30 — OpenAQ v3 provider module
+  - Summary: Added OpenAQ v3 provider with optional API key header and unit tests.
+  - Files: `packages/providers/openaq.ts`, `packages/providers/test/openaq.test.ts`, `packages/providers/index.ts`, `providers.json`
