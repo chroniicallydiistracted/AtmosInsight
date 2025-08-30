@@ -33,6 +33,14 @@ async function getTimes(id: string): Promise<string[]> {
 export async function handler(event: ServerEvent): Promise<ServerResponse> {
   const path = event.rawPath || '';
 
+  if (path === '/health') {
+    return {
+      statusCode: 200,
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ status: 'ok' }),
+    };
+  }
+
   if (path === '/catalog/layers') {
     const layers = await getLayers();
     return {
