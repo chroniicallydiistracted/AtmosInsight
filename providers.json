@@ -148,5 +148,11 @@
     "category": "air-quality",
     "accessRoute": "REST",
     "baseUrl": "https://api.openweathermap.org"
+  },
+  {
+    "slug": "google-air-quality",
+    "category": "air-quality",
+    "accessRoute": "REST",
+    "baseUrl": "https://airquality.googleapis.com/v1"
   }
 ]
