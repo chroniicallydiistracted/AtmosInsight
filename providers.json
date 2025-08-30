@@ -118,5 +118,11 @@
     "category": "water",
     "accessRoute": "REST",
     "baseUrl": "https://waterservices.usgs.gov/nwis"
+  },
+  {
+    "slug": "noaa-nwm",
+    "category": "hydrology",
+    "accessRoute": "S3",
+    "baseUrl": "https://noaa-nwm-pds.s3.amazonaws.com"
   }
 ]

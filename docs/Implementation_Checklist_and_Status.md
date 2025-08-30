@@ -169,3 +169,6 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added USGS NWIS provider with request builder and optional API key header; updated manifest and provider index.
   - Files: `packages/providers/usgs.ts`, `packages/providers/test/usgs.test.ts`, `packages/providers/index.ts`, `providers.json`
   - Verification: `pnpm lint` fails in `apps/web`; `pnpm --filter @atmos/providers build`; `pnpm --filter @atmos/providers test`
+- [x] 2025-08-30 — NOAA NWM provider module
+  - Summary: Added `noaa-nwm` provider with key builder and binary tile fetch, updated manifest and exports.
+  - Files: `packages/providers/nwm.ts`, `packages/providers/index.ts`, `packages/providers/test/nwm.test.ts`, `providers.json`

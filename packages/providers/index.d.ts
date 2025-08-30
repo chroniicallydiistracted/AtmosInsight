@@ -18,3 +18,4 @@ export * as noaaCoops from './noaa-coops.js';
 export * as noaaNdbc from './noaa-ndbc.js';
 export * as erddap from './erddap.js';
 export * as usgs from './usgs.js';
+export * as nwm from './nwm.js';
