@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import nock from 'nock';
+import { describe, it, expect, afterEach } from 'vitest';
 import { buildRequest, fetchJson } from '../openweather.js';
 
 describe('openweather provider', () => {
   afterEach(() => {
-    vi.restoreAllMocks();
+    nock.cleanAll();
   });
 
   it('builds onecall URL', () => {
@@ -14,11 +15,12 @@ describe('openweather provider', () => {
 
   it('calls fetch without headers', async () => {
     process.env.OPENWEATHER_API_KEY = 'test';
-    const mock = vi.fn().mockResolvedValue({ json: () => Promise.resolve({}) });
-    // @ts-ignore
-    global.fetch = mock;
+    const scope = nock('https://api.openweathermap.org')
+      .get('/data/3.0/onecall')
+      .query({ lat: '10', lon: '20', appid: 'test' })
+      .reply(200, {});
     const url = buildRequest({ lat: 10, lon: 20 });
     await fetchJson(url);
-    expect(mock).toHaveBeenCalledWith(url);
+    scope.done();
   });
 });
