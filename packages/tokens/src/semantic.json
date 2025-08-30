@@ -3,6 +3,15 @@
     "text": {
       "base": { "value": "#ffffff" },
       "muted": { "value": "#94a3b8" }
+    },
+    "alert": {
+      "extreme": { "value": "#7f0000" },
+      "severe": { "value": "#d7301f" },
+      "moderate": { "value": "#fc8d59" },
+      "minor": { "value": "#fdcc8a" },
+      "unknown": { "value": "#bdbdbd" },
+      "outline": { "value": "#444444" },
+      "point": { "value": "#08519c" }
     }
   }
 }
