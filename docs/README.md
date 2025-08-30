@@ -36,12 +36,12 @@ This commit establishes Milestone M1: foundational infrastructure configuration 
 - `OWM_API_KEY` – OpenWeatherMap tile API key used by the proxy.
 - `RAINVIEWER_ENABLED` – `true|false` to enable/disable RainViewer proxy (default enabled).
 - `GIBS_ENABLED` – `true|false` to enable/disable GIBS proxy (if implemented).
-- Mapbox/Cesium tokens as required by your chosen basemap providers.
+- `CESIUM_ION_KEY` – Cesium ion tokens as required.
 - `GLM_TOE_ENABLED` – `true|false` to enable experimental GLM TOE tile endpoint.
 - `GLM_TOE_PY_URL` – If set, proxy `/api/glm-toe/:z/:x/:y.png` to the Python FastAPI service (`tiling-services/glm_toe`).
 - `GLM_USE_ABI_GRID` – When running the Python service, enable precise ABI 2×2 km grid accumulation.
 - `GLM_TILE_CACHE_SIZE` – Python service tile LRU size (default 128).
-
+- ``
 ## Basemap Tokens
 
 The included demo basemap uses Protomaps’ public style and PMTiles and does not require a token. If you switch to Mapbox or other providers, add the appropriate environment variables locally and in your deployment platform — do not hard-code keys in source.
