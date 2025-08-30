@@ -11,6 +11,21 @@ Atmospheric Weather and Planetary Science Education App
 - `tiling-services/` – Tile rendering services (placeholder)
 - `docs/` – Documentation and ADRs
 
+## Port Configuration
+
+All local service ports are defined in `config/ports.json`:
+
+```json
+{
+  "proxy": 3000,
+  "catalog": 3001,
+  "web": 3002,
+  "database": { "min": 3306, "max": 5432 }
+}
+```
+
+Scripts and utilities load from this file as the single source of truth for port assignments.
+
 ## Milestones
 
 This commit establishes Milestone M1: foundational infrastructure configuration and a minimal app shell with Tracestrack basemap tiles.

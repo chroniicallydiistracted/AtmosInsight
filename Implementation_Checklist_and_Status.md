@@ -120,3 +120,4 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Regenerated `@atmos/proxy-constants` with updated default NWS User-Agent and added CI guard against TS/JS drift.
   - Files: `packages/proxy-constants/*`, `scripts/ci.sh`, `pnpm-lock.yaml`
   - Verification: `pnpm lint`, `pnpm test`, `pnpm --filter @atmos/proxy-constants build`
+
