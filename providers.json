@@ -76,5 +76,11 @@
     "category": "radar",
     "accessRoute": "XYZ",
     "baseUrl": "https://tiles.weather.gov"
+  },
+  {
+    "slug": "iowastate-iem",
+    "category": "weather",
+    "accessRoute": "WMTS",
+    "baseUrl": "https://mesonet.agron.iastate.edu"
   }
 ]

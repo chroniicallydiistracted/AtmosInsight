@@ -147,3 +147,6 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added NWS radar tile provider with canonical XYZ path builder and binary fetch function.
   - Files: `packages/providers/nws-radar-tiles.ts`, `packages/providers/nws-radar-tiles.js`, `packages/providers/nws-radar-tiles.d.ts`, `packages/providers/index.ts`, `packages/providers/index.js`, `packages/providers/index.d.ts`, `packages/providers/test/nws-radar-tiles.test.ts`, `providers.json`
   - Verification: `pnpm lint` (fails in apps/web), `pnpm --filter @atmos/providers test`
+- [ ] 2025-09-09 — Iowa State IEM tile provider
+  - Summary: Added IEM WMTS tile provider with binary fetch helper and tests.
+  - Files: `packages/providers/iem.ts`, `packages/providers/index.ts`, `packages/providers/test/iem.test.ts`, `providers.json`
