@@ -3,5 +3,7 @@
   {"slug": "met-norway", "category": "weather", "accessRoute": "REST", "baseUrl": "https://api.met.no/weatherapi"},
   {"slug": "open-meteo", "category": "weather", "accessRoute": "REST", "baseUrl": "https://api.open-meteo.com"},
   {"slug": "openweather-onecall", "category": "weather", "accessRoute": "REST", "baseUrl": "https://api.openweathermap.org"},
+  {"slug": "dwd-opendata", "category": "weather", "accessRoute": "WMS/WFS", "baseUrl": "https://opendata.dwd.de"}
   {"slug": "eccc-geomet", "category": "weather", "accessRoute": "OGC", "baseUrl": "https://geo.weather.gc.ca/geomet"}
+
 ]

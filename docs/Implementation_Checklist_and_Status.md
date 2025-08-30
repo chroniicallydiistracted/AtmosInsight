@@ -156,7 +156,14 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
   - Files: `packages/providers/*`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
+- [ ] 2025-08-30 — DWD OpenData provider with KVP builder
+  - Summary: Added DWD module with WMS/WFS KVP parameter builder, binary tile fetch helper, manifest entry, and index exports.
+  - Files: `packages/providers/dwd.ts`, `packages/providers/index.ts`, `packages/providers/test/dwd.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
 - [x] 2025-08-30 — ECCC GeoMet tile provider
   - Summary: Added canonical OGC KVP/WMTS request builder and tile fetcher with tests.
   - Files: `packages/providers/eccc.ts`, `packages/providers/test/eccc.test.ts`, `packages/providers/index.ts`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`
+
