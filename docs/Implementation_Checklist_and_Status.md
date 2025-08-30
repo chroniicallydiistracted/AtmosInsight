@@ -129,3 +129,7 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 - [ ] 2025-08-30 — XWeather provider module
   - Summary: Added XWeather provider using Aeris API with client credentials and canonical query ordering.
   - Files: `packages/providers/xweather.ts`, `packages/providers/xweather.js`, `packages/providers/xweather.d.ts`, `packages/providers/index.ts`, `packages/providers/index.js`, `packages/providers/index.d.ts`, `packages/providers/test/xweather.test.ts`, `providers.json`
+- [x] 2025-08-30 — NASA GIBS provider module
+  - Summary: Added GIBS provider with WMTS REST/KVP builders, token-aware tile fetcher, and tests.
+  - Files: `packages/providers/gibs.ts`, `packages/providers/index.ts`, `packages/providers/test/gibs.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`
