@@ -115,3 +115,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Switched `proxy-server` to `moduleResolution: bundler` to match workspace defaults and eliminate config drift.
   - Files: `proxy-server/tsconfig.json`, `Findings.md`, `Followups.md`
   - Verification: `pnpm lint`, `pnpm test`, `cd proxy-server && pnpm test`
+
+- [x] 2025-08-30 — OSM tile fetch retry and transient failure test
+  - Summary: Replaced direct fetch with `fetchWithRetry` for OpenStreetMap tiles using `AbortSignal.timeout` and added test covering network error retries.
+  - Files: `proxy-server/src/app.ts`, `packages/shared-utils/index.ts`, `packages/shared-utils/index.js`, `packages/fetch-client/test/fetchWithRetry.test.ts`
+  - Verification: `pnpm lint`, `pnpm test`

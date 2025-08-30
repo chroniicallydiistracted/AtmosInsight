@@ -39,4 +39,19 @@ describe('fetchWithRetry', () => {
     await expectation;
     vi.useRealTimers();
   });
+
+  it('retries on transient network error', async () => {
+    vi.useFakeTimers();
+    const error = new Error('network');
+    const res200 = new Response('ok', { status: 200 });
+    const mock = vi.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(res200);
+    // @ts-ignore
+    global.fetch = mock;
+    const promise = fetchWithRetry('http://example.com', {}, 1, 1000, 1);
+    await vi.runAllTimersAsync();
+    const res = await promise;
+    expect(mock).toHaveBeenCalledTimes(2);
+    expect(res.status).toBe(200);
+    vi.useRealTimers();
+  });
 });
