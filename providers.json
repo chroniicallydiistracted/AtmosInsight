@@ -154,5 +154,11 @@
     "category": "air-quality",
     "accessRoute": "REST",
     "baseUrl": "https://airquality.googleapis.com/v1"
+  },
+  {
+    "slug": "nws-alerts",
+    "category": "alerts",
+    "accessRoute": "REST",
+    "baseUrl": "https://api.weather.gov/alerts"
   }
 ]
