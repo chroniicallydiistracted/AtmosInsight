@@ -1,6 +1,10 @@
 [
-  {"slug": "nws-weather", "category": "weather", "accessRoute": "REST", "baseUrl": "https://api.weather.gov"},
+  {"slug": "dwd-opendata", "category": "weather", "accessRoute": "OGC WMS/WFS", "baseUrl": "https://opendata.dwd.de"},
+  {"slug": "fmi-opendata", "category": "weather", "accessRoute": "OGC WFS/WMS", "baseUrl": "https://opendata.fmi.fi"},
   {"slug": "met-norway", "category": "weather", "accessRoute": "REST", "baseUrl": "https://api.met.no/weatherapi"},
+  {"slug": "msc-geomet", "category": "weather", "accessRoute": "OGC WMS/WFS/WMTS", "baseUrl": "https://geo.weather.gc.ca/geomet"},
+  {"slug": "nws-weather", "category": "weather", "accessRoute": "REST", "baseUrl": "https://api.weather.gov"},
   {"slug": "open-meteo", "category": "weather", "accessRoute": "REST", "baseUrl": "https://api.open-meteo.com"},
-  {"slug": "openweather-onecall", "category": "weather", "accessRoute": "REST", "baseUrl": "https://api.openweathermap.org"}
+  {"slug": "openweather-onecall", "category": "weather", "accessRoute": "REST", "baseUrl": "https://api.openweathermap.org"},
+  {"slug": "smhi-opendata", "category": "weather", "accessRoute": "REST", "baseUrl": "https://opendata-download-metfcst.smhi.se"}
 ]
