@@ -2,5 +2,12 @@
   "name": "@atmos/proxy-constants",
   "version": "0.0.0",
   "type": "module",
-  "main": "index.js"
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
 }

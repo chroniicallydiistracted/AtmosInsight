@@ -105,6 +105,15 @@ else
     print_warning "Tokens package build failed (this might be expected in some cases)"
 fi
 
+# Ensure generated files are in sync
+print_status "Checking for TypeScript/JavaScript drift..."
+pnpm --filter @atmos/proxy-constants build > /dev/null 2>&1
+if ! git diff --quiet packages/proxy-constants/index.js packages/proxy-constants/index.d.ts; then
+    print_error "proxy-constants generated files are out of date. Run 'pnpm --filter @atmos/proxy-constants build' and commit changes."
+    exit 1
+fi
+print_success "No drift detected in proxy-constants"
+
 print_success "CI install completed successfully!"
 echo ""
 echo "📋 Next steps:"
