@@ -36,6 +36,10 @@ This commit establishes Milestone M1: foundational infrastructure configuration 
 - `OWM_API_KEY` – OpenWeatherMap tile API key used by the proxy.
 - `RAINVIEWER_ENABLED` – `true|false` to enable/disable RainViewer proxy (default enabled).
 - `GIBS_ENABLED` – `true|false` to enable/disable GIBS proxy (if implemented).
+- `TRACESTRACK_API_KEY` – Tracestrack basemap API key for tile requests.
+- `AIRNOW_ENABLED` – `true|false` to enable/disable AirNow air-quality proxy.
+- `AIRNOW_API_KEY` – AirNow API key used when the proxy is enabled.
+- `OPENAQ_ENABLED` – `true|false` to enable/disable OpenAQ air-quality proxy.
 - Mapbox/Cesium tokens as required by your chosen basemap providers.
 - `GLM_TOE_ENABLED` – `true|false` to enable experimental GLM TOE tile endpoint.
 - `GLM_TOE_PY_URL` – If set, proxy `/api/glm-toe/:z/:x/:y.png` to the Python FastAPI service (`tiling-services/glm_toe`).
@@ -45,6 +49,15 @@ This commit establishes Milestone M1: foundational infrastructure configuration 
 ## Basemap Tokens
 
 The included demo basemap uses Protomaps’ public style and PMTiles and does not require a token. If you switch to Mapbox or other providers, add the appropriate environment variables locally and in your deployment platform — do not hard-code keys in source.
+
+## Attribution
+
+- National Weather Service data courtesy of NOAA/NWS.
+- OpenWeatherMap layers © OpenWeatherMap.
+- RainViewer radar imagery © RainViewer.
+- NASA GIBS imagery courtesy of NASA EOSDIS.
+- Basemap tiles by Tracestrack and CyclOSM © OpenStreetMap contributors.
+- Air quality data from AirNow (U.S. EPA) and OpenAQ.
 
 ## References
 

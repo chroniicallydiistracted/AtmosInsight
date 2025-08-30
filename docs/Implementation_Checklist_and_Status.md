@@ -156,3 +156,38 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
   - Files: `packages/providers/*`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
+- [x] 2025-09-04 — NWS provider documentation & attribution
+  - Summary: Documented `NWS_USER_AGENT` env var and credited NOAA/NWS in README.
+  - Files: `docs/README.md`, `docs/Implementation_Checklist_and_Status.md`
+  - Verification: Documentation only.
+
+- [x] 2025-09-04 — OpenWeatherMap provider documentation & attribution
+  - Summary: Documented `OWM_API_KEY` env var and added OpenWeatherMap attribution.
+  - Files: `docs/README.md`, `docs/Implementation_Checklist_and_Status.md`
+  - Verification: Documentation only.
+
+- [x] 2025-09-04 — RainViewer provider attribution
+  - Summary: Added attribution for RainViewer radar imagery in README.
+  - Files: `docs/README.md`, `docs/Implementation_Checklist_and_Status.md`
+  - Verification: Documentation only.
+
+- [x] 2025-09-04 — NASA GIBS provider attribution
+  - Summary: Credited NASA EOSDIS for GIBS imagery in README.
+  - Files: `docs/README.md`, `docs/Implementation_Checklist_and_Status.md`
+  - Verification: Documentation only.
+
+- [x] 2025-09-04 — Tracestrack basemap env var & attribution
+  - Summary: Added `TRACESTRACK_API_KEY` env var and noted Tracestrack/CyclOSM attribution.
+  - Files: `docs/README.md`, `docs/Implementation_Checklist_and_Status.md`
+  - Verification: Documentation only.
+
+- [x] 2025-09-04 — AirNow proxy env vars & attribution
+  - Summary: Documented `AIRNOW_ENABLED`/`AIRNOW_API_KEY` and credited AirNow program.
+  - Files: `docs/README.md`, `docs/Implementation_Checklist_and_Status.md`
+  - Verification: Documentation only.
+
+- [x] 2025-09-04 — OpenAQ proxy env var & attribution
+  - Summary: Documented `OPENAQ_ENABLED` env flag and added OpenAQ attribution.
+  - Files: `docs/README.md`, `docs/Implementation_Checklist_and_Status.md`
+  - Verification: Documentation only.
