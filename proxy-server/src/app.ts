@@ -192,13 +192,16 @@ app.get('/api/osm/cyclosm/:z/:x/:y.png', shortLived60, async (req, res) => {
 
         console.log(`Trying OpenStreetMap tile from ${server}: ${targetUrl}`);
 
-        const upstream = await fetch(targetUrl, {
-          headers: {
-            'User-Agent': 'AtmosInsight/1.0 (https://github.com/your-repo)',
-            Accept: 'image/png,image/*,*/*',
-          },
-          signal: AbortSignal.timeout(5000), // 5 second timeout
-        });
+        const upstream = await fetchWithRetry(
+          targetUrl,
+          {
+            headers: {
+              'User-Agent': 'AtmosInsight/1.0 (https://github.com/your-repo)',
+              Accept: 'image/png,image/*,*/*',
+            },
+            signal: AbortSignal.timeout(5000), // 5 second timeout
+          }
+        );
 
         if (upstream.ok) {
           const buffer = Buffer.from(await upstream.arrayBuffer());

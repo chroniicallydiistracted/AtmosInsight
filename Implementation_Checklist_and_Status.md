@@ -116,8 +116,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Files: `proxy-server/tsconfig.json`, `Findings.md`, `Followups.md`
   - Verification: `pnpm lint`, `pnpm test`, `cd proxy-server && pnpm test`
 
-- [x] 2025-08-30 — Proxy constants drift check
-  - Summary: Regenerated `@atmos/proxy-constants` with updated default NWS User-Agent and added CI guard against TS/JS drift.
-  - Files: `packages/proxy-constants/*`, `scripts/ci.sh`, `pnpm-lock.yaml`
-  - Verification: `pnpm lint`, `pnpm test`, `pnpm --filter @atmos/proxy-constants build`
+- [x] 2025-08-30 — OSM tile fetch retry and transient failure test
+  - Summary: Replaced direct fetch with `fetchWithRetry` for OpenStreetMap tiles using `AbortSignal.timeout` and added test covering network error retries.
+  - Files: `proxy-server/src/app.ts`, `packages/shared-utils/index.ts`, `packages/shared-utils/index.js`, `packages/fetch-client/test/fetchWithRetry.test.ts`
+  - Verification: `pnpm lint`, `pnpm test`
 

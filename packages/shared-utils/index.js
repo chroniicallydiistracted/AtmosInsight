@@ -143,11 +143,10 @@ export async function fetchWithRetry(url, options = {}, retries = 3, timeoutMs =
     let attempt = 0;
     let delay = backoffMs;
     while (true) {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
         try {
-            const response = await fetch(url, { ...options, signal: controller.signal });
-            clearTimeout(timeoutId);
+            const timeoutSignal = AbortSignal.timeout(timeoutMs);
+            const signal = options.signal ? AbortSignal.any([options.signal, timeoutSignal]) : timeoutSignal;
+            const response = await fetch(url, { ...options, signal });
             // If we hit a rate limit (429) and still have retries left, wait and retry
             if (response.status === 429 && attempt < retries) {
                 await new Promise(resolve => setTimeout(resolve, delay));
@@ -158,7 +157,6 @@ export async function fetchWithRetry(url, options = {}, retries = 3, timeoutMs =
             return response;
         }
         catch (error) {
-            clearTimeout(timeoutId);
             // If we've used all retries, throw the error
             if (attempt >= retries) {
                 throw error;
