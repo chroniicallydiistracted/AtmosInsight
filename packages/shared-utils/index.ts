@@ -201,3 +201,4 @@ export async function fetchWithRetry(
     }
   }
 }
+export { latLonToTile } from './tile';
