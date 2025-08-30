@@ -156,3 +156,6 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 - [ ] 2025-08-30 — RainViewer provider module
   - Summary: Added RainViewer tile URL builder and binary fetch helper with tests and manifest update.
   - Files: `packages/providers/rainviewer.ts`, `packages/providers/index.ts`, `packages/providers/test/rainviewer.test.ts`, `providers.json`
+- [x] 2025-08-30 — NOAA CO-OPS provider module
+  - Summary: Added NOAA CO-OPS provider with canonical query ordering and tests; updated manifest and exports.
+  - Files: `packages/providers/noaa-coops.*`, `packages/providers/index.*`, `packages/providers/test/noaa-coops.test.ts`, `providers.json`

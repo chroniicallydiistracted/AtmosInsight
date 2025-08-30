@@ -14,3 +14,4 @@ export * as nwsRadarTiles from './nws-radar-tiles.js';
 export * as iem from './iem.js';
 export * as himawari8 from './himawari8.js';
 export * as rainviewer from './rainviewer.js';
+export * as noaaCoops from './noaa-coops.js';
