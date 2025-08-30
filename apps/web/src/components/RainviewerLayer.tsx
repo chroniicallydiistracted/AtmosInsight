@@ -1,8 +1,18 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type maplibregl from 'maplibre-gl';
-import type { RasterLayerSpecification, RasterSourceSpecification } from '@maplibre/maplibre-gl-style-spec';
-import { clampFps, frameDelayMs, isPlayable, nextIndex, prefetchSchedule, DEFAULT_FPS } from '@/lib/utils/playback';
+import type {
+  RasterLayerSpecification,
+  RasterSourceSpecification,
+} from 'maplibre-gl';
+import {
+  clampFps,
+  frameDelayMs,
+  isPlayable,
+  nextIndex,
+  prefetchSchedule,
+  DEFAULT_FPS,
+} from '@/lib/utils/playback';
 import { createTileCache, loadImage } from '@/lib/utils/tileCache';
 
 interface RainviewerLayerProps {
@@ -17,12 +27,22 @@ export function RainviewerLayer({ map }: RainviewerLayerProps) {
   const [lastError, setLastError] = useState<string | null>(null);
   const timerRef = useRef<number | null>(null);
 
-  const fps = useMemo(() => clampFps(Number(process.env.NEXT_PUBLIC_PLAYBACK_FPS) || DEFAULT_FPS), []);
+  const fps = useMemo(
+    () => clampFps(Number(process.env.NEXT_PUBLIC_PLAYBACK_FPS) || DEFAULT_FPS),
+    []
+  );
   const delay = useMemo(() => frameDelayMs(fps), [fps]);
-  const cache = useMemo(() => createTileCache({
-    enabled: String(process.env.NEXT_PUBLIC_ENABLE_TILE_CACHE || '').toLowerCase() === 'true',
-    max: Math.max(8, Number(process.env.NEXT_PUBLIC_TILE_CACHE_SIZE) || 64)
-  }), []);
+  const cache = useMemo(
+    () =>
+      createTileCache({
+        enabled:
+          String(
+            process.env.NEXT_PUBLIC_ENABLE_TILE_CACHE || ''
+          ).toLowerCase() === 'true',
+        max: Math.max(8, Number(process.env.NEXT_PUBLIC_TILE_CACHE_SIZE) || 64),
+      }),
+    []
+  );
 
   // Load RainViewer frames
   useEffect(() => {
@@ -30,11 +50,13 @@ export function RainviewerLayer({ map }: RainviewerLayerProps) {
     async function load() {
       try {
         const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-    const res = await fetch(`${apiBase}/api/rainviewer/index.json`);
+        const res = await fetch(`${apiBase}/api/rainviewer/index.json`);
         const data = await res.json();
         if (!cancelled) {
-          const pastFrames = data.radar.past?.map((f: { time: number }) => f.time) || [];
-          const nowcastFrames = data.radar.nowcast?.map((f: { time: number }) => f.time) || [];
+          const pastFrames =
+            data.radar.past?.map((f: { time: number }) => f.time) || [];
+          const nowcastFrames =
+            data.radar.nowcast?.map((f: { time: number }) => f.time) || [];
           setFrames([...pastFrames, ...nowcastFrames]);
         }
       } catch (error) {
@@ -52,7 +74,7 @@ export function RainviewerLayer({ map }: RainviewerLayerProps) {
     if (!playing) return;
     if (!isPlayable(frames, lastError)) return;
     timerRef.current = window.setInterval(() => {
-      setIndex((i) => nextIndex(i, frames.length));
+      setIndex(i => nextIndex(i, frames.length));
     }, delay) as unknown as number;
     return () => {
       if (timerRef.current !== null) {
@@ -70,7 +92,7 @@ export function RainviewerLayer({ map }: RainviewerLayerProps) {
       const t = frames[idx];
       const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '';
       const url = `${apiBase}/api/rainviewer/${t}/256/${map.getZoom()}/${Math.floor(map.getCenter().lng)}/${Math.floor(map.getCenter().lat)}/0/1_0.png`;
-      loadImage(url, cache).catch((e) => setLastError(String(e)));
+      loadImage(url, cache).catch(e => setLastError(String(e)));
     }
   }, [index, frames, map, cache]);
 
@@ -90,7 +112,7 @@ export function RainviewerLayer({ map }: RainviewerLayerProps) {
           tiles: [`${apiBase}/api/rainviewer/{z}/{x}/{y}/256/0/1_0.png`],
           tileSize: 256,
           minzoom: 0,
-          maxzoom: 10
+          maxzoom: 10,
         } as RasterSourceSpecification);
       }
 
@@ -102,8 +124,8 @@ export function RainviewerLayer({ map }: RainviewerLayerProps) {
           source: sourceId,
           paint: {
             'raster-opacity': 0.7,
-            'raster-resampling': 'linear'
-          }
+            'raster-resampling': 'linear',
+          },
         } as RasterLayerSpecification);
       }
     } else {
@@ -129,35 +151,35 @@ export function RainviewerLayer({ map }: RainviewerLayerProps) {
           <input
             type="checkbox"
             checked={visible}
-            onChange={(e) => setVisible(e.target.checked)}
+            onChange={e => setVisible(e.target.checked)}
             className="w-3 h-3"
           />
           <span className="text-xs">Visible</span>
         </label>
         <button
-          onClick={() => setPlaying((p) => !p)}
+          onClick={() => setPlaying(p => !p)}
           disabled={!playable}
           className="px-2 py-1 rounded hairline hover:bg-white/10 disabled:opacity-50 text-xs"
         >
           {playing ? `Pause (${fps} fps)` : 'Play'}
         </button>
-        <a 
-          href="/learn/radar.md" 
-          target="_blank" 
-          rel="noreferrer" 
+        <a
+          href="/learn/radar.md"
+          target="_blank"
+          rel="noreferrer"
           className="text-blue-300 hover:text-blue-200 text-xs"
         >
           Learn
         </a>
       </div>
-      
+
       {!playing && (
         <input
           type="range"
           min={0}
           max={frames.length - 1}
           value={index}
-          onChange={(e) => setIndex(Number(e.target.value))}
+          onChange={e => setIndex(Number(e.target.value))}
           className="w-full mt-2"
         />
       )}

@@ -1,6 +1,6 @@
 data "archive_file" "catalog_api" {
   type        = "zip"
-  source_file = "${path.module}/../tiling-services/catalog-api/index.mjs"
+  source_file = "${path.module}/../tiling-services/catalog-api/index.ts"
   output_path = "${path.module}/../tiling-services/catalog-api/function.zip"
 }
 

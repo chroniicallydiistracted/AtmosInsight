@@ -1,0 +1,4 @@
+# Port Scanner Requirements
+# All dependencies are built-in Python modules, no external packages needed
+# Python 3.7+ required for f-strings and typing features
+

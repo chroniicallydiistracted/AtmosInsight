@@ -156,7 +156,7 @@ start_service() {
 }
 
 # Check if we're in the right directory
-if [ ! -f "package.json" ] || [ ! -d "apps" ] || [ ! -d "proxy-server" ]; then
+if [ ! -f "package.json" ] || [ ! -d "apps" ] || [ ! -d "proxy-server" ] || [ ! -d "tiling-services" ]; then
     echo -e "${RED}❌ Error: This script must be run from the AtmosInsight root directory${NC}"
     echo -e "${RED}💡 Please run: cd /path/to/AtmosInsight && ./start-atmosinsight.sh${NC}"
     exit 1

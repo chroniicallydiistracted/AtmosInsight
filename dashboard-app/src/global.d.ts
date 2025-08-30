@@ -1,10 +1,9 @@
-import type maplibregl from 'maplibre-gl'
+import type maplibregl from 'maplibre-gl';
 
 declare global {
   interface Window {
-    __map?: maplibregl.Map
+    __map?: maplibregl.Map;
   }
 }
 
-export {}
-
+export {};

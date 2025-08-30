@@ -88,7 +88,7 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 
 - [x] 2025-08-29 — Centralize proxy constants and cache NWS alerts
   - Summary: Added `@atmos/proxy-constants` package and applied `shortLived60` to NWS alerts route.
-  - Files: `packages/proxy-constants/*`, `proxy-server/src/app.ts`, `proxy-server/src/gibs.ts`, `proxy-server/src/owm.ts`, `tiling-services/proxy-api/index.mjs`, `proxy-server/package.json`, `pnpm-lock.yaml`
+  - Files: `packages/proxy-constants/*`, `proxy-server/src/app.ts`, `proxy-server/src/gibs.ts`, `proxy-server/src/owm.ts`, `tiling-services/proxy-api/index.ts`, `proxy-server/package.json`, `pnpm-lock.yaml`
   - Verification: `pnpm lint`, `pnpm test`. Marked production ready.
 
 - [x] 2025-08-29 — GIBS proxy env gating
@@ -98,7 +98,7 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 
 - [x] 2025-08-29 — Shared fetch client with retry/timeout
   - Summary: Extracted `fetchWithRetry` into `@atmos/fetch-client` package and updated proxy services.
-  - Files: `packages/fetch-client/*`, `proxy-server/src/app.ts`, `proxy-server/src/rainviewer.ts`, `tiling-services/proxy-api/index.mjs`, `proxy-server/package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`
+  - Files: `packages/fetch-client/*`, `proxy-server/src/app.ts`, `proxy-server/src/rainviewer.ts`, `tiling-services/proxy-api/index.ts`, `proxy-server/package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`
   - Verification: `pnpm lint`, `pnpm test`, `cd proxy-server && pnpm test`. Marked production ready.
 
 - [x] 2025-08-29 — Tokenize SVG icon colors
@@ -115,4 +115,3 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Switched `proxy-server` to `moduleResolution: bundler` to match workspace defaults and eliminate config drift.
   - Files: `proxy-server/tsconfig.json`, `Findings.md`, `Followups.md`
   - Verification: `pnpm lint`, `pnpm test`, `cd proxy-server && pnpm test`
-

@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { clampFps, frameDelayMs, isPlayable, nextIndex, prefetchSchedule, DEFAULT_FPS } from '../utils/playback';
+import {
+  clampFps,
+  frameDelayMs,
+  isPlayable,
+  nextIndex,
+  prefetchSchedule,
+  DEFAULT_FPS,
+} from '../utils/playback';
 import { createTileCache, loadImage } from '../utils/tileCache';
 
 interface TimelineProps {
@@ -13,12 +20,21 @@ export function Timeline({ layerId }: TimelineProps) {
   const [lastError, setLastError] = useState<string | null>(null);
   const timerRef = useRef<number | null>(null);
 
-  const fps = useMemo(() => clampFps(Number(import.meta.env.VITE_PLAYBACK_FPS) || DEFAULT_FPS), []);
+  const fps = useMemo(
+    () => clampFps(Number(import.meta.env.VITE_PLAYBACK_FPS) || DEFAULT_FPS),
+    []
+  );
   const delay = useMemo(() => frameDelayMs(fps), [fps]);
-  const cache = useMemo(() => createTileCache({
-    enabled: String(import.meta.env.VITE_ENABLE_TILE_CACHE || '').toLowerCase() === 'true',
-    max: Math.max(8, Number(import.meta.env.VITE_TILE_CACHE_SIZE) || 64)
-  }), []);
+  const cache = useMemo(
+    () =>
+      createTileCache({
+        enabled:
+          String(import.meta.env.VITE_ENABLE_TILE_CACHE || '').toLowerCase() ===
+          'true',
+        max: Math.max(8, Number(import.meta.env.VITE_TILE_CACHE_SIZE) || 64),
+      }),
+    []
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -38,7 +54,7 @@ export function Timeline({ layerId }: TimelineProps) {
     if (!playing) return;
     if (!isPlayable(times, lastError)) return;
     timerRef.current = window.setInterval(() => {
-      setIndex((i) => nextIndex(i, times.length));
+      setIndex(i => nextIndex(i, times.length));
     }, delay) as unknown as number;
     return () => {
       if (timerRef.current !== null) {
@@ -55,7 +71,7 @@ export function Timeline({ layerId }: TimelineProps) {
     for (const idx of toPrefetch) {
       const t = times[idx];
       const url = `/tiles/${layerId}/${t}.png`;
-      loadImage(url, cache).catch((e) => setLastError(String(e)));
+      loadImage(url, cache).catch(e => setLastError(String(e)));
     }
   }, [index, times, layerId, cache]);
 
@@ -67,7 +83,7 @@ export function Timeline({ layerId }: TimelineProps) {
     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
       <button
         aria-label={playing ? 'pause' : 'play'}
-        onClick={() => setPlaying((p) => !p)}
+        onClick={() => setPlaying(p => !p)}
         disabled={!playable}
       >
         {playing ? 'Pause' : `Play (${fps} fps)`}
@@ -78,7 +94,7 @@ export function Timeline({ layerId }: TimelineProps) {
         min={0}
         max={times.length - 1}
         value={index}
-        onChange={(e) => setIndex(Number(e.target.value))}
+        onChange={e => setIndex(Number(e.target.value))}
         style={{ flex: 1 }}
       />
     </div>

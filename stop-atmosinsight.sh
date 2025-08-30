@@ -14,6 +14,7 @@ NC='\033[0m' # No Color
 
 # Port configuration
 PROXY_PORT=3000
+CATALOG_PORT=3001
 WEB_PORT=3002
 
 echo -e "${BLUE}🛑 AtmosInsight Teardown Script${NC}"
@@ -150,7 +151,7 @@ wait_for_port() {
 }
 
 # Check if we're in the right directory
-if [ ! -f "package.json" ] || [ ! -d "apps" ] || [ ! -d "proxy-server" ]; then
+if [ ! -f "package.json" ] || [ ! -d "apps" ] || [ ! -d "proxy-server" ] || [ ! -d "tiling-services" ]; then
     echo -e "${RED}❌ Error: This script must be run from the AtmosInsight root directory${NC}"
     echo -e "${RED}💡 Please run: cd /path/to/AtmosInsight && ./stop-atmosinsight.sh${NC}"
     exit 1
@@ -164,6 +165,7 @@ echo -e "${BLUE}🔍 Checking current service status...${NC}"
 echo ""
 
 PROXY_RUNNING=false
+CATALOG_RUNNING=false
 WEB_RUNNING=false
 
 if check_port $PROXY_PORT; then
@@ -171,6 +173,13 @@ if check_port $PROXY_PORT; then
     PROXY_RUNNING=true
 else
     echo -e "${GREEN}✅ Port $PROXY_PORT: FREE${NC}"
+fi
+
+if check_port $CATALOG_PORT; then
+    echo -e "${YELLOW}⚠️  Port $CATALOG_PORT: IN USE (catalog-api)${NC}"
+    CATALOG_RUNNING=true
+else
+    echo -e "${GREEN}✅ Port $CATALOG_PORT: FREE${NC}"
 fi
 
 if check_port $WEB_PORT; then
@@ -183,7 +192,7 @@ fi
 echo ""
 
 # Stop services if running
-if [ "$PROXY_RUNNING" = true ] || [ "$WEB_RUNNING" = true ]; then
+if [ "$PROXY_RUNNING" = true ] || [ "$CATALOG_RUNNING" = true ] || [ "$WEB_RUNNING" = true ]; then
     echo -e "${BLUE}🛑 Stopping running services...${NC}"
     echo ""
     
@@ -195,6 +204,18 @@ if [ "$PROXY_RUNNING" = true ] || [ "$WEB_RUNNING" = true ]; then
             }
         else
             echo -e "${RED}❌ Failed to stop proxy-server${NC}"
+            exit 1
+        fi
+    fi
+    
+    if [ "$CATALOG_RUNNING" = true ]; then
+        if kill_port $CATALOG_PORT "catalog-api"; then
+            wait_for_port $CATALOG_PORT || {
+                echo -e "${RED}❌ Failed to free port $CATALOG_PORT${NC}"
+                exit 1
+            }
+        else
+            echo -e "${RED}❌ Failed to stop catalog-api${NC}"
             exit 1
         fi
     fi
@@ -232,6 +253,9 @@ if command -v fuser >/dev/null 2>&1; then
     if fuser -k $PROXY_PORT/tcp 2>/dev/null; then
         echo -e "${GREEN}✅ Killed remaining processes on port $PROXY_PORT${NC}"
     fi
+    if fuser -k $CATALOG_PORT/tcp 2>/dev/null; then
+        echo -e "${GREEN}✅ Killed remaining processes on port $CATALOG_PORT${NC}"
+    fi
     if fuser -k $WEB_PORT/tcp 2>/dev/null; then
         echo -e "${GREEN}✅ Killed remaining processes on port $WEB_PORT${NC}"
     fi
@@ -240,6 +264,7 @@ else
     echo -e "${YELLOW}ℹ️  fuser not available, using pkill fallback${NC}"
     pkill -f ":$PROXY_PORT" 2>/dev/null || true
     pkill -f ":$WEB_PORT" 2>/dev/null || true
+    pkill -f ":$CATALOG_PORT" 2>/dev/null || true
 fi
 
 echo ""
@@ -255,6 +280,13 @@ if check_port $PROXY_PORT; then
     FINAL_CHECK_PASSED=false
 else
     echo -e "${GREEN}✅ Port $PROXY_PORT: CONFIRMED FREE${NC}"
+fi
+
+if check_port $CATALOG_PORT; then
+    echo -e "${RED}❌ Port $CATALOG_PORT: STILL IN USE${NC}"
+    FINAL_CHECK_PASSED=false
+else
+    echo -e "${GREEN}✅ Port $CATALOG_PORT: CONFIRMED FREE${NC}"
 fi
 
 if check_port $WEB_PORT; then
@@ -280,6 +312,6 @@ else
     echo -e "${RED}⚠️  Some ports may still be in use${NC}"
     echo ""
     echo -e "${YELLOW}💡 You may need to manually check and kill processes${NC}"
-    echo -e "${YELLOW}💡 Check with: lsof -i :3001 and lsof -i :3002${NC}"
+    echo -e "${YELLOW}💡 Check with: lsof -i :3000, lsof -i :3001, and lsof -i :3002${NC}"
     exit 1
 fi

@@ -1,14 +1,16 @@
-@import '@atmos/tokens/dist/tokens.css';
-
 :root {
-  font-family: "Manrope Variable", system-ui, sans-serif;
+  font-family: 'Manrope Variable', system-ui, sans-serif;
 }
 
 .panel,
 .card,
 .chip {
   backdrop-filter: blur(12px);
-  background-color: color-mix(in oklab, var(--color-neutral-900) 80%, transparent);
+  background-color: color-mix(
+    in oklab,
+    var(--color-neutral-900) 80%,
+    transparent
+  );
 }
 
 @supports not (backdrop-filter: blur(1px)) {
@@ -20,7 +22,8 @@
 }
 
 .hairline {
-  border: 1px solid color-mix(in oklab, var(--color-neutral-300) 70%, transparent);
+  border: 1px solid
+    color-mix(in oklab, var(--color-neutral-300) 70%, transparent);
 }
 
 .hairline-teal {
@@ -28,5 +31,6 @@
 }
 
 .glow-coral {
-  box-shadow: 0 0 0 2px color-mix(in oklab, var(--color-accent-coral) 50%, transparent);
+  box-shadow: 0 0 0 2px
+    color-mix(in oklab, var(--color-accent-coral) 50%, transparent);
 }

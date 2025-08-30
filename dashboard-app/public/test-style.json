@@ -3,7 +3,10 @@
   "name": "e2e-minimal",
   "sources": {},
   "layers": [
-    { "id": "bg", "type": "background", "paint": { "background-color": "#111820" } }
+    {
+      "id": "bg",
+      "type": "background",
+      "paint": { "background-color": "#111820" }
+    }
   ]
 }
-

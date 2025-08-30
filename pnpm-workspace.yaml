@@ -2,6 +2,7 @@ packages:
   - apps/*
   - packages/*
   - proxy-server
+  - tiling-services/*
 onlyBuiltDependencies:
   - '@bundled-es-modules/glob'
   - '@vaadin/vaadin-usage-statistics'

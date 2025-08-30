@@ -83,25 +83,25 @@ Today’s work delivers a production‑ready proxy layer (GIBS/OWM/RainViewer/NW
 
 ## Immediate Next Steps
 
-1) GLM — Exact ABI Fixed Grid
+1. GLM — Exact ABI Fixed Grid
    - Add geostationary projection (pyproj) and map event lon/lat to ABI grid indices.
    - Accumulate TOE on the ABI grid over `window` and optional `t`.
    - Resample ABI grid subset to Web Mercator tile at render time; keep color ramp consistent.
    - Add snapshot tests to validate grid mapping stability.
 
-2) GLM — QC Flags and Tile Cache
+2. GLM — QC Flags and Tile Cache
    - Implement configurable QC masks per L2 docs.
    - Add a small LRU cache keyed by `(z,x,y,window,t)`; invalidate on new ingests.
 
-3) GLM — Poller & Deterministic Caching
+3. GLM — Poller & Deterministic Caching
    - Gate S3 poller via env; add minimal structured logs.
    - When `t` is present, set Cache‑Control for deterministic tiles (immutable short TTL or ETag‑based).
 
-4) UI — GLM Layer + Learn
+4. UI — GLM Layer + Learn
    - Add a MapLibre raster source for GLM TOE tiles, with a togglable legend and “Learn” link.
    - Document units (fJ), window, and limitations (cloud‑top, parallax).
 
-5) Validation & CI
+5. Validation & CI
    - Add integration test using `GLM_SAMPLE_FILE` (small local fixture) for deterministic CI.
    - Ensure CI marks GLM live/S3 tests as optional/skipped without sample.
 

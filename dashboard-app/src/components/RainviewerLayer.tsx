@@ -1,7 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type maplibregl from 'maplibre-gl';
-import type { RasterLayerSpecification, RasterSourceSpecification } from '@maplibre/maplibre-gl-style-spec';
-import { clampFps, frameDelayMs, isPlayable, nextIndex, prefetchSchedule, DEFAULT_FPS } from '../utils/playback';
+import type {
+  RasterLayerSpecification,
+  RasterSourceSpecification,
+} from '@maplibre/maplibre-gl-style-spec';
+import {
+  clampFps,
+  frameDelayMs,
+  isPlayable,
+  nextIndex,
+  prefetchSchedule,
+  DEFAULT_FPS,
+} from '../utils/playback';
 import { createTileCache, loadImage } from '../utils/tileCache';
 
 interface RainviewerLayerProps {
@@ -18,7 +28,9 @@ function lonLatToTile(lon: number, lat: number, z: number) {
   const n = Math.pow(2, z);
   const xtile = Math.floor(((lon + 180) / 360) * n);
   const latRad = (lat * Math.PI) / 180;
-  const ytile = Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n);
+  const ytile = Math.floor(
+    ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n
+  );
   return { x: xtile, y: ytile };
 }
 
@@ -31,7 +43,10 @@ export function RainviewerLayer({ map }: RainviewerLayerProps) {
   const size = '256';
   const color = '3';
   const options = '1_0';
-  const fps = useMemo(() => clampFps(Number(import.meta.env.VITE_PLAYBACK_FPS) || DEFAULT_FPS), []);
+  const fps = useMemo(
+    () => clampFps(Number(import.meta.env.VITE_PLAYBACK_FPS) || DEFAULT_FPS),
+    []
+  );
   const delay = useMemo(() => frameDelayMs(fps), [fps]);
   const cache = useMemo(() => createTileCache({ enabled: true, max: 64 }), []);
 
@@ -42,21 +57,37 @@ export function RainviewerLayer({ map }: RainviewerLayerProps) {
       try {
         const res = await fetch('/api/rainviewer/index.json');
         const json: RadarIndex = await res.json();
-        const list = [...(json.radar.past || []), ...((json.radar.nowcast || []))].map((f) => f.time);
+        const list = [
+          ...(json.radar.past || []),
+          ...(json.radar.nowcast || []),
+        ].map(f => f.time);
         if (!cancelled) setFrames(list);
-      } catch { void 0; }
+      } catch {
+        void 0;
+      }
     }
     load();
     const interval = window.setInterval(load, 60_000);
-    return () => { cancelled = true; clearInterval(interval); };
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   // Playback ticker
   useEffect(() => {
     if (!playing) return;
     if (!isPlayable(frames, null)) return;
-    timerRef.current = window.setInterval(() => setI((v) => nextIndex(v, frames.length)), delay) as unknown as number;
-    return () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } };
+    timerRef.current = window.setInterval(
+      () => setI(v => nextIndex(v, frames.length)),
+      delay
+    ) as unknown as number;
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
   }, [playing, frames, delay]);
 
   // Apply tiles for current frame (wait for style load)
@@ -66,30 +97,59 @@ export function RainviewerLayer({ map }: RainviewerLayerProps) {
     const ts = String(frames[i]);
     const srcId = 'rainviewer';
     const layerId = 'rainviewer_layer';
-    const tiles = [`${location.origin}/api/rainviewer/${ts}/${size}/{z}/{x}/{y}/${color}/${options}.png`];
+    const tiles = [
+      `${location.origin}/api/rainviewer/${ts}/${size}/{z}/{x}/{y}/${color}/${options}.png`,
+    ];
     const vis = visible ? 'visible' : 'none';
     const apply = () => {
       const source = map.getSource(srcId) as unknown;
       try {
-        if (source && typeof (source as { setTiles?: unknown }).setTiles === 'function') {
+        if (
+          source &&
+          typeof (source as { setTiles?: unknown }).setTiles === 'function'
+        ) {
           (source as { setTiles: (t: string[]) => void }).setTiles(tiles);
-          if (map.getLayer(layerId)) map.setLayoutProperty(layerId, 'visibility', vis);
+          if (map.getLayer(layerId))
+            map.setLayoutProperty(layerId, 'visibility', vis);
           return;
         }
-      } catch { void 0; }
+      } catch {
+        void 0;
+      }
       try {
         if (map.getLayer(layerId)) map.removeLayer(layerId);
-      } catch { void 0; }
+      } catch {
+        void 0;
+      }
       try {
         if (map.getSource(srcId)) map.removeSource(srcId);
-      } catch { void 0; }
+      } catch {
+        void 0;
+      }
       try {
-        map.addSource(srcId, { type: 'raster', tiles, tileSize: 256, minzoom: 0, maxzoom: 12 } as RasterSourceSpecification);
-        map.addLayer({ id: layerId, type: 'raster', source: srcId, paint: { 'raster-opacity': 0.8, 'raster-resampling': 'linear' } } as RasterLayerSpecification);
+        map.addSource(srcId, {
+          type: 'raster',
+          tiles,
+          tileSize: 256,
+          minzoom: 0,
+          maxzoom: 12,
+        } as RasterSourceSpecification);
+        map.addLayer({
+          id: layerId,
+          type: 'raster',
+          source: srcId,
+          paint: { 'raster-opacity': 0.8, 'raster-resampling': 'linear' },
+        } as RasterLayerSpecification);
         map.setLayoutProperty(layerId, 'visibility', vis);
-      } catch { void 0; }
+      } catch {
+        void 0;
+      }
     };
-    if (typeof (map as unknown as { isStyleLoaded?: () => boolean }).isStyleLoaded === 'function' && !map.isStyleLoaded()) {
+    if (
+      typeof (map as unknown as { isStyleLoaded?: () => boolean })
+        .isStyleLoaded === 'function' &&
+      !map.isStyleLoaded()
+    ) {
       map.once('load', apply);
       return;
     }
@@ -122,17 +182,41 @@ export function RainviewerLayer({ map }: RainviewerLayerProps) {
   const playable = isPlayable(frames, null);
 
   return (
-    <div style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(0,0,0,0.55)', color: '#fff', padding: 10, borderRadius: 8, fontSize: 12, boxShadow: '0 6px 20px rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}>
+    <div
+      style={{
+        position: 'absolute',
+        top: 12,
+        left: 12,
+        background: 'rgba(0,0,0,0.55)',
+        color: '#fff',
+        padding: 10,
+        borderRadius: 8,
+        fontSize: 12,
+        boxShadow: '0 6px 20px rgba(0,0,0,0.35)',
+        backdropFilter: 'blur(4px)',
+      }}
+    >
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <strong>Radar</strong>
         <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <input type="checkbox" checked={visible} onChange={(e) => setVisible(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={visible}
+            onChange={e => setVisible(e.target.checked)}
+          />
           <span>Visible</span>
         </label>
-        <button onClick={() => setPlaying((p) => !p)} disabled={!playable}>
+        <button onClick={() => setPlaying(p => !p)} disabled={!playable}>
           {playing ? `Pause (${fps} fps)` : 'Play'}
         </button>
-        <a href="/learn/radar.md" target="_blank" rel="noreferrer" style={{ color: '#9cf', textDecoration: 'none' }}>Learn</a>
+        <a
+          href="/learn/radar.md"
+          target="_blank"
+          rel="noreferrer"
+          style={{ color: '#9cf', textDecoration: 'none' }}
+        >
+          Learn
+        </a>
       </div>
     </div>
   );

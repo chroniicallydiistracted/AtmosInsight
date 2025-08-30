@@ -6,4 +6,5 @@
 - Source: RainViewer Weather Maps API provides time index and tile host/path; tiles constructed as `{host}{path}/{size}/{z}/{x}/{y}/{color}/{options}.png`.
 
 Notes:
+
 - Playback clamps to 2–8 FPS (default 4) and prefetches the next frame to keep animation smooth.

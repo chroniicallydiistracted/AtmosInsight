@@ -5,9 +5,11 @@ This directory contains three essential scripts for managing your AtmosInsight d
 ## 📋 **Available Scripts**
 
 ### 1. **`start-atmosinsight.sh`** - Universal Startup Script
+
 **Purpose:** Starts both proxy-server and Next.js web app with automatic port conflict resolution.
 
 **Features:**
+
 - ✅ Checks for port conflicts (3001, 3002)
 - ✅ Automatically kills conflicting processes
 - ✅ Starts services in the correct order (proxy-server first, then web app)
@@ -16,11 +18,13 @@ This directory contains three essential scripts for managing your AtmosInsight d
 - ✅ Color-coded output for easy reading
 
 **Usage:**
+
 ```bash
 ./start-atmosinsight.sh
 ```
 
 **What it does:**
+
 1. Verifies you're in the correct directory
 2. Checks if ports 3001 or 3002 are in use
 3. Kills any conflicting processes (graceful shutdown, then force kill if needed)
@@ -33,9 +37,11 @@ This directory contains three essential scripts for managing your AtmosInsight d
 ---
 
 ### 2. **`stop-atmosinsight.sh`** - Teardown Script
+
 **Purpose:** Stops all running services and confirms ports are free.
 
 **Features:**
+
 - ✅ Stops both proxy-server and Next.js web app
 - ✅ Graceful shutdown with fallback to force kill
 - ✅ Confirms ports are actually free
@@ -44,11 +50,13 @@ This directory contains three essential scripts for managing your AtmosInsight d
 - ✅ Final verification of cleanup
 
 **Usage:**
+
 ```bash
 ./stop-atmosinsight.sh
 ```
 
 **What it does:**
+
 1. Checks current status of all services
 2. Stops proxy-server (port 3001) if running
 3. Stops Next.js web app (port 3002) if running
@@ -59,9 +67,11 @@ This directory contains three essential scripts for managing your AtmosInsight d
 ---
 
 ### 3. **`status-atmosinsight.sh`** - Status Check Script
+
 **Purpose:** Shows current status of all services and ports.
 
 **Features:**
+
 - ✅ Real-time status of both services
 - ✅ Process details (PID, command, user, uptime)
 - ✅ Health checks (HTTP response testing)
@@ -70,11 +80,13 @@ This directory contains three essential scripts for managing your AtmosInsight d
 - ✅ Non-intrusive (read-only)
 
 **Usage:**
+
 ```bash
 ./status-atmosinsight.sh
 ```
 
 **What it shows:**
+
 1. Proxy-server status (port 3001)
 2. Next.js web app status (port 3002)
 3. Other pnpm processes
@@ -86,11 +98,13 @@ This directory contains three essential scripts for managing your AtmosInsight d
 ## 🔧 **Setup Requirements**
 
 ### **Prerequisites:**
+
 - `lsof` command available (usually pre-installed on Linux/macOS)
 - `curl` command available (for health checks)
 - Running from AtmosInsight root directory
 
 ### **Make Scripts Executable:**
+
 ```bash
 chmod +x start-atmosinsight.sh stop-atmosinsight.sh status-atmosinsight.sh
 ```
@@ -100,19 +114,21 @@ chmod +x start-atmosinsight.sh stop-atmosinsight.sh status-atmosinsight.sh
 ## 🚀 **Typical Workflow**
 
 ### **Starting Development:**
+
 ```bash
 # Start all services (choose one):
 pnpm start                    # Using package.json script
 ./start-atmosinsight.sh      # Direct script execution
 
 # Check status (choose one):
-pnpm status                  # Using package.json script  
+pnpm status                  # Using package.json script
 ./status-atmosinsight.sh    # Direct script execution
 
 # Open browser to http://localhost:3002
 ```
 
 ### **During Development:**
+
 ```bash
 # Check status anytime (choose one):
 pnpm status                  # Using package.json script
@@ -120,6 +136,7 @@ pnpm status                  # Using package.json script
 ```
 
 ### **Stopping Development:**
+
 ```bash
 # Stop all services (choose one):
 pnpm stop                    # Using package.json script
@@ -127,6 +144,7 @@ pnpm stop                    # Using package.json script
 ```
 
 ### **Restart Everything:**
+
 ```bash
 # Restart all services (choose one):
 pnpm restart                 # Using package.json script
@@ -137,25 +155,28 @@ pnpm restart                 # Using package.json script
 
 ## 🎯 **Port Configuration**
 
-| Service | Port | Purpose |
-|---------|------|---------|
-| **proxy-server** | 3000 | API proxy, tile services, GLM TOE |
-| **Next.js Web App** | 3002 | Frontend application |
+| Service             | Port | Purpose                           |
+| ------------------- | ---- | --------------------------------- |
+| **proxy-server**    | 3000 | API proxy, tile services, GLM TOE |
+| **Next.js Web App** | 3002 | Frontend application              |
 
 ---
 
 ## 🛠️ **Troubleshooting**
 
 ### **Port Already in Use:**
+
 - Scripts automatically handle this
 - If manual intervention needed: `lsof -i :3001` or `lsof -i :3002`
 
 ### **Services Won't Start:**
+
 - Check logs: `proxy-server/proxy-server.log` and `apps/web/Next.js web app.log`
 - Verify environment variables are set
 - Check `pnpm install` was run in both directories
 
 ### **Permission Denied:**
+
 - Ensure scripts are executable: `chmod +x *.sh`
 - Run from AtmosInsight root directory
 
@@ -164,20 +185,23 @@ pnpm restart                 # Using package.json script
 ## 🔍 **Manual Commands (if needed)**
 
 ### **Start Individual Services:**
+
 ```bash
 # Start proxy-server only
 cd proxy-server && pnpm run dev
 
-# Start web app only  
+# Start web app only
 cd apps/web && pnpm run dev
 ```
 
 ### **Stop All Services:**
+
 ```bash
 pkill -f "pnpm run dev"
 ```
 
 ### **Check Ports:**
+
 ```bash
 lsof -i :3001  # proxy-server
 lsof -i :3002  # web app

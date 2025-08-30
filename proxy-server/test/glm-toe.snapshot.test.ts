@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { GlmToeAggregator, type GlmEvent } from '../src/services/glm-toe/ingest.js';
+import {
+  GlmToeAggregator,
+  type GlmEvent,
+} from '../src/services/glm-toe/ingest.js';
 import { renderTilePng } from '../src/services/glm-toe/tiles.js';
 import { createHash } from 'node:crypto';
 
@@ -27,17 +30,20 @@ describe('GLM TOE tile color mapping snapshot', () => {
         lon: center.lon + (rng() - 0.5) * 0.1,
         lat: center.lat + (rng() - 0.5) * 0.1,
         energy_fj: 50 + Math.floor(rng() * 5000),
-        timeMs: now - Math.floor(rng() * 15 * 60 * 1000)
+        timeMs: now - Math.floor(rng() * 15 * 60 * 1000),
       });
     }
     agg.ingest(events);
     const z = 6;
     // Tile covering Austin approximately
-    const x = 15, y = 28;
+    const x = 15,
+      y = 28;
     const buf = renderTilePng(agg, z, x, y);
     const h = hash(buf);
     expect(h).toMatch(/^[a-f0-9]{64}$/);
     // Snapshot hash for regression detection
-    expect(h).toBe('d7a82c85633dad3888d58785831147ac9d4cce18901b31c411828da5919c2201');
+    expect(h).toBe(
+      'd7a82c85633dad3888d58785831147ac9d4cce18901b31c411828da5919c2201'
+    );
   });
 });

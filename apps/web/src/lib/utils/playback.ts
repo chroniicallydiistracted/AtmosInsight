@@ -16,7 +16,10 @@ export function frameDelayMs(fps: number): number {
   return Math.round(1000 / f);
 }
 
-export function isPlayable(timestamps: readonly unknown[], lastError?: unknown): boolean {
+export function isPlayable(
+  timestamps: readonly unknown[],
+  lastError?: unknown
+): boolean {
   if (!Array.isArray(timestamps) || timestamps.length < 2) return false;
   if (lastError) return false;
   return true;

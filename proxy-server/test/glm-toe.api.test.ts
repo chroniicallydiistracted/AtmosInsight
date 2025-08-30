@@ -23,7 +23,7 @@ describe('GLM TOE API (feature-flagged)', () => {
         lon: -110.97 + (i % 5) * 0.01,
         lat: 32.22 + Math.floor(i / 5) * 0.01,
         energy_fj: 500,
-        timeMs: now - 60_000
+        timeMs: now - 60_000,
       });
     }
     const ingest = await request(app)
@@ -33,11 +33,12 @@ describe('GLM TOE API (feature-flagged)', () => {
     expect(ingest.status).toBe(200);
 
     // Choose a tile over the cluster
-    const z = 6, x = 11, y = 27;
+    const z = 6,
+      x = 11,
+      y = 27;
     const res = await request(app).get(`/api/glm-toe/${z}/${x}/${y}.png`);
     expect(res.status).toBe(200);
     expect(res.headers['content-type']).toMatch(/image\/png/);
     expect(res.body.length).toBeGreaterThan(200);
   }, 10000);
 });
-

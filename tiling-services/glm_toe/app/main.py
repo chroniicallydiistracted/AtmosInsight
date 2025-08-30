@@ -1,354 +1,568 @@
-from fastapi import FastAPI, Response, HTTPException, Query
-from pydantic import BaseModel
-from typing import List, Set, Tuple
-import time
-import math
-import io
-from PIL import Image
+"""
+GLM TOE Service - Complete Implementation
+Implements the full GLM L2 lightning data to TOE heatmap tile pipeline
+as specified in the documentation.
+"""
+
 import os
-from .ingest_glm import read_glm_events_from_file
+import logging
 import asyncio
-import datetime as dt
-import fsspec
+from typing import List, Optional, Dict, Any
+from datetime import datetime, timedelta
 from collections import OrderedDict
-from pyproj import CRS, Transformer
+import time
 
-app = FastAPI(title="GLM TOE Service", version="0.1.0")
+from fastapi import FastAPI, Response, HTTPException, Query, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import uvicorn
 
+from .glm_processor import GLMDataProcessor, GLMEvent, GLMGranule
+from .tile_renderer import TOETileRenderer
+from .s3_fetcher import GLMS3Fetcher
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Initialize FastAPI app
+app = FastAPI(
+    title="GLM TOE Service",
+    description="Complete GLM L2 lightning data to TOE heatmap tile service",
+    version="1.0.0"
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Configure appropriately for production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Configuration from environment variables
+GLM_USE_ABI_GRID = os.environ.get('GLM_USE_ABI_GRID', 'true').lower() == 'true'
+GLM_ABI_LON0 = float(os.environ.get('GLM_ABI_LON0', '-75.0'))
+GLM_TILE_CACHE_SIZE = int(os.environ.get('GLM_TILE_CACHE_SIZE', '128'))
+GLM_S3_POLL_ENABLED = os.environ.get('GLM_S3_POLL_ENABLED', 'false').lower() == 'true'
+GLM_S3_POLL_INTERVAL = int(os.environ.get('GLM_S3_POLL_INTERVAL', '60'))
+GLM_S3_BUCKET = os.environ.get('GLM_S3_BUCKET', 'noaa-goes18')
+
+# Global state
+_events: List[GLMEvent] = []
+_ingested_granules: Dict[str, GLMGranule] = {}
+_processor: Optional[GLMDataProcessor] = None
+_renderer: Optional[TOETileRenderer] = None
+_s3_fetcher: Optional[GLMS3Fetcher] = None
+
+# LRU cache for rendered tiles
+class LRUCache:
+    def __init__(self, max_items: int = 128):
+        self.max_items = max_items
+        self.cache: OrderedDict[str, bytes] = OrderedDict()
+    
+    def get(self, key: str) -> Optional[bytes]:
+        if key in self.cache:
+            # Move to end (most recently used)
+            self.cache.move_to_end(key)
+            return self.cache[key]
+        return None
+    
+    def set(self, key: str, value: bytes):
+        if key in self.cache:
+            # Move to end
+            self.cache.move_to_end(key)
+        else:
+            # Check if we need to evict
+            if len(self.cache) >= self.max_items:
+                self.cache.popitem(last=False)
+        
+        self.cache[key] = value
+
+_tile_cache = LRUCache(max_items=GLM_TILE_CACHE_SIZE)
+
+# Pydantic models
 class Event(BaseModel):
     lat: float
     lon: float
-    energy_fj: float
-    timeMs: int | None = None
-    qc_ok: bool | None = None
-
-
-DEFAULT_WINDOW_MS = 5 * 60 * 1000  # 5 minutes default per guide
-_events: List[Event] = []
-_ingested_keys: Set[str] = set()
-
-# Simple LRU cache for rendered tiles
-class _LRU:
-    def __init__(self, max_items: int = 128):
-        self.max = max_items
-        self.map: OrderedDict[str, bytes] = OrderedDict()
-    def get(self, k: str) -> bytes | None:
-        v = self.map.get(k)
-        if v is not None:
-            self.map.move_to_end(k)
-        return v
-    def set(self, k: str, v: bytes):
-        if k in self.map:
-            self.map.move_to_end(k)
-        self.map[k] = v
-        while len(self.map) > self.max:
-            self.map.popitem(last=False)
-
-_tile_cache = _LRU(max_items=int(os.environ.get('GLM_TILE_CACHE_SIZE', '128')))
-
-# ABI fixed-grid settings (optional high-quality mode)
-GLM_USE_ABI_GRID = os.environ.get('GLM_USE_ABI_GRID', 'false').lower() == 'true'
-GLM_ABI_LON0 = float(os.environ.get('GLM_ABI_LON0', '-75.0'))  # GOES-East default
-
-# Locked ABI geostationary constants per GOES-R documentation
-ABI_A = 6378137.0            # GRS80 semi-major (meters)
-ABI_B = 6356752.31414        # GRS80 semi-minor (meters)
-ABI_H = 35786023.0           # Perspective point height above ellipsoid (meters)
-ABI_SWEEP = 'x'              # GOES-R sweep axis
-
-
-
-def _make_geos_transformers(lon0: float):
-    # GOES-R nominal: height ~35786023m, GRS80 ellipsoid
-    crs_geos = CRS.from_proj4(
-        f"+proj=geos +lon_0={lon0} +h={ABI_H} +a={ABI_A} +b={ABI_B} +units=m +sweep={ABI_SWEEP} +no_defs"
-    )
-    crs_wgs84 = CRS.from_epsg(4326)
-    fwd = Transformer.from_crs(crs_wgs84, crs_geos, always_xy=True)
-    inv = Transformer.from_crs(crs_geos, crs_wgs84, always_xy=True)
-    return fwd, inv
-
-_GEOS_FWD, _GEOS_INV = _make_geos_transformers(GLM_ABI_LON0)
-
-
-
-@app.get("/health")
-def health():
-    return {"ok": True, "events": len(_events)}
-
-
-@app.post("/ingest")
-def ingest(batch: List[Event]):
-    now = int(time.time() * 1000)
-    for e in batch:
-        if abs(e.lat) > 90 or abs(e.lon) > 180 or not math.isfinite(e.energy_fj):
-            continue
-        if e.timeMs is None:
-            e.timeMs = now
-        _events.append(e)
-    prune()
-    return {"ok": True, "count": len(batch)}
-
-
-def prune(window_ms: int | None = None):
-    now = int(time.time() * 1000)
-    w = window_ms if window_ms is not None else DEFAULT_WINDOW_MS
-    cutoff = now - w
-    global _events
-    _events = [e for e in _events if (e.timeMs or 0) >= cutoff]
-
-
-def lonlat_to_pixel(lon: float, lat: float, z: int, x: int, y: int):
-    tile_size = 256
-    scale = tile_size * (2 ** z)
-    world_x = ((lon + 180.0) / 360.0) * scale
-    sin_lat = math.sin(math.radians(lat))
-    # Clamp to avoid division by zero / log domain errors at the poles
-    eps = 1e-12
-    if sin_lat >= 1.0 - eps:
-        sin_lat = 1.0 - eps
-    elif sin_lat <= -1.0 + eps:
-        sin_lat = -1.0 + eps
-    world_y = (0.5 - math.log((1 + sin_lat) / (1 - sin_lat)) / (4 * math.pi)) * scale
-    px = world_x - x * tile_size
-    py = world_y - y * tile_size
-    return px, py
-
-
-def meters_per_pixel(lat: float, z: int):
-    mpp_equator = 156543.03392804097
-    return (mpp_equator * math.cos(math.radians(lat))) / (2 ** z)
-
-
-def _parse_window(s: str | None) -> int:
-    if not s:
-        return DEFAULT_WINDOW_MS
-    s = s.strip().lower()
-    try:
-        # raw ms
-        if s.isdigit():
-            return max(60_000, int(s))
-    except Exception:
-        pass
-    if s.endswith('ms') and s[:-2].isdigit():
-        return max(60_000, int(s[:-2]))
-    if s.endswith('s') and s[:-1].isdigit():
-        return max(60_000, int(s[:-1]) * 1000)
-    if s.endswith('m') and s[:-1].isdigit():
-        return max(60_000, int(s[:-1]) * 60_000)
-    return DEFAULT_WINDOW_MS
-
-
-def render_tile(z: int, x: int, y: int, *, window_ms: int, t_end_ms: int | None = None, qc: bool = False) -> bytes:
-    prune(max(window_ms, DEFAULT_WINDOW_MS))
-    tile_size = 256
-    img = Image.new("RGBA", (tile_size, tile_size), (0, 0, 0, 0))
-    px = img.load()
-
-    # Simple stepped ramp; will replace with production ramp during Phase 2
-    def color_for(v: float):
-        if v <= 0:
-            return (0, 0, 0, 0)
-        if v < 50:
-            return (65, 182, 196, 160)
-        if v < 200:
-            return (44, 127, 184, 200)
-        if v < 500:
-            return (37, 52, 148, 220)
-        if v < 1000:
-            return (255, 255, 0, 240)
-        if v < 2000:
-            return (255, 140, 0, 255)
-        return (220, 20, 60, 255)
-
-    # Time window selection
-    now_ms = int(time.time() * 1000)
-    end_ms = t_end_ms if t_end_ms is not None else now_ms
-    start_ms = end_ms - window_ms
-
-    if GLM_USE_ABI_GRID:
-        # Accumulate on ABI fixed grid (~2km cells), then render onto Web Mercator tile
-        grid_bins = {}
-        cell_m = 2000.0
-        for e in _events:
-            if e.timeMs is None or e.timeMs < start_ms or e.timeMs > end_ms:
-                continue
-            if qc and (e.qc_ok is False):
-                continue
-            X, Y = _GEOS_FWD.transform(e.lon, e.lat)
-            if not (math.isfinite(X) and math.isfinite(Y)):
-                continue
-            gx = int(math.floor(X / cell_m))
-            gy = int(math.floor(Y / cell_m))
-            grid_bins[(gx, gy)] = grid_bins.get((gx, gy), 0.0) + float(e.energy_fj)
-        for (gx, gy), toe in grid_bins.items():
-            cx = (gx + 0.5) * cell_m
-            cy = (gy + 0.5) * cell_m
-            lonc, latc = _GEOS_INV.transform(cx, cy)
-            xpix, ypix = lonlat_to_pixel(lonc, latc, z, x, y)
-            if xpix < 0 or ypix < 0 or xpix >= tile_size or ypix >= tile_size:
-                continue
-            sx = int(xpix)
-            sy = int(ypix)
-            r, g, b, a = color_for(toe)
-            for dy in (-1, 0, 1):
-                for dx in (-1, 0, 1):
-                    px_i = sx + dx
-                    py_i = sy + dy
-                    if 0 <= px_i < tile_size and 0 <= py_i < tile_size:
-                        px[px_i, py_i] = (r, g, b, a)
-    else:
-        bins = {}
-        for e in _events:
-            if e.timeMs is None or e.timeMs < start_ms or e.timeMs > end_ms:
-                continue
-            if qc and (e.qc_ok is False):
-                continue
-            mpp = meters_per_pixel(e.lat, z)
-            # Guard against poles / invalid latitudes where cos(lat) -> 0
-            if not math.isfinite(mpp) or mpp <= 0:
-                continue
-            step = max(1, round(2000.0 / mpp))
-            xpix, ypix = lonlat_to_pixel(e.lon, e.lat, z, x, y)
-            if xpix < 0 or ypix < 0 or xpix >= tile_size or ypix >= tile_size:
-                continue
-            sx = min(tile_size - 1, max(0, (int(xpix) // step) * step))
-            sy = min(tile_size - 1, max(0, (int(ypix) // step) * step))
-            key = sy * tile_size + sx
-            bins[key] = bins.get(key, 0.0) + float(e.energy_fj)
-        for key, toe in bins.items():
-            sy = key // tile_size
-            sx = key % tile_size
-            px[sx, sy] = color_for(toe)
-
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    return buf.getvalue()
-
-
-@app.get("/tiles/{z}/{x}/{y}.png")
-def tiles(
-    z: int,
-    x: int,
-    y: int,
-    window: str | None = Query(None, description="Window e.g., 1m, 5m, 300s, 180000ms"),
-    t: str | None = Query(None, description="End time ISO8601 (UTC) for window end; default now"),
-    qc: bool = Query(False, description="Enable strict QC filtering (reserved)"),
-):
-    t_end_ms = None
-    if t:
-        try:
-            if t.endswith('Z'):
-                t_end_ms = int(dt.datetime.fromisoformat(t.replace('Z','+00:00')).timestamp()*1000)
-            else:
-                t_end_ms = int(dt.datetime.fromisoformat(t).timestamp()*1000)
-        except Exception:
-            t_end_ms = None
-    w_ms = _parse_window(window)
-    cache_key = f"{z}/{x}/{y}?w={w_ms}&t={t_end_ms or 0}&qc={int(qc)}"
-    cached = _tile_cache.get(cache_key)
-    if cached is not None:
-        return Response(content=cached, media_type="image/png", headers={"X-Cache": "HIT"})
-    content = render_tile(z, x, y, window_ms=w_ms, t_end_ms=t_end_ms, qc=qc)
-    _tile_cache.set(cache_key, content)
-    headers = {"X-Cache": "MISS"}
-    if t_end_ms is not None:
-        headers["Cache-Control"] = "public, max-age=300"
-    return Response(content=content, media_type="image/png", headers=headers)
-
+    energy_j: float
+    timestamp: Optional[datetime] = None
+    quality_flag: Optional[int] = None
 
 class IngestFilesRequest(BaseModel):
     paths: List[str]
+    bucket_name: Optional[str] = None
 
+class TimeWindowRequest(BaseModel):
+    start_time: datetime
+    end_time: datetime
+    window_minutes: int = 5
 
-@app.post("/ingest_files")
-def ingest_files(body: IngestFilesRequest):
-    if not body.paths:
-        raise HTTPException(status_code=400, detail="paths required")
-    total = 0
-    for p in body.paths:
-        try:
-            events = read_glm_events_from_file(p)
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"failed to read {p}: {e}")
-        now = int(time.time() * 1000)
-        for item in events:
-            if len(item) == 5:
-                la, lo, en, t, qc_ok = item  # type: ignore[misc]
-            else:
-                la, lo, en, t = item  # type: ignore[misc]
-                qc_ok = None
-            # ensure window pruning relative to now
-            if t > now:
-                t = now
-            _events.append(Event(lat=la, lon=lo, energy_fj=en, timeMs=t, qc_ok=qc_ok))
-            total += 1
-    prune()
-    return {"ok": True, "ingested": total}
+class TileRequest(BaseModel):
+    z: int
+    x: int
+    y: int
+    window_minutes: int = 5
+    end_time: Optional[datetime] = None
+    quality_filter: bool = False
 
-
-# ----------------
-# Background S3 poller (env-gated)
-# ----------------
-GLM_POLL_ENABLED = os.environ.get('GLM_POLL_ENABLED', 'false').lower() == 'true'
-GLM_POLL_BUCKET = os.environ.get('GLM_POLL_BUCKET', 'noaa-goes16')
-GLM_POLL_PREFIX = os.environ.get('GLM_POLL_PREFIX', 'GLM-L2-LCFA')
-GLM_POLL_INTERVAL_SEC = int(os.environ.get('GLM_POLL_INTERVAL_SEC', '60'))
-GLM_POLL_GRANULES_MAX = int(os.environ.get('GLM_POLL_GRANULES_MAX', '12'))  # ~4 minutes
-
-async def _poll_once():
+# Startup event
+@app.on_event("startup")
+async def startup_event():
+    """Initialize the service on startup"""
+    global _processor, _renderer, _s3_fetcher
+    
     try:
-        fs = fsspec.filesystem('s3', anon=True)
-        now = dt.datetime.utcnow()
-        # Consider last two hours across day boundary
-        hours: List[Tuple[int,int,int]] = []  # (year, doy, hour)
-        for delta_h in range(0, 2):
-            t = now - dt.timedelta(hours=delta_h)
-            year = t.year
-            doy = int(t.strftime('%j'))
-            hour = t.hour
-            hours.append((year, doy, hour))
-        candidates: List[str] = []
-        for year, doy, hour in hours:
-            prefix = f"s3://{GLM_POLL_BUCKET}/{GLM_POLL_PREFIX}/{year}/{doy:03d}/{hour:02d}/"
-            try:
-                files = fs.glob(prefix + 'OR_GLM-L2-LCFA_*.nc')
-            except Exception:
-                files = []
-            files.sort(reverse=True)
-            for k in files:
-                if k not in _ingested_keys:
-                    candidates.append(k)
-                    if len(candidates) >= GLM_POLL_GRANULES_MAX:
-                        break
-            if len(candidates) >= GLM_POLL_GRANULES_MAX:
-                break
-        added = 0
-        for path in candidates:
-            try:
-                events = read_glm_events_from_file(path)
-            except Exception:
-                continue
-            now_ms = int(__import__('time').time() * 1000)
-            for la, lo, en, tms in events:
-                if tms > now_ms:
-                    tms = now_ms
-                _events.append(Event(lat=la, lon=lo, energy_fj=en, timeMs=tms))
-            _ingested_keys.add(path)
-            added += len(events)
-        if added:
-            prune()
-    except Exception:
-        # swallow errors; best effort
-        pass
+        # Initialize GLM processor
+        _processor = GLMDataProcessor(
+            use_abi_grid=GLM_USE_ABI_GRID,
+            abi_lon0=GLM_ABI_LON0
+        )
+        
+        # Initialize tile renderer
+        _renderer = TOETileRenderer(tile_size=256)
+        _renderer.set_transformers(
+            _processor.wgs84_crs,
+            _processor.web_mercator_crs,
+            _processor.wgs84_to_web_mercator
+        )
+        
+        # Initialize S3 fetcher
+        _s3_fetcher = GLMS3Fetcher()
+        
+        logger.info("GLM TOE Service initialized successfully")
+        
+        # Start S3 polling if enabled
+        if GLM_S3_POLL_ENABLED:
+            asyncio.create_task(s3_polling_task())
+            
+    except Exception as e:
+        logger.error(f"Failed to initialize service: {e}")
+        raise
 
-@app.on_event('startup')
-async def _startup_poller():
-    if not GLM_POLL_ENABLED:
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {
+        "status": "healthy",
+        "service": "GLM TOE Service",
+        "version": "1.0.0",
+        "events_count": len(_events),
+        "granules_count": len(_ingested_granules),
+        "cache_size": len(_tile_cache.cache),
+        "processor_ready": _processor is not None,
+        "renderer_ready": _renderer is not None,
+        "s3_fetcher_ready": _s3_fetcher is not None
+    }
+
+# Service status endpoint
+@app.get("/status")
+async def service_status():
+    """Get detailed service status"""
+    if not _processor:
+        raise HTTPException(status_code=503, detail="Service not initialized")
+    
+    return {
+        "processor_config": _processor.get_grid_metadata(),
+        "events_count": len(_events),
+        "granules_count": len(_ingested_granules),
+        "cache_stats": {
+            "size": len(_tile_cache.cache),
+            "max_size": _tile_cache.max_items
+        },
+        "s3_status": _s3_fetcher.get_available_buckets() if _s3_fetcher else None
+    }
+
+# Tile endpoint
+@app.get("/tiles/{z}/{x}/{y}.png")
+async def get_tile(
+    z: int,
+    x: int,
+    y: int,
+    window: Optional[str] = Query(None, description="Time window (e.g., 1m, 5m, 300s)"),
+    t: Optional[str] = Query(None, description="End time ISO8601 (UTC)"),
+    qc: bool = Query(False, description="Enable quality filtering"),
+    grid_type: str = Query("auto", description="Grid type: auto, abi, geodetic")
+):
+    """
+    Get TOE heatmap tile
+    Implements the tile serving pipeline from documentation
+    """
+    if not _processor or not _renderer:
+        raise HTTPException(status_code=503, detail="Service not initialized")
+    
+    try:
+        # Parse time window
+        window_minutes = parse_time_window(window)
+        
+        # Parse end time
+        end_time = parse_end_time(t)
+        
+        # Create cache key
+        cache_key = f"{z}/{x}/{y}?w={window_minutes}&t={end_time.isoformat() if end_time else 'now'}&qc={int(qc)}&g={grid_type}"
+        
+        # Check cache
+        cached_tile = _tile_cache.get(cache_key)
+        if cached_tile:
+            return Response(
+                content=cached_tile,
+                media_type="image/png",
+                headers={"X-Cache": "HIT", "X-Tile-Info": f"z{z}x{x}y{y}"}
+            )
+        
+        # Generate tile
+        tile_data = await generate_tile(z, x, y, window_minutes, end_time, qc, grid_type)
+        
+        # Cache tile
+        _tile_cache.set(cache_key, tile_data)
+        
+        # Set response headers
+        headers = {
+            "X-Cache": "MISS",
+            "X-Tile-Info": f"z{z}x{x}y{y}",
+            "X-Time-Window": f"{window_minutes}m",
+            "X-Grid-Type": grid_type
+        }
+        
+        if end_time:
+            headers["Cache-Control"] = "public, max-age=300"
+        
+        return Response(
+            content=tile_data,
+            media_type="image/png",
+            headers=headers
+        )
+        
+    except Exception as e:
+        logger.error(f"Error generating tile {z}/{x}/{y}: {e}")
+        raise HTTPException(status_code=500, detail=f"Tile generation failed: {str(e)}")
+
+# Event ingestion endpoint
+@app.post("/ingest")
+async def ingest_events(events: List[Event]):
+    """Ingest GLM events"""
+    if not _processor:
+        raise HTTPException(status_code=503, detail="Service not initialized")
+    
+    try:
+        count = 0
+        for event_data in events:
+            # Validate coordinates
+            if not (-90 <= event_data.lat <= 90 and -180 <= event_data.lon <= 180):
+                continue
+            
+            # Validate energy
+            if event_data.energy_j <= 0:
+                continue
+            
+            # Create GLMEvent
+            event = GLMEvent(
+                lat=event_data.lat,
+                lon=event_data.lon,
+                energy_j=event_data.energy_j,
+                timestamp=event_data.timestamp or datetime.utcnow(),
+                quality_flag=event_data.quality_flag
+            )
+            
+            _events.append(event)
+            count += 1
+        
+        # Prune old events
+        prune_old_events()
+        
+        logger.info(f"Ingested {count} events")
+        return {"status": "success", "ingested": count, "total_events": len(_events)}
+        
+    except Exception as e:
+        logger.error(f"Error ingesting events: {e}")
+        raise HTTPException(status_code=500, detail=f"Ingestion failed: {str(e)}")
+
+# File ingestion endpoint
+@app.post("/ingest_files")
+async def ingest_files(request: IngestFilesRequest):
+    """Ingest GLM granules from files or S3"""
+    if not _processor:
+        raise HTTPException(status_code=503, detail="Service not initialized")
+    
+    try:
+        total_events = 0
+        processed_files = 0
+        
+        for file_path in request.paths:
+            try:
+                # Read granule
+                granule = _processor.read_glm_granule(file_path)
+                
+                # Store granule
+                _ingested_granules[file_path] = granule
+                
+                # Add events
+                for event in granule.events:
+                    _events.append(event)
+                
+                total_events += len(granule.events)
+                processed_files += 1
+                
+                logger.info(f"Processed {file_path}: {len(granule.events)} events")
+                
+            except Exception as e:
+                logger.error(f"Failed to process {file_path}: {e}")
+                continue
+        
+        # Prune old events
+        prune_old_events()
+        
+        logger.info(f"Processed {processed_files} files, total events: {total_events}")
+        return {
+            "status": "success",
+            "processed_files": processed_files,
+            "total_events": total_events,
+            "total_files": len(request.paths)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error ingesting files: {e}")
+        raise HTTPException(status_code=500, detail=f"File ingestion failed: {str(e)}")
+
+# S3 ingestion endpoint
+@app.post("/ingest_s3")
+async def ingest_from_s3(
+    bucket_name: str = GLM_S3_BUCKET,
+    hours_back: int = 2,
+    max_granules: int = 15
+):
+    """Ingest GLM granules from S3"""
+    if not _s3_fetcher:
+        raise HTTPException(status_code=503, detail="S3 fetcher not available")
+    
+    try:
+        # Get latest granules
+        granule_keys = _s3_fetcher.get_latest_granules(
+            bucket_name=bucket_name,
+            count=max_granules,
+            hours_back=hours_back
+        )
+        
+        if not granule_keys:
+            return {"status": "no_granules", "message": "No granules found"}
+        
+        # Process granules
+        total_events = 0
+        processed_granules = 0
+        
+        for key in granule_keys:
+            try:
+                # Skip if already processed
+                if key in _ingested_granules:
+                    continue
+                
+                # Read granule directly from S3
+                granule = _processor.read_glm_granule(f"s3://{bucket_name}/{key}")
+                
+                # Store granule
+                _ingested_granules[key] = granule
+                
+                # Add events
+                for event in granule.events:
+                    _events.append(event)
+                
+                total_events += len(granule.events)
+                processed_granules += 1
+                
+            except Exception as e:
+                logger.error(f"Failed to process S3 granule {key}: {e}")
+                continue
+        
+        # Prune old events
+        prune_old_events()
+        
+        logger.info(f"Processed {processed_granules} S3 granules, total events: {total_events}")
+        return {
+            "status": "success",
+            "processed_granules": processed_granules,
+            "total_events": total_events,
+            "bucket": bucket_name,
+            "time_window_hours": hours_back
+        }
+        
+    except Exception as e:
+        logger.error(f"Error ingesting from S3: {e}")
+        raise HTTPException(status_code=500, detail=f"S3 ingestion failed: {str(e)}")
+
+# S3 status endpoint
+@app.get("/s3/status")
+async def s3_status():
+    """Get S3 bucket status"""
+    if not _s3_fetcher:
+        raise HTTPException(status_code=503, detail="S3 fetcher not available")
+    
+    return {
+        "buckets": _s3_fetcher.get_available_buckets(),
+        "default_bucket": GLM_S3_BUCKET
+    }
+
+# Grid information endpoint
+@app.get("/grid/info")
+async def grid_info():
+    """Get grid configuration information"""
+    if not _processor:
+        raise HTTPException(status_code=503, detail="Service not initialized")
+    
+    return {
+        "grid_config": _processor.get_grid_metadata(),
+        "grid_bounds": get_grid_bounds(),
+        "tile_size": 256,
+        "supported_zoom_levels": list(range(0, 21))  # 0-20
+    }
+
+# Utility functions
+def parse_time_window(window_str: Optional[str]) -> int:
+    """Parse time window string to minutes"""
+    if not window_str:
+        return 5  # Default 5 minutes
+    
+    window_str = window_str.strip().lower()
+    
+    try:
+        if window_str.endswith('ms'):
+            minutes = int(window_str[:-2]) / (1000 * 60)
+        elif window_str.endswith('s'):
+            minutes = int(window_str[:-1]) / 60
+        elif window_str.endswith('m'):
+            minutes = int(window_str[:-1])
+        elif window_str.endswith('h'):
+            minutes = int(window_str[:-1]) * 60
+        else:
+            # Assume minutes
+            minutes = int(window_str)
+        
+        return max(1, int(minutes))  # Minimum 1 minute
+        
+    except (ValueError, TypeError):
+        return 5  # Default fallback
+
+def parse_end_time(time_str: Optional[str]) -> Optional[datetime]:
+    """Parse end time string to datetime"""
+    if not time_str:
+        return None
+    
+    try:
+        if time_str.endswith('Z'):
+            return datetime.fromisoformat(time_str.replace('Z', '+00:00'))
+        else:
+            return datetime.fromisoformat(time_str)
+    except ValueError:
+        return None
+
+def get_grid_bounds() -> Dict[str, Any]:
+    """Get grid bounds for current configuration"""
+    if GLM_USE_ABI_GRID:
+        return {
+            "type": "abi",
+            "x_min": -5000000,  # -5000 km
+            "x_max": 5000000,   # 5000 km
+            "y_min": -5000000,  # -5000 km
+            "y_max": 5000000,   # 5000 km
+            "cell_size_m": 2000.0,
+            "lon0": GLM_ABI_LON0
+        }
+    else:
+        return {
+            "type": "geodetic",
+            "lat_min": -90.0,
+            "lat_max": 90.0,
+            "lon_min": -180.0,
+            "lon_max": 180.0,
+            "cell_size_deg": 0.018  # ~2km at equator
+        }
+
+async def generate_tile(z: int, x: int, y: int, window_minutes: int, 
+                       end_time: Optional[datetime], qc: bool, grid_type: str) -> bytes:
+    """Generate tile from current events"""
+    if not _processor or not _renderer:
+        raise HTTPException(status_code=503, detail="Service not initialized")
+    
+    try:
+        # Determine actual grid type
+        if grid_type == "auto":
+            actual_grid_type = "abi" if GLM_USE_ABI_GRID else "geodetic"
+        else:
+            actual_grid_type = grid_type
+        
+        # Aggregate events to TOE grid
+        toe_grid = _processor.aggregate_toe_grid(
+            events=_events,
+            time_window_minutes=window_minutes,
+            end_time=end_time
+        )
+        
+        # Get grid bounds
+        grid_bounds = get_grid_bounds()
+        
+        # Render tile
+        tile_data = _renderer.render_tile_from_grid(
+            toe_grid=toe_grid,
+            grid_bounds=grid_bounds,
+            z=z, x=x, y=y,
+            grid_type=actual_grid_type
+        )
+        
+        return tile_data
+        
+    except Exception as e:
+        logger.error(f"Error generating tile: {e}")
+        raise
+
+def prune_old_events():
+    """Remove events older than the maximum time window"""
+    global _events
+    
+    if not _events:
         return
-    async def loop():
-        while True:
-            await _poll_once()
-            await asyncio.sleep(max(10, GLM_POLL_INTERVAL_SEC))
-    asyncio.create_task(loop())
+    
+    # Keep events from last 24 hours
+    cutoff_time = datetime.utcnow() - timedelta(hours=24)
+    
+    _events = [
+        event for event in _events
+        if event.timestamp >= cutoff_time
+    ]
+    
+    logger.info(f"Pruned events, remaining: {len(_events)}")
+
+async def s3_polling_task():
+    """Background task for S3 polling"""
+    if not _s3_fetcher:
+        return
+    
+    logger.info(f"Starting S3 polling for bucket {GLM_S3_BUCKET}")
+    
+    while True:
+        try:
+            # Poll for new granules
+            await ingest_from_s3(
+                bucket_name=GLM_S3_BUCKET,
+                hours_back=1,
+                max_granules=5
+            )
+            
+            # Wait for next poll
+            await asyncio.sleep(GLM_S3_POLL_INTERVAL)
+            
+        except Exception as e:
+            logger.error(f"Error in S3 polling: {e}")
+            await asyncio.sleep(GLM_S3_POLL_INTERVAL)
+
+# Main entry point
+if __name__ == "__main__":
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 8000)),
+        reload=True
+    )

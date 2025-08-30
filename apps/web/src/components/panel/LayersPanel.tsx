@@ -9,7 +9,7 @@ export function LayersPanel() {
         className="hairline w-full rounded px-2 py-1 focus:outline-none focus:hairline-teal"
         placeholder="Search layers"
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={e => setSearch(e.target.value)}
       />
       <div className="mt-4 opacity-70">No layers</div>
     </div>

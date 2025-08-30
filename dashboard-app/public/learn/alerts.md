@@ -6,8 +6,8 @@
 - Source: https://api.weather.gov/alerts (requires a User‑Agent header per NWS policy).
 
 Severity legend used here:
+
 - Extreme: deep red
 - Severe: red‑orange
 - Moderate: orange
 - Minor: light orange
-

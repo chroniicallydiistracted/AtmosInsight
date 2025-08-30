@@ -12,6 +12,30 @@
     "start": "./start-atmosinsight.sh",
     "stop": "./stop-atmosinsight.sh",
     "status": "./status-atmosinsight.sh",
-    "restart": "./stop-atmosinsight.sh && ./start-atmosinsight.sh"
+    "restart": "./stop-atmosinsight.sh && ./start-atmosinsight.sh",
+    "scan": "python3 port_scanner.py",
+    "scan:common": "python3 port_scanner.py --common",
+    "scan:web": "python3 port_scanner.py --range 80 443",
+    "scan:all": "python3 port_scanner.py --all",
+    "scan:demo": "./demo_scan.sh",
+    "scan:ssh": "python3 port_scanner.py --range 22 22",
+    "scan:database": "python3 port_scanner.py --range 3306 5432",
+    "scan:local": "python3 port_scanner.py --host 127.0.0.1 --common",
+    "kill": "python3 port_killer.py",
+    "kill:port": "python3 port_killer.py --port",
+    "kill:common": "python3 port_killer.py --common",
+    "kill:force": "python3 port_killer.py --force",
+    "kill:web": "python3 port_killer.py --port 80,443,8080,8443",
+    "kill:database": "python3 port_killer.py --port 3306,5432,27017",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "format:fix": "prettier --write --ignore-unknown .",
+    "ci": "pnpm ci --frozen-lockfile --prefer-offline",
+    "ci:clean": "rm -rf node_modules && rm -rf */node_modules && rm -rf */*/node_modules && pnpm install --frozen-lockfile",
+    "ci:fresh": "rm -rf node_modules && rm -rf */node_modules && rm -rf */*/node_modules && rm -rf .pnpm && pnpm install --frozen-lockfile",
+    "ci:script": "./scripts/ci.sh"
+  },
+  "dependencies": {
+    "prettier": "^3.6.2"
   }
 }

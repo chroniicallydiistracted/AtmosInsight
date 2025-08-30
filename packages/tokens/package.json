@@ -2,12 +2,39 @@
   "name": "@atmos/tokens",
   "version": "0.0.0",
   "private": true,
-  "main": "dist/tokens.ts",
-  "types": "dist/tokens.ts",
+  "type": "module",
+  "files": [
+    "dist/**/*"
+  ],
+  "style": "dist/tokens-base.css",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    ".": {
+      "style": "./dist/tokens-base.css",
+      "default": "./dist/tokens-base.css"
+    },
+    "./base.css": "./dist/tokens-base.css",
+    "./dark.css": "./dist/tokens-dark.css",
+    "./light.css": "./dist/tokens-light.css",
+    "./tokens-base": "./dist/tokens-base.js",
+    "./tokens-dark": "./dist/tokens-dark.js",
+    "./tokens-light": "./dist/tokens-light.js",
+    "./dist/tokens-base.css": "./dist/tokens-base.css",
+    "./dist/tokens-dark.css": "./dist/tokens-dark.css",
+    "./dist/tokens-light.css": "./dist/tokens-light.css"
+  },
   "scripts": {
-    "build": "style-dictionary build --config style-dictionary.config.js"
+    "build": "node build.js",
+    "watch": "node build.js --watch",
+    "clean": "rimraf dist"
   },
   "devDependencies": {
-    "style-dictionary": "4.4.0"
+    "rimraf": "^6.0.1",
+    "style-dictionary": "^4.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

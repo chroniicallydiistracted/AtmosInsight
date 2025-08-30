@@ -1,14 +1,25 @@
-import type { Metadata } from 'next';
+// Bring in design tokens first so your own CSS can override them if needed
+import '@atmos/tokens/dist/tokens-base.css';
+import '@atmos/tokens/dist/tokens-dark.css';
+import '@atmos/tokens/dist/tokens-light.css';
+
+// Then your global styles
 import './globals.css';
 
-export const metadata: Metadata = {
+// Plain JS metadata object (no TS types)
+export const metadata = {
   title: 'AtmosInsight',
   description: 'Prototype UI shell',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en">
+    <html lang="en" className="theme-dark">
+      {/* switch to theme-light to change theme */}
       <body>{children}</body>
     </html>
   );

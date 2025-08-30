@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { handler } from '../index.mjs';
+import { handler } from '../index.ts';
 
 test('lists layers', async () => {
   const res = await handler({ rawPath: '/catalog/layers' });
@@ -11,7 +11,10 @@ test('lists layers', async () => {
 });
 
 test('lists times with limit', async () => {
-  const res = await handler({ rawPath: '/catalog/layers/goes-east/times', queryStringParameters: { limit: '2' } });
+  const res = await handler({
+    rawPath: '/catalog/layers/goes-east/times',
+    queryStringParameters: { limit: '2' },
+  });
   assert.equal(res.statusCode, 200);
   const body = JSON.parse(res.body);
   assert.equal(body.length, 2);

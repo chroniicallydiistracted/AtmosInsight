@@ -3,9 +3,10 @@
 This add-on to the main guide gives concrete, **example** commands (no keys, no paid services) and a **MapLibre** layer stub you can drop into your style JSON. Everything below uses public data paths and standard, open-source tools.
 
 > Notes:
+>
 > - AWS CLI examples use `--no-sign-request` for anonymous access to the public buckets.
 > - For **listing** objects, prefer AWS CLI. Plain `curl` can fetch **known** object keys directly but is not ideal for enumeration.
-> - Filenames embed **year + day-of-year + time**. If you need the *latest* granules, list by prefix (hour folder) and select the most recent keys.
+> - Filenames embed **year + day-of-year + time**. If you need the _latest_ granules, list by prefix (hour folder) and select the most recent keys.
 > - GLM L2 granules are ~**20 s** each; several per minute. One hour folder (`.../<YYYY>/<DDD>/<HH>/`) will contain many files.
 
 ---
@@ -13,10 +14,12 @@ This add-on to the main guide gives concrete, **example** commands (no keys, no 
 ## 1) AWS CLI — list and download recent GLM L2 granules
 
 ### Prerequisites
+
 - Install the AWS CLI v2
 - No credentials needed for these buckets; add `--no-sign-request`
 
 ### List files for a specific hour (GOES-West, GLM L2)
+
 ```bash
 # Example: 2025 day-of-year 240 (Aug 28, 2025), hour 01 UTC
 aws s3 ls \
@@ -25,6 +28,7 @@ aws s3 ls \
 ```
 
 ### Fetch the N most recent granules in that hour
+
 ```bash
 # Set the prefix you want to search (adjust YYYY/DDD/HH)
 PREFIX="GLM-L2-LCFA/2025/240/01/"
@@ -44,6 +48,7 @@ done
 > If your time window crosses an hour boundary, repeat for the previous hour folder as well (e.g., `.../00/` and `.../01/`).
 
 ### Compute day-of-year (DDD) from a date (GNU/Linux example)
+
 ```bash
 # Example: UTC date to year + DDD (Julian day), GNU date
 UTC_DATE="2025-08-28"
@@ -51,7 +56,8 @@ YYYY=$(date -u -d "$UTC_DATE" +%Y)
 DDD=$(date -u -d "$UTC_DATE" +%j)
 echo "$YYYY $DDD"
 ```
-*macOS/BSD `date` uses different flags; compute DDD in Python if you want a portable solution.*
+
+_macOS/BSD `date` uses different flags; compute DDD in Python if you want a portable solution._
 
 ---
 
@@ -68,7 +74,7 @@ curl -fL -o OR_GLM-L2-LCFA_G18_<STAMP>.nc \
   "https://noaa-goes18.s3.amazonaws.com/GLM-L2-LCFA/<YYYY>/<DDD>/<HH>/OR_GLM-L2-LCFA_G18_s<YYYYJJJHHMMSS>_e<YYYYJJJHHMMSS>_c<YYYYJJJHHMMSS>.nc"
 ```
 
-> Replace placeholders with actual values. For *discovery* (finding the latest file names), use AWS CLI listing as shown above.
+> Replace placeholders with actual values. For _discovery_ (finding the latest file names), use AWS CLI listing as shown above.
 
 ---
 
@@ -116,6 +122,7 @@ GLM heatmaps should be **colorized server-side** (you serve PNG tiles of the gri
 ```
 
 **Facts to keep straight:**
+
 - MapLibre **does not** re-color single-band scientific rasters into palettes automatically; your server should output **already-colored PNGs** (or use a multi-band RGBA PNG).
 - If you must ship raw single-band rasters, convert them to color-mapped PNG tiles server-side (e.g., with GDAL or a rendering library) before publishing.
 - Use cache headers and a rolling time index on the server (e.g., `.../tiles/glm/toe/2025-08-28T01:05Z/{z}/{x}/{y}.png`) if you need deterministic caching per time window.

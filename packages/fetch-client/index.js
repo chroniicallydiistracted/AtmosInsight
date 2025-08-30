@@ -23,7 +23,7 @@ export async function fetchWithRetry(
       }
     }
     clearTimeout(id);
-    await new Promise((r) => setTimeout(r, delay));
+    await new Promise(r => setTimeout(r, delay));
     delay *= 2;
     attempt++;
   }

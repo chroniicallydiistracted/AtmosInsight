@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { GlmToeAggregator, type GlmEvent } from '../src/services/glm-toe/ingest.js';
+import {
+  GlmToeAggregator,
+  type GlmEvent,
+} from '../src/services/glm-toe/ingest.js';
 import { renderTilePng } from '../src/services/glm-toe/tiles.js';
 
 function tileFromLonLat(lon: number, lat: number, z: number) {
@@ -7,7 +10,7 @@ function tileFromLonLat(lon: number, lat: number, z: number) {
   const xtile = Math.floor(((lon + 180) / 360) * n);
   const latRad = (lat * Math.PI) / 180;
   const ytile = Math.floor(
-    (1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n
+    ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n
   );
   return { x: xtile, y: ytile };
 }

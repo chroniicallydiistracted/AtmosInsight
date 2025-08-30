@@ -29,4 +29,3 @@ Describe the scope of this PR and which checklist items from `AGENTS.md` it impl
 ## Notes
 
 Anything else reviewers should know.
-

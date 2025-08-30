@@ -12,7 +12,12 @@ export class GlmToeAggregator {
   ingest(batch: GlmEvent[]) {
     const now = Date.now();
     for (const e of batch) {
-      if (!Number.isFinite(e.lat) || !Number.isFinite(e.lon) || !Number.isFinite(e.energy_fj)) continue;
+      if (
+        !Number.isFinite(e.lat) ||
+        !Number.isFinite(e.lon) ||
+        !Number.isFinite(e.energy_fj)
+      )
+        continue;
       if (Math.abs(e.lat) > 90 || Math.abs(e.lon) > 180) continue;
       // Coerce timeMs fallback to now if missing
       this.events.push({ ...e, timeMs: e.timeMs ?? now });
@@ -23,16 +28,23 @@ export class GlmToeAggregator {
   prune(nowMs: number = Date.now()) {
     const cutoff = nowMs - this.windowMs;
     // Simple filter; for higher volumes consider a deque
-    this.events = this.events.filter((e) => e.timeMs >= cutoff);
+    this.events = this.events.filter(e => e.timeMs >= cutoff);
   }
 
   // Project lon/lat to WebMercator pixel within tile z/x/y (256px tile)
-  private lonLatToPixel(lon: number, lat: number, z: number, x: number, y: number) {
+  private lonLatToPixel(
+    lon: number,
+    lat: number,
+    z: number,
+    x: number,
+    y: number
+  ) {
     const tileSize = 256;
     const scale = tileSize * Math.pow(2, z);
     const worldX = ((lon + 180) / 360) * scale;
     const sinLat = Math.sin((lat * Math.PI) / 180);
-    const worldY = (0.5 - Math.log((1 + sinLat) / (1 - sinLat)) / (4 * Math.PI)) * scale;
+    const worldY =
+      (0.5 - Math.log((1 + sinLat) / (1 - sinLat)) / (4 * Math.PI)) * scale;
     const px = worldX - x * tileSize;
     const py = worldY - y * tileSize;
     return { px, py };
@@ -40,7 +52,9 @@ export class GlmToeAggregator {
 
   private metersPerPixel(lat: number, z: number) {
     const metersPerPixelEquator = 156543.03392804097;
-    return (metersPerPixelEquator * Math.cos((lat * Math.PI) / 180)) / Math.pow(2, z);
+    return (
+      (metersPerPixelEquator * Math.cos((lat * Math.PI) / 180)) / Math.pow(2, z)
+    );
   }
 
   // Aggregate TOE into approximate 2km bins by snapping to pixel grid sized to ~2km
@@ -56,8 +70,14 @@ export class GlmToeAggregator {
       const step = Math.max(1, Math.round(2000 / mpp));
       const { px, py } = this.lonLatToPixel(e.lon, e.lat, z, x, y);
       if (px < 0 || py < 0 || px >= tileSize || py >= tileSize) continue;
-      const sx = Math.min(tileSize - 1, Math.max(0, Math.floor(px / step) * step));
-      const sy = Math.min(tileSize - 1, Math.max(0, Math.floor(py / step) * step));
+      const sx = Math.min(
+        tileSize - 1,
+        Math.max(0, Math.floor(px / step) * step)
+      );
+      const sy = Math.min(
+        tileSize - 1,
+        Math.max(0, Math.floor(py / step) * step)
+      );
       const key = sy * tileSize + sx;
       bins.set(key, (bins.get(key) || 0) + e.energy_fj);
     }

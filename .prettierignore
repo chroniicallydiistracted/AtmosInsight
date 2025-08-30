@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+.pnpm/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Generated files
+*.min.js
+*.min.css
+
+# Logs
+*.log
+
+# Environment files
+.env*
+
+# Python virtual environments
+venv/
+__pycache__/
+*.pyc
+
+# Data files
+*.json.gz
+*.har
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock

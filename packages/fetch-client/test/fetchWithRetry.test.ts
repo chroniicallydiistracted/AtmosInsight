@@ -6,7 +6,8 @@ describe('fetchWithRetry', () => {
     vi.useFakeTimers();
     const res429 = new Response(null, { status: 429 });
     const res200 = new Response('ok', { status: 200 });
-    const mock = vi.fn()
+    const mock = vi
+      .fn()
       .mockResolvedValueOnce(res429)
       .mockResolvedValueOnce(res200);
     // @ts-ignore

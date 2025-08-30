@@ -40,14 +40,17 @@ export function createTileCache(opts: TileCacheOptions) {
   return { get, set, has };
 }
 
-export async function loadImage(url: string, cache: ReturnType<typeof createTileCache>): Promise<HTMLImageElement> {
+export async function loadImage(
+  url: string,
+  cache: ReturnType<typeof createTileCache>
+): Promise<HTMLImageElement> {
   const cached = cache.get(url);
   if (cached) return cached;
   const img = new Image();
   img.crossOrigin = 'anonymous';
   const p = new Promise<HTMLImageElement>((resolve, reject) => {
     img.onload = () => resolve(img);
-    img.onerror = (e) => reject(e);
+    img.onerror = e => reject(e);
   });
   img.src = url;
   try {

@@ -6,4 +6,5 @@
 - Source: NASA GIBS WMTS REST template `https://gibs.earthdata.nasa.gov/wmts/epsg{EPSG}/best/{Layer}/default/{Time}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.{ext}`; DescribeDomains can enumerate broader time ranges.
 
 Tip:
+
 - For Web Mercator, use `epsg3857` and `GoogleMapsCompatible_LevelN`; omitting `Time` uses the layer’s default date.

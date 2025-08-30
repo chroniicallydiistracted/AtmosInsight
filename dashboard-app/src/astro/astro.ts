@@ -36,4 +36,3 @@ export function computeAstro({ date, lat, lon }: AstroInput): AstroOutput {
     },
   };
 }
-

@@ -1,6 +1,6 @@
 data "archive_file" "proxy_api" {
   type        = "zip"
-  source_file = "${path.module}/../tiling-services/proxy-api/index.mjs"
+  source_file = "${path.module}/../tiling-services/proxy-api/index.ts"
   output_path = "${path.module}/../tiling-services/proxy-api/function.zip"
 }
 

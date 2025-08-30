@@ -1,9 +1,5 @@
 {
   "color": {
-    "text": {
-      "base": { "value": "#ffffff" },
-      "muted": { "value": "#94a3b8" }
-    },
     "neutral": {
       "50": { "value": "#f9fafb" },
       "100": { "value": "#f3f4f6" },
@@ -35,7 +31,7 @@
   },
   "shadow": {
     "sm": { "value": "0 1px 2px rgba(0,0,0,0.04)" },
-    "md": { "value": "0 4px 8px rgba(0,0,0,0.1)" }
+    "md": { "value": "0 4px 8px rgba(0,0,0,0.10)" }
   },
   "motion": {
     "fast": { "value": "150ms" },

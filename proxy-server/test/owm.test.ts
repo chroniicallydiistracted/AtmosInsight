@@ -12,11 +12,14 @@ describe('OWM tiles proxy', () => {
     expect(res.status).toBe(400);
   });
 
-  it.skipIf(!process.env.OWM_API_KEY)('returns 200 for clouds_new when key is set', async () => {
-    const res = await request(app).get('/api/owm/clouds_new/3/2/1.png');
-    expect(res.status).toBe(200);
-    expect(res.headers['content-type']).toMatch(/image\/png/);
-    expect(res.headers['cache-control']).toBe('public, max-age=60');
-  }, 20000);
+  it.skipIf(!process.env.OWM_API_KEY)(
+    'returns 200 for clouds_new when key is set',
+    async () => {
+      const res = await request(app).get('/api/owm/clouds_new/3/2/1.png');
+      expect(res.status).toBe(200);
+      expect(res.headers['content-type']).toMatch(/image\/png/);
+      expect(res.headers['cache-control']).toBe('public, max-age=60');
+    },
+    20000
+  );
 });
-

@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { clampFps, frameDelayMs, isPlayable, nextIndex, prefetchSchedule, MIN_FPS, MAX_FPS, DEFAULT_FPS } from './playback';
+import {
+  clampFps,
+  frameDelayMs,
+  isPlayable,
+  nextIndex,
+  prefetchSchedule,
+  MIN_FPS,
+  MAX_FPS,
+  DEFAULT_FPS,
+} from './playback';
 
 describe('playback utils', () => {
   it('clamps FPS bounds and defaults', () => {
@@ -36,4 +45,3 @@ describe('playback utils', () => {
     expect(prefetchSchedule(0, 0)).toEqual([]);
   });
 });
-

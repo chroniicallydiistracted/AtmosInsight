@@ -5,10 +5,10 @@ export function AlertsLegend() {
     <div className="panel absolute top-4 right-4 p-3 text-sm">
       <div className="flex justify-between items-center gap-2 mb-2">
         <strong>NWS Alerts</strong>
-        <a 
-          href="/learn/alerts.md" 
-          target="_blank" 
-          rel="noreferrer" 
+        <a
+          href="/learn/alerts.md"
+          target="_blank"
+          rel="noreferrer"
           className="text-blue-300 hover:text-blue-200 text-xs"
         >
           Learn

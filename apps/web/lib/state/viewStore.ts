@@ -23,19 +23,19 @@ export const useViewStore = create<ViewState>((set, get) => ({
   zoom: 0,
   timeISO: new Date().toISOString(),
   activeLayers: [],
-  setTime: (iso) => set({ timeISO: iso }),
-  toggleLayer: (id) => {
-    const exists = get().activeLayers.find((l) => l.id === id);
+  setTime: iso => set({ timeISO: iso }),
+  toggleLayer: id => {
+    const exists = get().activeLayers.find(l => l.id === id);
     set({
       activeLayers: exists
-        ? get().activeLayers.filter((l) => l.id !== id)
+        ? get().activeLayers.filter(l => l.id !== id)
         : [...get().activeLayers, { id }],
     });
   },
   setOpacity: (id, value) =>
     set({
-      activeLayers: get().activeLayers.map((l) =>
-        l.id === id ? { ...l, opacity: value } : l,
+      activeLayers: get().activeLayers.map(l =>
+        l.id === id ? { ...l, opacity: value } : l
       ),
     }),
   setWorkspace: () => {},

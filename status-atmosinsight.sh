@@ -12,6 +12,7 @@ NC='\033[0m' # No Color
 
 # Port configuration
 PROXY_PORT=3000
+CATALOG_PORT=3001
 WEB_PORT=3002
 
 echo -e "${BLUE}📊 AtmosInsight Status Check${NC}"
@@ -46,7 +47,7 @@ get_port_details() {
 }
 
 # Check if we're in the right directory
-if [ ! -f "package.json" ] || [ ! -d "apps" ] || [ ! -d "proxy-server" ]; then
+if [ ! -f "package.json" ] || [ ! -d "apps" ] || [ ! -d "proxy-server" ] || [ ! -d "tiling-services" ]; then
     echo -e "${RED}❌ Error: This script must be run from the AtmosInsight root directory${NC}"
     echo -e "${RED}💡 Please run: cd /path/to/AtmosInsight && ./status-atmosinsight.sh${NC}"
     exit 1
@@ -71,6 +72,33 @@ if check_port $PROXY_PORT; then
     
     # Check if it's responding
     if curl -s http://localhost:$PROXY_PORT/health >/dev/null 2>&1; then
+        echo -e "${GREEN}   Health: RESPONDING${NC}"
+    else
+        echo -e "${YELLOW}   Health: NOT RESPONDING${NC}"
+    fi
+else
+    echo -e "${RED}❌ Status: STOPPED${NC}"
+    echo -e "${BLUE}   Port:${NC} FREE"
+fi
+
+echo ""
+
+# Check catalog-api status
+echo -e "${BLUE}📚 Catalog API (Port $CATALOG_PORT)${NC}"
+echo "----------------------------------------"
+
+if check_port $CATALOG_PORT; then
+    local details=$(get_port_details $CATALOG_PORT)
+    IFS='|' read -r pid cmd user time <<< "$details"
+    
+    echo -e "${GREEN}✅ Status: RUNNING${NC}"
+    echo -e "${BLUE}   PID:${NC} $pid"
+    echo -e "${BLUE}   Command:${NC} $cmd"
+    echo -e "${BLUE}   User:${NC} $user"
+    echo -e "${BLUE}   Uptime:${NC} $time"
+    
+    # Check if it's responding
+    if curl -s http://localhost:$CATALOG_PORT/health >/dev/null 2>&1; then
         echo -e "${GREEN}   Health: RESPONDING${NC}"
     else
         echo -e "${YELLOW}   Health: NOT RESPONDING${NC}"
@@ -134,25 +162,45 @@ echo -e "${BLUE}📋 Summary${NC}"
 echo "----------------------------------------"
 
 PROXY_RUNNING=false
+CATALOG_RUNNING=false
 WEB_RUNNING=false
 
 if check_port $PROXY_PORT; then
     PROXY_RUNNING=true
 fi
 
+if check_port $CATALOG_PORT; then
+    CATALOG_RUNNING=true
+fi
+
 if check_port $WEB_PORT; then
     WEB_RUNNING=true
 fi
 
-if [ "$PROXY_RUNNING" = true ] && [ "$WEB_RUNNING" = true ]; then
+if [ "$PROXY_RUNNING" = true ] && [ "$CATALOG_RUNNING" = true ] && [ "$WEB_RUNNING" = true ]; then
     echo -e "${GREEN}🎉 All services are running!${NC}"
     echo -e "${BLUE}🌐 Open your browser to: http://localhost:$WEB_PORT${NC}"
+elif [ "$PROXY_RUNNING" = true ] && [ "$CATALOG_RUNNING" = true ]; then
+    echo -e "${YELLOW}⚠️  Only proxy-server and catalog-api are running${NC}"
+    echo -e "${BLUE}💡 Start web app: cd apps/web && pnpm run dev${NC}"
+elif [ "$PROXY_RUNNING" = true ] && [ "$WEB_RUNNING" = true ]; then
+    echo -e "${YELLOW}⚠️  Only proxy-server and web app are running${NC}"
+    echo -e "${BLUE}💡 Start catalog-api: cd tiling-services/catalog-api && pnpm run start${NC}"
+elif [ "$CATALOG_RUNNING" = true ] && [ "$WEB_RUNNING" = true ]; then
+    echo -e "${YELLOW}⚠️  Only catalog-api and web app are running${NC}"
+    echo -e "${BLUE}💡 Start proxy-server: cd proxy-server && pnpm run dev${NC}"
 elif [ "$PROXY_RUNNING" = true ]; then
     echo -e "${YELLOW}⚠️  Only proxy-server is running${NC}"
+    echo -e "${BLUE}💡 Start catalog-api: cd tiling-services/catalog-api && pnpm run start${NC}"
+    echo -e "${BLUE}💡 Start web app: cd apps/web && pnpm run dev${NC}"
+elif [ "$CATALOG_RUNNING" = true ]; then
+    echo -e "${YELLOW}⚠️  Only catalog-api is running${NC}"
+    echo -e "${BLUE}💡 Start proxy-server: cd proxy-server && pnpm run dev${NC}"
     echo -e "${BLUE}💡 Start web app: cd apps/web && pnpm run dev${NC}"
 elif [ "$WEB_RUNNING" = true ]; then
     echo -e "${YELLOW}⚠️  Only Next.js web app is running${NC}"
     echo -e "${BLUE}💡 Start proxy-server: cd proxy-server && pnpm run dev${NC}"
+    echo -e "${BLUE}💡 Start catalog-api: cd tiling-services/catalog-api && pnpm run start${NC}"
 else
     echo -e "${RED}❌ No services are running${NC}"
     echo -e "${BLUE}💡 Start all services: ./start-atmosinsight.sh${NC}"

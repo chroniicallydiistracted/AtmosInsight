@@ -5,9 +5,8 @@ import type {
   StyleSpecification,
   GeoJSONSourceSpecification,
   RasterSourceSpecification,
-  RasterLayerSpecification
-} from '@maplibre/maplibre-gl-style-spec';
-import type { BackgroundLayerSpecification } from '@maplibre/maplibre-gl-style-spec';
+  RasterLayerSpecification,
+} from 'maplibre-gl';
 import type { GeoJSONSource } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Timeline } from '@/components/Timeline';
@@ -28,12 +27,10 @@ export default function Home() {
       sources: {
         'osm-cyclosm': {
           type: 'raster',
-          tiles: [
-            `${apiBase}/api/osm/cyclosm/{z}/{x}/{y}.png`
-          ],
+          tiles: [`${apiBase}/api/osm/cyclosm/{z}/{x}/{y}.png`],
           tileSize: 256,
-          attribution: '© OpenStreetMap contributors, © CyclOSM'
-        }
+          attribution: '© OpenStreetMap contributors, © CyclOSM',
+        },
       },
       layers: [
         {
@@ -41,9 +38,9 @@ export default function Home() {
           type: 'raster',
           source: 'osm-cyclosm',
           minzoom: 0,
-          maxzoom: 18
-        }
-      ]
+          maxzoom: 18,
+        },
+      ],
     };
 
     const map = new maplibregl.Map({
@@ -52,7 +49,7 @@ export default function Home() {
       center: [-112.074037, 33.448376], // Phoenix, AZ coordinates
       zoom: 8,
       maxZoom: 18,
-      minZoom: 0
+      minZoom: 0,
     });
 
     // Store map reference globally for debugging
@@ -62,12 +59,12 @@ export default function Home() {
     function addAlertsLayer() {
       const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '';
       fetch(`${apiBase}/api/nws/alerts/active`)
-        .then((r) => r.json())
-        .then((geojson) => {
+        .then(r => r.json())
+        .then(geojson => {
           if (!map.getSource('nws-alerts')) {
             map.addSource('nws-alerts', {
               type: 'geojson',
-              data: geojson as unknown as GeoJSON.GeoJSON
+              data: geojson as unknown as GeoJSON.GeoJSON,
             } as GeoJSONSourceSpecification);
 
             // Fill polygons by severity
@@ -78,15 +75,20 @@ export default function Home() {
               filter: ['==', ['geometry-type'], 'Polygon'],
               paint: {
                 'fill-color': [
-                  'match', ['get', 'severity'],
-                  'Extreme', '#7f0000',
-                  'Severe', '#d7301f',
-                  'Moderate', '#fc8d59',
-                  'Minor', '#fdcc8a',
-                  /* other */ '#bdbdbd'
+                  'match',
+                  ['get', 'severity'],
+                  'Extreme',
+                  '#7f0000',
+                  'Severe',
+                  '#d7301f',
+                  'Moderate',
+                  '#fc8d59',
+                  'Minor',
+                  '#fdcc8a',
+                  /* other */ '#bdbdbd',
                 ],
-                'fill-opacity': 0.35
-              }
+                'fill-opacity': 0.35,
+              },
             });
 
             // Outline
@@ -94,11 +96,15 @@ export default function Home() {
               id: 'nws-alerts-line',
               type: 'line',
               source: 'nws-alerts',
-              filter: ['any', ['==', ['geometry-type'], 'Polygon'], ['==', ['geometry-type'], 'LineString']],
+              filter: [
+                'any',
+                ['==', ['geometry-type'], 'Polygon'],
+                ['==', ['geometry-type'], 'LineString'],
+              ],
               paint: {
                 'line-color': '#444',
-                'line-width': 1
-              }
+                'line-width': 1,
+              },
             });
 
             // Points (if any)
@@ -111,13 +117,17 @@ export default function Home() {
                 'circle-color': '#08519c',
                 'circle-radius': 4,
                 'circle-stroke-color': '#fff',
-                'circle-stroke-width': 1
-              }
+                'circle-stroke-width': 1,
+              },
             });
 
-            const clickTargets = ['nws-alerts-fill', 'nws-alerts-line', 'nws-alerts-point'];
-            clickTargets.forEach((id) => {
-              map.on('click', id, (e) => {
+            const clickTargets = [
+              'nws-alerts-fill',
+              'nws-alerts-line',
+              'nws-alerts-point',
+            ];
+            clickTargets.forEach(id => {
+              map.on('click', id, e => {
                 const f = e.features?.[0];
                 if (!f) return;
 
@@ -142,11 +152,21 @@ export default function Home() {
                   .addTo(map);
               });
 
-              map.on('mouseenter', id, () => (map.getCanvas().style.cursor = 'pointer'));
-              map.on('mouseleave', id, () => (map.getCanvas().style.cursor = ''));
+              map.on(
+                'mouseenter',
+                id,
+                () => (map.getCanvas().style.cursor = 'pointer')
+              );
+              map.on(
+                'mouseleave',
+                id,
+                () => (map.getCanvas().style.cursor = '')
+              );
             });
           } else {
-            const src = map.getSource('nws-alerts') as GeoJSONSource | undefined;
+            const src = map.getSource('nws-alerts') as
+              | GeoJSONSource
+              | undefined;
             src?.setData(geojson as unknown as GeoJSON.GeoJSON);
           }
         })
@@ -162,12 +182,10 @@ export default function Home() {
         const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '';
         map.addSource(glmSourceId, {
           type: 'raster',
-          tiles: [
-            `${apiBase}/api/glm-toe/{z}/{x}/{y}.png?window=5m`
-          ],
+          tiles: [`${apiBase}/api/glm-toe/{z}/{x}/{y}.png?window=5m`],
           tileSize: 256,
           minzoom: 0,
-          maxzoom: 10
+          maxzoom: 10,
         } as RasterSourceSpecification);
 
         map.addLayer({
@@ -176,8 +194,8 @@ export default function Home() {
           source: glmSourceId,
           paint: {
             'raster-opacity': 0.85,
-            'raster-resampling': 'linear'
-          }
+            'raster-resampling': 'linear',
+          },
         } as RasterLayerSpecification);
       }
     });

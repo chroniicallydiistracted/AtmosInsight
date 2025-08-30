@@ -16,7 +16,7 @@ export function GlmLegend({ map, layerId = 'glm_toe_layer' }: GlmLegendProps) {
 
     function apply() {
       if (!map || !map.getLayer(layerId)) return;
-      
+
       const visibility = visible ? 'visible' : 'none';
       map.setLayoutProperty(layerId, 'visibility', visibility);
     }
@@ -30,23 +30,27 @@ export function GlmLegend({ map, layerId = 'glm_toe_layer' }: GlmLegendProps) {
   }, [map, layerId, visible]);
 
   return (
-    <div className={`panel absolute bottom-4 right-4 p-3 text-sm transition-all duration-200 ${
-      collapsed ? 'w-36' : 'w-72'
-    }`}>
+    <div
+      className={`panel absolute bottom-4 right-4 p-3 text-sm transition-all duration-200 ${
+        collapsed ? 'w-36' : 'w-72'
+      }`}
+    >
       <div className="flex justify-between items-center mb-2">
         <strong title="Total Optical Energy (fJ)">GLM TOE</strong>
-        <span title="Color ramp thresholds and units" className="opacity-80">ⓘ</span>
+        <span title="Color ramp thresholds and units" className="opacity-80">
+          ⓘ
+        </span>
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
             checked={visible}
-            onChange={(e) => setVisible(e.target.checked)}
+            onChange={e => setVisible(e.target.checked)}
             className="w-3 h-3"
           />
           <span className="text-xs">Visible</span>
         </label>
       </div>
-      
+
       {!collapsed && (
         <div className="space-y-2">
           <div className="flex justify-between items-center text-xs">
@@ -58,7 +62,7 @@ export function GlmLegend({ map, layerId = 'glm_toe_layer' }: GlmLegendProps) {
               Collapse
             </button>
           </div>
-          
+
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-gradient-to-r from-blue-900 to-blue-500 rounded-sm"></div>
@@ -77,7 +81,7 @@ export function GlmLegend({ map, layerId = 'glm_toe_layer' }: GlmLegendProps) {
               <span className="text-xs">Extreme</span>
             </div>
           </div>
-          
+
           <div className="text-xs opacity-70 mt-2">
             <p>Total Optical Energy from GOES-R GLM</p>
             <p>2×2 km grid resolution</p>
@@ -85,7 +89,7 @@ export function GlmLegend({ map, layerId = 'glm_toe_layer' }: GlmLegendProps) {
           </div>
         </div>
       )}
-      
+
       {collapsed && (
         <button
           onClick={() => setCollapsed(false)}

@@ -10,9 +10,70 @@ import { fetchWithRetry } from '@atmos/fetch-client';
 // Lightweight Lambda proxy for /api/* endpoints.
 // Runtime: nodejs20.x (fetch available)
 
-const JSON_HEADERS = { "Content-Type": "application/json" };
+interface LambdaEvent {
+  rawPath?: string;
+  rawQueryString?: string;
+  requestContext?: {
+    http?: {
+      method?: string;
+    };
+  };
+  queryStringParameters?: Record<string, string>;
+  headers?: Record<string, string>;
+  body?: string;
+}
 
-function json(status, obj, extra = {}) {
+interface LambdaResponse {
+  statusCode: number;
+  headers: Record<string, string>;
+  body: string;
+  isBase64Encoded?: boolean;
+}
+
+interface GibsTileParams {
+  epsg: string;
+  layer: string;
+  time?: string;
+  tms: string;
+  z: string;
+  y: string;
+  x: string;
+  ext: string;
+}
+
+interface GibsDomainsParams {
+  epsg: string;
+  layer: string;
+  tms: string;
+  range: string;
+}
+
+interface OwmTileParams {
+  layer: string;
+  z: string;
+  x: string;
+  y: string;
+  apiKey: string;
+}
+
+interface RainviewerTileParams {
+  index: any;
+  ts: string;
+  size: string;
+  z: string;
+  x: string;
+  y: string;
+  color: string;
+  options: string;
+}
+
+const JSON_HEADERS = { 'Content-Type': 'application/json' };
+
+function json(
+  status: number,
+  obj: any,
+  extra: Record<string, string> = {}
+): LambdaResponse {
   return {
     statusCode: status,
     headers: { ...JSON_HEADERS, ...extra },
@@ -20,7 +81,11 @@ function json(status, obj, extra = {}) {
   };
 }
 
-function text(status, body, headers = {}) {
+function text(
+  status: number,
+  body: string,
+  headers: Record<string, string> = {}
+): LambdaResponse {
   return {
     statusCode: status,
     headers,
@@ -28,66 +93,110 @@ function text(status, body, headers = {}) {
   };
 }
 
-function bin(status, bodyBuf, contentType, headers = {}) {
+function bin(
+  status: number,
+  bodyBuf: Buffer,
+  contentType: string,
+  headers: Record<string, string> = {}
+): LambdaResponse {
   return {
     statusCode: status,
     isBase64Encoded: true,
-    headers: { "Content-Type": contentType, ...headers },
-    body: Buffer.from(bodyBuf).toString("base64"),
+    headers: { 'Content-Type': contentType, ...headers },
+    body: Buffer.from(bodyBuf).toString('base64'),
   };
 }
-
 
 // -----------------
 // GIBS helpers
 // -----------------
-function buildGibsTileUrl({ epsg, layer, time, tms, z, y, x, ext }) {
+function buildGibsTileUrl({
+  epsg,
+  layer,
+  time,
+  tms,
+  z,
+  y,
+  x,
+  ext,
+}: GibsTileParams): string {
   const timePart = time ? `${time}/` : '';
   return `${GIBS_BASE}/epsg${epsg}/best/${layer}/default/${timePart}${tms}/${z}/${y}/${x}.${ext}`;
 }
-function buildGibsDomainsUrl({ epsg, layer, tms, range }) {
+
+function buildGibsDomainsUrl({
+  epsg,
+  layer,
+  tms,
+  range,
+}: GibsDomainsParams): string {
   return `${GIBS_BASE}/epsg${epsg}/best/1.0.0/${layer}/default/${tms}/all/${range}.xml`;
 }
 
 // -----------------
 // OWM helpers
 // -----------------
-function buildOwmTileUrl({ layer, z, x, y, apiKey }) {
+function buildOwmTileUrl({ layer, z, x, y, apiKey }: OwmTileParams): string {
   return `${OWM_BASE}/${layer}/${z}/${x}/${y}.png?appid=${encodeURIComponent(apiKey)}`;
 }
 
 // -----------------
 // RainViewer helpers
 // -----------------
-let rvCache = null; let rvAt = 0; const RV_TTL = 60_000;
-async function getRainviewerIndex() {
+let rvCache: any = null;
+let rvAt = 0;
+const RV_TTL = 60_000;
+
+async function getRainviewerIndex(): Promise<any> {
   const now = Date.now();
-  if (rvCache && (now - rvAt) < RV_TTL) return rvCache;
-  const res = await fetchWithRetry('https://api.rainviewer.com/public/weather-maps.json');
+  if (rvCache && now - rvAt < RV_TTL) return rvCache;
+  const res = await fetchWithRetry(
+    'https://api.rainviewer.com/public/weather-maps.json'
+  );
   if (!res.ok) throw new Error(`rainviewer index ${res.status}`);
   rvCache = await res.json();
   rvAt = now;
   return rvCache;
 }
-function buildRainviewerTileUrl({ index, ts, size, z, x, y, color, options }) {
+
+function buildRainviewerTileUrl({
+  index,
+  ts,
+  size,
+  z,
+  x,
+  y,
+  color,
+  options,
+}: RainviewerTileParams): string | null {
   const sizeVal = size === '512' ? '512' : '256';
   const tsNum = Number(ts);
   if (!Number.isFinite(tsNum)) return null;
-  const frames = [...(index?.radar?.past || []), ...(index?.radar?.nowcast || [])];
+  const frames = [
+    ...(index?.radar?.past || []),
+    ...(index?.radar?.nowcast || []),
+  ];
   if (!frames.length) return null;
-  let match = frames.find(f => f.time === tsNum);
+  let match = frames.find((f: any) => f.time === tsNum);
   if (!match) {
-    const pastOrEqual = frames.filter(f => f.time <= tsNum).sort((a,b)=>b.time-a.time);
-    match = pastOrEqual[0] || frames.sort((a,b)=>b.time-a.time)[0];
+    const pastOrEqual = frames
+      .filter((f: any) => f.time <= tsNum)
+      .sort((a: any, b: any) => b.time - a.time);
+    match =
+      pastOrEqual[0] || frames.sort((a: any, b: any) => b.time - a.time)[0];
   }
   if (!match) return null;
   return `${index.host}${match.path}/${sizeVal}/${z}/${x}/${y}/${color}/${options}.png`;
 }
 
 // Util
-function withShortCache(h = {}) { return { 'Cache-Control': 'public, max-age=60', ...h }; }
+function withShortCache(
+  h: Record<string, string> = {}
+): Record<string, string> {
+  return { 'Cache-Control': 'public, max-age=60', ...h };
+}
 
-export const handler = async (event) => {
+export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
   const path = event.rawPath || '/';
   const qs = event.rawQueryString ? `?${event.rawQueryString}` : '';
   const method = event.requestContext?.http?.method || 'GET';
@@ -102,11 +211,16 @@ export const handler = async (event) => {
     if (path.startsWith('/api/nws/alerts')) {
       const userAgent = process.env.NWS_USER_AGENT || DEFAULT_NWS_USER_AGENT;
       const url = NWS_API_BASE + path.replace('/api/nws/alerts', '') + qs;
-      const upstream = await fetchWithRetry(url, { headers: { 'User-Agent': userAgent, 'Accept': 'application/geo+json' } });
+      const upstream = await fetchWithRetry(url, {
+        headers: { 'User-Agent': userAgent, Accept: 'application/geo+json' },
+      });
       const textBody = await upstream.text();
       return {
         statusCode: upstream.status,
-        headers: withShortCache({ 'Content-Type': upstream.headers.get('content-type') || 'application/geo+json' }),
+        headers: withShortCache({
+          'Content-Type':
+            upstream.headers.get('content-type') || 'application/geo+json',
+        }),
         body: textBody,
       };
     }
@@ -115,13 +229,19 @@ export const handler = async (event) => {
     let m = path.match(/^\/api\/owm\/([^/]+)\/(\d+)\/(\d+)\/(\d+)\.png$/);
     if (m) {
       const [, layer, z, x, y] = m;
-      if (!OWM_ALLOW.has(layer)) return json(400, { error: 'unknown or blocked layer' });
+      if (!OWM_ALLOW.has(layer))
+        return json(400, { error: 'unknown or blocked layer' });
       const apiKey = process.env.OWM_API_KEY;
       if (!apiKey) return json(503, { error: 'OWM_API_KEY not configured' });
       const url = buildOwmTileUrl({ layer, z, x, y, apiKey });
       const upstream = await fetchWithRetry(url, {});
       const buf = Buffer.from(await upstream.arrayBuffer());
-      return bin(upstream.status, buf, upstream.headers.get('content-type') || 'image/png', withShortCache());
+      return bin(
+        upstream.status,
+        buf,
+        upstream.headers.get('content-type') || 'image/png',
+        withShortCache()
+      );
     }
 
     // RainViewer index
@@ -131,15 +251,31 @@ export const handler = async (event) => {
     }
 
     // RainViewer tile
-    m = path.match(/^\/api\/rainviewer\/(\d+)\/(256|512)\/(\d+)\/(\d+)\/(\d+)\/([^/]+)\/([^/]+)\.png$/);
+    m = path.match(
+      /^\/api\/rainviewer\/(\d+)\/(256|512)\/(\d+)\/(\d+)\/(\d+)\/([^/]+)\/([^/]+)\.png$/
+    );
     if (m) {
       const [, ts, size, z, x, y, color, options] = m;
       const idx = await getRainviewerIndex();
-      const url = buildRainviewerTileUrl({ index: idx, ts, size, z, x, y, color, options });
+      const url = buildRainviewerTileUrl({
+        index: idx,
+        ts,
+        size,
+        z,
+        x,
+        y,
+        color,
+        options,
+      });
       if (!url) return json(404, { error: 'frame not found' });
       const upstream = await fetchWithRetry(url, {});
       const buf = Buffer.from(await upstream.arrayBuffer());
-      return bin(upstream.status, buf, upstream.headers.get('content-type') || 'image/png', withShortCache());
+      return bin(
+        upstream.status,
+        buf,
+        upstream.headers.get('content-type') || 'image/png',
+        withShortCache()
+      );
     }
 
     // GIBS redirect helper
@@ -153,9 +289,11 @@ export const handler = async (event) => {
       const y = params.get('y');
       const x = params.get('x');
       const ext = params.get('ext') || 'png';
-      if (!layer || !epsg || !tms || !z || !y || !x) return json(400, { error: 'missing params' });
+      if (!layer || !epsg || !tms || !z || !y || !x)
+        return json(400, { error: 'missing params' });
       const url = buildGibsTileUrl({ epsg, layer, time, tms, z, y, x, ext });
-      if (!url.startsWith('https://gibs.earthdata.nasa.gov/')) return json(400, { error: 'invalid redirect' });
+      if (!url.startsWith('https://gibs.earthdata.nasa.gov/'))
+        return json(400, { error: 'invalid redirect' });
       return {
         statusCode: 302,
         headers: { Location: url, ...withShortCache() },
@@ -164,32 +302,56 @@ export const handler = async (event) => {
     }
 
     // GIBS tile (with time)
-    m = path.match(/^\/api\/gibs\/tile\/(\d+)\/([^/]+)\/([^/]+)\/([^/]+)\/(\d+)\/(\d+)\/(\d+)\.([a-zA-Z0-9]+)$/);
+    m = path.match(
+      /^\/api\/gibs\/tile\/(\d+)\/([^/]+)\/([^/]+)\/([^/]+)\/(\d+)\/(\d+)\/(\d+)\.([a-zA-Z0-9]+)$/
+    );
     if (m) {
       const [, epsg, layer, time, tms, z, y, x, ext] = m;
       const url = buildGibsTileUrl({ epsg, layer, time, tms, z, y, x, ext });
       const upstream = await fetchWithRetry(url, {});
       const buf = Buffer.from(await upstream.arrayBuffer());
-      return bin(upstream.status, buf, upstream.headers.get('content-type') || 'image/png', withShortCache());
+      return bin(
+        upstream.status,
+        buf,
+        upstream.headers.get('content-type') || 'image/png',
+        withShortCache()
+      );
     }
+
     // GIBS tile (no time)
-    m = path.match(/^\/api\/gibs\/tile\/(\d+)\/([^/]+)\/([^/]+)\/(\d+)\/(\d+)\/(\d+)\.([a-zA-Z0-9]+)$/);
+    m = path.match(
+      /^\/api\/gibs\/tile\/(\d+)\/([^/]+)\/([^/]+)\/(\d+)\/(\d+)\/(\d+)\.([a-zA-Z0-9]+)$/
+    );
     if (m) {
       const [, epsg, layer, tms, z, y, x, ext] = m;
       const url = buildGibsTileUrl({ epsg, layer, tms, z, y, x, ext });
       const upstream = await fetchWithRetry(url, {});
       const buf = Buffer.from(await upstream.arrayBuffer());
-      return bin(upstream.status, buf, upstream.headers.get('content-type') || 'image/png', withShortCache());
+      return bin(
+        upstream.status,
+        buf,
+        upstream.headers.get('content-type') || 'image/png',
+        withShortCache()
+      );
     }
 
     // GIBS DescribeDomains
-    m = path.match(/^\/api\/gibs\/domains\/(\d+)\/([^/]+)\/([^/]+)\/([^/]+)\.xml$/);
+    m = path.match(
+      /^\/api\/gibs\/domains\/(\d+)\/([^/]+)\/([^/]+)\/([^/]+)\.xml$/
+    );
     if (m) {
       const [, epsg, layer, tms, range] = m;
       const url = buildGibsDomainsUrl({ epsg, layer, tms, range });
       const upstream = await fetchWithRetry(url, {});
       const body = await upstream.text();
-      return text(upstream.status, body, withShortCache({ 'Content-Type': upstream.headers.get('content-type') || 'application/xml' }));
+      return text(
+        upstream.status,
+        body,
+        withShortCache({
+          'Content-Type':
+            upstream.headers.get('content-type') || 'application/xml',
+        })
+      );
     }
 
     // GLM TOE tile (proxy to Python microservice if configured)
@@ -201,7 +363,12 @@ export const handler = async (event) => {
       const url = `${proxy.replace(/\/$/, '')}/tiles/${z}/${x}/${y}.png`;
       const upstream = await fetchWithRetry(url, {});
       const buf = Buffer.from(await upstream.arrayBuffer());
-      return bin(upstream.status, buf, upstream.headers.get('content-type') || 'image/png', withShortCache());
+      return bin(
+        upstream.status,
+        buf,
+        upstream.headers.get('content-type') || 'image/png',
+        withShortCache()
+      );
     }
 
     // Fallback
@@ -216,4 +383,3 @@ export const handler = async (event) => {
     return json(500, { error: 'proxy error' });
   }
 };
-
