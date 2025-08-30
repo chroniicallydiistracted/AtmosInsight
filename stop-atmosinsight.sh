@@ -12,13 +12,32 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Port configuration
-PROXY_PORT=3000
-CATALOG_PORT=3001
-WEB_PORT=3002
+# Load port configuration from JSON file
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="$SCRIPT_DIR/config/ports.json"
+
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo -e "${RED}❌ Configuration file not found: $CONFIG_FILE${NC}"
+    exit 1
+fi
+
+# Extract port values from JSON using jq
+if ! command -v jq &> /dev/null; then
+    echo -e "${RED}❌ jq is required but not installed${NC}"
+    exit 1
+fi
+
+PROXY_PORT=$(jq -r ".proxy" "$CONFIG_FILE")
+CATALOG_PORT=$(jq -r ".catalog" "$CONFIG_FILE")
+WEB_PORT=$(jq -r ".web" "$CONFIG_FILE")
 
 echo -e "${BLUE}🛑 AtmosInsight Teardown Script${NC}"
 echo "====================================="
+echo ""
+echo -e "${BLUE}📋 Configuration:${NC}"
+echo "  Proxy Server Port: $PROXY_PORT"
+echo "  Catalog API Port: $CATALOG_PORT"
+echo "  Web App Port: $WEB_PORT"
 echo ""
 
 # Function to check if port is in use
