@@ -11,6 +11,8 @@ export const OWM_ALLOW = new Set([
     'rain',
     'snow',
 ]);
+export const AIRNOW_BASE = 'https://www.airnowapi.org';
+export const OPENAQ_BASE = 'https://api.openaq.org/v2';
 export function buildGibsTileUrl({ epsg, layer, time, tms, z, y, x, ext, }) {
     const timePart = time ? `${time}/` : '';
     return `${GIBS_BASE}/epsg${epsg}/best/${layer}/default/${timePart}${tms}/${z}/${y}/${x}.${ext}`;
