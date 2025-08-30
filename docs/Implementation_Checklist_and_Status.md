@@ -156,3 +156,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
   - Files: `packages/providers/*`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
+- [x] 2025-08-30 — FMI Open Data provider module
+  - Summary: Added `fmi-open-data` provider with stored query builder, tile fetcher, tests, and manifest entry.
+  - Files: `packages/providers/fmi.ts`, `packages/providers/fmi.js`, `packages/providers/fmi.d.ts`, `packages/providers/index.ts`, `packages/providers/index.js`, `packages/providers/index.d.ts`, `packages/providers/test/fmi.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers test`
