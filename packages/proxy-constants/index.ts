@@ -11,3 +11,44 @@ export const OWM_ALLOW = new Set([
   'rain',
   'snow',
 ]);
+
+export interface GibsTileParams {
+  epsg: string;
+  layer: string;
+  tms: string;
+  z: string;
+  y: string;
+  x: string;
+  ext: string;
+  time?: string;
+}
+
+export function buildGibsTileUrl({
+  epsg,
+  layer,
+  time,
+  tms,
+  z,
+  y,
+  x,
+  ext,
+}: GibsTileParams): string {
+  const timePart = time ? `${time}/` : '';
+  return `${GIBS_BASE}/epsg${epsg}/best/${layer}/default/${timePart}${tms}/${z}/${y}/${x}.${ext}`;
+}
+
+export interface GibsDomainsParams {
+  epsg: string;
+  layer: string;
+  tms: string;
+  range: string;
+}
+
+export function buildGibsDomainsUrl({
+  epsg,
+  layer,
+  tms,
+  range,
+}: GibsDomainsParams): string {
+  return `${GIBS_BASE}/epsg${epsg}/best/1.0.0/${layer}/default/${tms}/all/${range}.xml`;
+}

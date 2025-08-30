@@ -1,9 +1,10 @@
 import {
   NWS_API_BASE,
   DEFAULT_NWS_USER_AGENT,
-  GIBS_BASE,
   OWM_BASE,
   OWM_ALLOW,
+  buildGibsTileUrl,
+  buildGibsDomainsUrl,
 } from '@atmos/proxy-constants';
 import { fetchWithRetry } from '@atmos/fetch-client';
 
@@ -28,24 +29,6 @@ interface LambdaResponse {
   headers: Record<string, string>;
   body: string;
   isBase64Encoded?: boolean;
-}
-
-interface GibsTileParams {
-  epsg: string;
-  layer: string;
-  time?: string;
-  tms: string;
-  z: string;
-  y: string;
-  x: string;
-  ext: string;
-}
-
-interface GibsDomainsParams {
-  epsg: string;
-  layer: string;
-  tms: string;
-  range: string;
 }
 
 interface OwmTileParams {
@@ -105,32 +88,6 @@ function bin(
     headers: { 'Content-Type': contentType, ...headers },
     body: Buffer.from(bodyBuf).toString('base64'),
   };
-}
-
-// -----------------
-// GIBS helpers
-// -----------------
-function buildGibsTileUrl({
-  epsg,
-  layer,
-  time,
-  tms,
-  z,
-  y,
-  x,
-  ext,
-}: GibsTileParams): string {
-  const timePart = time ? `${time}/` : '';
-  return `${GIBS_BASE}/epsg${epsg}/best/${layer}/default/${timePart}${tms}/${z}/${y}/${x}.${ext}`;
-}
-
-function buildGibsDomainsUrl({
-  epsg,
-  layer,
-  tms,
-  range,
-}: GibsDomainsParams): string {
-  return `${GIBS_BASE}/epsg${epsg}/best/1.0.0/${layer}/default/${tms}/all/${range}.xml`;
 }
 
 // -----------------

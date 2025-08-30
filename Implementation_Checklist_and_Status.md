@@ -116,8 +116,9 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Files: `proxy-server/tsconfig.json`, `Findings.md`, `Followups.md`
   - Verification: `pnpm lint`, `pnpm test`, `cd proxy-server && pnpm test`
 
-- [ ] 2025-08-29 — Tokenize alert colors and button hovers
-  - Summary: Mapped hard-coded hex values in the web UI to design tokens and added semantic alert color tokens.
-  - Files: `packages/tokens/src/semantic.json`, `apps/web/src/app/page.tsx`, `apps/web/src/app/page.module.css`
-  - Verification: `pnpm tokens`, `pnpm lint`, `pnpm --filter web build`, `pnpm test` (fails in `tiling-services/catalog-api` with `ERR_UNKNOWN_FILE_EXTENSION`)
+- [x] 2025-08-30 — Share GIBS URL builders
+  - Summary: Moved `buildGibsTileUrl` and `buildGibsDomainsUrl` into `@atmos/proxy-constants` and refactored proxy services to import the shared helpers.
+  - Files: `packages/proxy-constants/*`, `proxy-server/src/app.ts`, `proxy-server/test/gibs.test.ts`, `tiling-services/proxy-api/index.ts`, `pnpm-lock.yaml`
+  - Verification: `pnpm build`, `pnpm test` — marked production ready.
+
 

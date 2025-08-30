@@ -5,9 +5,13 @@
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "vitest run"
   },
   "devDependencies": {
-    "typescript": "^5.8.3"
+    "@types/node": "^20",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+
   }
 }
