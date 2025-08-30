@@ -190,5 +190,29 @@
     "category": "satellite",
     "accessRoute": "REST",
     "baseUrl": "https://cmr.earthdata.nasa.gov/stac"
+  },
+  {
+    "slug": "dwd-opendata",
+    "category": "weather",
+    "accessRoute": "OGC WMS/WFS",
+    "baseUrl": "https://opendata.dwd.de"
+  },
+  {
+    "slug": "fmi-opendata",
+    "category": "weather",
+    "accessRoute": "OGC WFS/WMS",
+    "baseUrl": "https://opendata.fmi.fi"
+  },
+  {
+    "slug": "msc-geomet",
+    "category": "weather",
+    "accessRoute": "OGC WMS/WFS/WMTS",
+    "baseUrl": "https://geo.weather.gc.ca/geomet"
+  },
+  {
+    "slug": "smhi-opendata",
+    "category": "weather",
+    "accessRoute": "REST",
+    "baseUrl": "https://opendata-download-metfcst.smhi.se"
   }
 ]

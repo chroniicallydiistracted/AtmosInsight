@@ -30,3 +30,6 @@ export * as wfigs from './wfigs.js';
 export * as planetaryComputer from './planetary-computer.js';
 export * as earthsearch from './earth-search.js';
 export * as cmrstac from './cmr-stac.js';
+export * as dwd from './dwd.js';
+export * as fmi from './fmi.js';
+export * as msc from './msc.js';
