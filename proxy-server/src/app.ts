@@ -7,6 +7,8 @@ import {
   DEFAULT_NWS_USER_AGENT,
   buildGibsTileUrl,
   buildGibsDomainsUrl,
+  AIRNOW_BASE,
+  OPENAQ_BASE,
 } from '@atmos/proxy-constants';
 import {
   PORTS,
@@ -183,6 +185,99 @@ app.use('/api/nws/alerts', shortLived60, async (req, res) => {
       'Proxy error',
       { originalError: err instanceof Error ? err.message : String(err) }
     ));
+  }
+});
+
+// AirNow air quality proxy
+app.use('/api/air/airnow', ensureAirNowEnabled, shortLived60, async (req, res) => {
+  const apiKey = process.env.AIRNOW_API_KEY;
+  if (!apiKey) {
+    res
+      .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
+      .json(
+        createErrorResponse(
+          HTTP_STATUS.INTERNAL_SERVER_ERROR,
+          'AirNow API key not configured'
+        )
+      );
+    return;
+  }
+  const targetUrl = new URL(
+    AIRNOW_BASE + req.originalUrl.replace('/api/air/airnow', '')
+  );
+  if (!targetUrl.searchParams.get('API_KEY')) {
+    targetUrl.searchParams.set('API_KEY', apiKey);
+  }
+  if (!targetUrl.searchParams.get('format')) {
+    targetUrl.searchParams.set('format', 'application/json');
+  }
+  try {
+    const upstream = await fetchWithRetry(targetUrl.toString(), {
+      headers: { Accept: 'application/json' },
+    });
+    const body = await upstream.text();
+    res.status(upstream.status);
+    upstream.headers.forEach((value: string, key: string) => {
+      const k = key.toLowerCase();
+      if (
+        k === 'content-encoding' ||
+        k === 'content-length' ||
+        k === 'transfer-encoding' ||
+        k === 'cache-control'
+      ) {
+        return;
+      }
+      res.setHeader(key, value);
+    });
+    res.send(body);
+  } catch (err) {
+    console.error('AirNow proxy error:', err);
+    res
+      .status(HTTP_STATUS.BAD_GATEWAY)
+      .json(
+        createErrorResponse(
+          HTTP_STATUS.BAD_GATEWAY,
+          'Proxy error',
+          { originalError: err instanceof Error ? err.message : String(err) }
+        )
+      );
+  }
+});
+
+// OpenAQ air quality proxy
+app.use('/api/air/openaq', ensureOpenAqEnabled, shortLived60, async (req, res) => {
+  const targetUrl =
+    OPENAQ_BASE + req.originalUrl.replace('/api/air/openaq', '');
+  try {
+    const upstream = await fetchWithRetry(targetUrl, {
+      headers: { Accept: 'application/json' },
+    });
+    const body = await upstream.text();
+    res.status(upstream.status);
+    upstream.headers.forEach((value: string, key: string) => {
+      const k = key.toLowerCase();
+      if (
+        k === 'content-encoding' ||
+        k === 'content-length' ||
+        k === 'transfer-encoding' ||
+        k === 'cache-control'
+      ) {
+        return;
+      }
+      res.setHeader(key, value);
+    });
+    res.send(body);
+  } catch (err) {
+    console.error('OpenAQ proxy error:', err);
+    res
+      .status(HTTP_STATUS.BAD_GATEWAY)
+      .json(
+        createErrorResponse(
+          HTTP_STATUS.BAD_GATEWAY,
+          'Proxy error',
+          { originalError: err instanceof Error ? err.message : String(err) }
+        )
+      );
   }
 });
 
@@ -576,6 +671,46 @@ function ensureGibsEnabled(
   next();
 }
 
+function ensureAirNowEnabled(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {
+  if (
+    process.env.AIRNOW_ENABLED &&
+    process.env.AIRNOW_ENABLED.toLowerCase() === 'false'
+  ) {
+    res.status(HTTP_STATUS.SERVICE_UNAVAILABLE).json(
+      createErrorResponse(
+        HTTP_STATUS.SERVICE_UNAVAILABLE,
+        'AirNow disabled'
+      )
+    );
+    return;
+  }
+  next();
+}
+
+function ensureOpenAqEnabled(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {
+  if (
+    process.env.OPENAQ_ENABLED &&
+    process.env.OPENAQ_ENABLED.toLowerCase() === 'false'
+  ) {
+    res.status(HTTP_STATUS.SERVICE_UNAVAILABLE).json(
+      createErrorResponse(
+        HTTP_STATUS.SERVICE_UNAVAILABLE,
+        'OpenAQ disabled'
+      )
+    );
+    return;
+  }
+  next();
+}
+
 // GIBS endpoints
 app.get(
   '/api/gibs/tile/:epsg/:layer/:time/:tms/:z/:y/:x.:ext',
@@ -603,7 +738,7 @@ app.get('/api/gibs/redirect', ensureGibsEnabled, shortLived60, redirectGibs);
 app.get('/api/tracestrack/:style/:z/:x/:y.webp', shortLived60, async (req, res) => {
   try {
     const { style, z, x, y } = req.params as Record<string, string>;
-    const apiKey = process.env.TTRACK_API_KEY;
+    const apiKey = process.env.TRACESTRACK_API_KEY;
     if (!apiKey) {
       res
         .status(HTTP_STATUS.SERVICE_UNAVAILABLE)
@@ -611,15 +746,18 @@ app.get('/api/tracestrack/:style/:z/:x/:y.webp', shortLived60, async (req, res) 
           createErrorResponse(
             HTTP_STATUS.SERVICE_UNAVAILABLE,
 
-            'TTRACK_API_KEY not configured'
+
+            'API key not configured'
             
           )
         );
       return;
     }
 
-    const targetUrl = `https://tile.tracestrack.com/${style}/${z}/${x}/${y}.webp?key=${apiKey}`;
-
+    const styleParam =
+      typeof req.query.style === 'string' ? req.query.style : 'outrun';
+    const targetUrl =
+      `https://tile.tracestrack.com/${style}/${z}/${x}/${y}.webp?key=${apiKey}&style=${styleParam}`;
 
     console.log(`Fetching Tracestrack tile from: ${targetUrl}`);
 

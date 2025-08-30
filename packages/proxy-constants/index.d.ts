@@ -3,6 +3,8 @@ export declare const DEFAULT_NWS_USER_AGENT = "(AtmosInsight, contact@atmosinsig
 export declare const GIBS_BASE = "https://gibs.earthdata.nasa.gov/wmts";
 export declare const OWM_BASE = "https://tile.openweathermap.org/map";
 export declare const OWM_ALLOW: Set<string>;
+export declare const AIRNOW_BASE = "https://www.airnowapi.org";
+export declare const OPENAQ_BASE = "https://api.openaq.org/v2";
 export interface GibsTileParams {
     epsg: string;
     layer: string;
