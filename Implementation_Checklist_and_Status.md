@@ -152,3 +152,7 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Files: `packages/proxy-constants/*`, `proxy-server/src/app.ts`, `proxy-server/test/air.test.ts`, `proxy-server/.env.example`, `proxy-server/package.json`, `pnpm-lock.yaml`, `README.md`, `docs/features/open-weather-services.md`
   - Verification: `pnpm lint`, `pnpm test`, `pnpm --filter proxy-server test`
 
+- [ ] 2025-08-30 — Initial provider modules for open weather APIs
+  - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
+  - Files: `packages/providers/*`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
