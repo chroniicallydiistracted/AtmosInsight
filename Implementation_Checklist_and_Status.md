@@ -132,6 +132,11 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Files: `apps/web/package.json`, `tiling-services/catalog-api/index.ts`, `status-atmosinsight.sh`, `start-atmosinsight.sh`, `stop-atmosinsight.sh`
   - Verification: `pnpm status`, `pnpm stop` pass; `pnpm start` launches proxy and catalog but fails to confirm web app; `pnpm test` fails (proxy-server test).
 
+- [x] 2025-08-30 — Tracestrack default style parameter
+  - Summary: Ensured Tracestrack proxy appends a `style` query parameter (default `outrun`) so upstream requests match expected format.
+  - Files: `proxy-server/src/app.ts`
+  - Verification: `pnpm lint`, `pnpm test` — marked production ready.
+
 - [x] 2025-08-30 — Open weather services catalog
   - Summary: Documented freely accessible weather and space-data feeds with proxy examples and reference sites.
   - Files: `docs/features/open-weather-services.md`
@@ -146,3 +151,4 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added `/api/air/airnow` and `/api/air/openaq` routes with feature flags and AirNow API key support.
   - Files: `packages/proxy-constants/*`, `proxy-server/src/app.ts`, `proxy-server/test/air.test.ts`, `proxy-server/.env.example`, `proxy-server/package.json`, `pnpm-lock.yaml`, `README.md`, `docs/features/open-weather-services.md`
   - Verification: `pnpm lint`, `pnpm test`, `pnpm --filter proxy-server test`
+

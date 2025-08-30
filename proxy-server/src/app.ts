@@ -745,13 +745,19 @@ app.get('/api/tracestrack/:style/:z/:x/:y.webp', shortLived60, async (req, res) 
         .json(
           createErrorResponse(
             HTTP_STATUS.SERVICE_UNAVAILABLE,
-            'Tracestrack API key not configured'
+
+
+            'API key not configured'
+            
           )
         );
       return;
     }
 
-    const targetUrl = `https://tile.tracestrack.com/${style}/${z}/${x}/${y}.webp?key=${apiKey}`;
+    const styleParam =
+      typeof req.query.style === 'string' ? req.query.style : 'outrun';
+    const targetUrl =
+      `https://tile.tracestrack.com/${style}/${z}/${x}/${y}.webp?key=${apiKey}&style=${styleParam}`;
 
     console.log(`Fetching Tracestrack tile from: ${targetUrl}`);
 
