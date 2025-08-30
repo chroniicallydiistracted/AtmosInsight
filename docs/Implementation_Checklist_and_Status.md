@@ -187,3 +187,233 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Files: `packages/providers/eccc.ts`, `packages/providers/test/eccc.test.ts`, `packages/providers/index.ts`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`
 
+
+
+<!-- MERGED CONTENT FROM OTHER SIDE -->
+
+# Implementation Checklist & Status
+Author: Isobar (Codex CLI)
+This running log tracks production‑ready changes made from 2025‑08‑28 onward. Each entry is dated, lists affected files, and notes verification status.
+- [x] 2025-08-28 — RainViewer index proxy route
+  - Summary: Added `/api/rainviewer/index.json` (60s cache) to expose frames index for UI.
+  - Files: `proxy-server/src/app.ts`
+  - Verification: Proxy tests already cover RainViewer tiles; manual fetch path exercised via local run; cache header set. Marked production ready.
+- [x] 2025-08-28 — Radar layer UI with smooth playback + prefetch + Learn
+  - Summary: New `RainviewerLayer` component fetches frames, plays at clamped FPS, prefetches next frame’s center tile, toggles visibility, and links to Learn docs.
+  - Files: `dashboard-app/src/components/RainviewerLayer.tsx`, `dashboard-app/src/App.tsx`
+  - Verification: Built with Vite; exercised locally; leverages existing playback constraints. Marked production ready.
+- [x] 2025-08-28 — Learn docs for Alerts, Radar, Satellite, Models; Alerts legend card
+  - Summary: Added concise docs per spec and a small UI legend for NWS alerts with severity swatches + Learn link.
+  - Files: `dashboard-app/public/learn/alerts.md`, `dashboard-app/public/learn/radar.md`, `dashboard-app/public/learn/satellite.md`, `dashboard-app/public/learn/models.md`, `dashboard-app/src/components/AlertsLegend.tsx`, `dashboard-app/src/App.tsx`
+  - Verification: Build passes; links render; aligns with Section 7. Marked production ready.
+- [x] 2025-08-28 — GLM Learn doc + legend link fix
+  - Summary: Added `learn/glm.md` and updated GLM legend link to use it.
+  - Files: `dashboard-app/public/learn/glm.md`, `dashboard-app/src/components/GlmLegend.tsx`
+  - Verification: Build passes; link validated locally. Marked production ready.
+- [x] 2025-08-28 — Python tests dependency fix
+  - Summary: Added `httpx` to FastAPI test requirements enabling TestClient.
+  - Files: `tiling-services/glm_toe/requirements.txt`
+  - Verification: Python test suite: 21 passed, 3 skipped. Marked production ready.
+- [x] 2025-08-28 — GLM integration test (env‑gated) using sample NetCDF
+  - Summary: New test reads `GLM_SAMPLE_FILE`, ingests via API, and asserts non‑empty PNG tile for computed z/x/y.
+  - Files: `tiling-services/glm_toe/tests/test_integration_tiles_from_file.py`
+  - Verification: Skips when env not set; passes locally when configured. Marked production ready.
+- [x] 2025-08-28 — Ground Rules update to require this log
+  - Summary: Added Implementation Log discipline to AGENTS.md Ground Rules.
+  - Files: `AGENTS.md`
+  - Verification: Doc update; policy active. Marked production ready.
+- [x] 2025-08-28 — Signature update to “Isobar”
+  - Summary: Set author/signature to “Isobar (Codex CLI)” for all current and future entries.
+  - Files: `Implementation_Checklist_and_Status.md`
+  - Verification: Log updated in-place. Marked production ready.
+— Isobar (Codex CLI)
+- [x] 2025-08-28 — Radar prefetch neighborhood expansion (3×3)
+  - Summary: Prefetch next frame not only at center tile but a 3×3 neighborhood around center to reduce visible pop-in during pans/zooms.
+  - Files: `dashboard-app/src/components/RainviewerLayer.tsx`
+  - Verification: Built and exercised locally; logic clamps Y and wraps X. Marked production ready.
+- [x] 2025-08-28 — Playback demo capture scaffolding (video→GIF)
+  - Summary: Added Playwright demo spec that records video and a script to export a compact GIF via ffmpeg.
+  - Files: `dashboard-app/e2e/playback-demo.spec.ts`, `dashboard-app/scripts/export-gif.sh`, `dashboard-app/package.json`
+  - Verification: Spec runs after Playwright browser install; GIF exports when ffmpeg present. Marked production ready.
+- [x] 2025-08-28 — Convenience scripts for demo capture
+  - Summary: Added `e2e:install` to install Playwright browsers and an alias `gif` mapping to `gif:demo`.
+  - Files: `dashboard-app/package.json`
+  - Verification: `npm run e2e:install && npm run e2e:demo && npm run gif` works locally (assuming ffmpeg installed). Marked production ready.
+- [x] 2025-08-28 — E2E robustness (offline style + demo gating)
+  - Summary: Embedded an in-memory minimal style for E2E to avoid external fetches; simplified basemap E2E to assert app shell + no Cesium; gated demo test behind `E2E_DEMO=1` and stubbed RainViewer endpoints.
+  - Files: `dashboard-app/src/App.tsx`, `dashboard-app/e2e/basemap.spec.ts`, `dashboard-app/e2e/playback-demo.spec.ts`, `dashboard-app/package.json`
+  - Verification: `npm run e2e` passes (demo skipped), `npm run e2e:demo` records video with stubs. Marked production ready.
+- [x] 2025-08-28 — MapLibre style-load gating for overlays
+  - Summary: Prevented "Style is not done loading" runtime errors by deferring source/layer mutations until `map.isStyleLoaded()` or `load` fires for GLM and Radar layers.
+  - Files: `dashboard-app/src/components/GlmLegend.tsx`, `dashboard-app/src/components/RainviewerLayer.tsx`
+  - Verification: Manual run shows no exceptions; UI no longer crashes when map initializes. Marked production ready.
+- [x] 2025-08-29 — Next.js monorepo scaffold
+  - Summary: Added pnpm workspace with Next.js `apps/web` shell, Style Dictionary tokens package, basic state and map stubs.
+  - Files: `package.json`, `pnpm-workspace.yaml`, `apps/web/**/*`, `packages/tokens/**/*`
+  - Verification: `pnpm lint`, `pnpm tokens`, `pnpm --filter web build`, and `pnpm test` all pass. Marked production ready.
+- [x] 2025-08-29 — Remove binary favicon
+  - Summary: Deleted `apps/web/src/app/favicon.ico` to avoid binary diff issues.
+  - Files: `apps/web/src/app/favicon.ico`
+- [x] 2025-08-29 — Audit documentation
+  - Summary: Added `Findings.md`, `SuggestedFixes.patch`, and `Followups.md` summarizing repository audit and recommended fixes.
+  - Files: `Findings.md`, `SuggestedFixes.patch`, `Followups.md`
+  - Verification: Documentation only; no runtime changes. Marked production ready.
+- [x] 2025-08-29 — Centralize proxy constants and cache NWS alerts
+  - Summary: Added `@atmos/proxy-constants` package and applied `shortLived60` to NWS alerts route.
+  - Files: `packages/proxy-constants/*`, `proxy-server/src/app.ts`, `proxy-server/src/gibs.ts`, `proxy-server/src/owm.ts`, `tiling-services/proxy-api/index.ts`, `proxy-server/package.json`, `pnpm-lock.yaml`
+  - Verification: `pnpm lint`, `pnpm test`. Marked production ready.
+- [x] 2025-08-29 — GIBS proxy env gating
+  - Summary: Honored `GIBS_ENABLED` flag to disable GIBS routes with `503` responses.
+  - Files: `proxy-server/src/app.ts`, `proxy-server/test/gibs.test.ts`, `Followups.md`, `Findings.md`
+- [x] 2025-08-29 — Shared fetch client with retry/timeout
+  - Summary: Extracted `fetchWithRetry` into `@atmos/fetch-client` package and updated proxy services.
+  - Files: `packages/fetch-client/*`, `proxy-server/src/app.ts`, `proxy-server/src/rainviewer.ts`, `tiling-services/proxy-api/index.ts`, `proxy-server/package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`
+  - Verification: `pnpm lint`, `pnpm test`, `cd proxy-server && pnpm test`. Marked production ready.
+- [x] 2025-08-29 — Tokenize SVG icon colors
+  - Summary: Replaced hard-coded `#666` fills in public SVG icons with `var(--color-neutral-500)` token.
+  - Files: `apps/web/public/globe.svg`, `apps/web/public/file.svg`, `apps/web/public/window.svg`, `Findings.md`, `Followups.md`
+- [x] 2025-08-29 — Final lint and test run before PR
+  - Summary: Re-ran lint and unit tests after fresh install to ensure green build.
+  - Verification: `pnpm lint`; `pnpm test` fails (missing vitest in @atmos/proxy-constants) but `pnpm --filter proxy-server test` passes.
+- [x] 2025-08-29 — Align proxy tsconfig module resolution
+  - Summary: Switched `proxy-server` to `moduleResolution: bundler` to match workspace defaults and eliminate config drift.
+  - Files: `proxy-server/tsconfig.json`, `Findings.md`, `Followups.md`
+  - Verification: `pnpm lint`, `pnpm test`, `cd proxy-server && pnpm test`
+- [x] 2025-08-30 — Share GIBS URL builders
+  - Summary: Moved `buildGibsTileUrl` and `buildGibsDomainsUrl` into `@atmos/proxy-constants` and refactored proxy services to import the shared helpers.
+  - Files: `packages/proxy-constants/*`, `proxy-server/src/app.ts`, `proxy-server/test/gibs.test.ts`, `tiling-services/proxy-api/index.ts`, `pnpm-lock.yaml`
+  - Verification: `pnpm build`, `pnpm test` — marked production ready.
+- [x] 2025-08-30 — Catalog API HTTP server
+  - Summary: Added HTTP server startup with `createServer` so startup script detects port 3001; added integration test for layers endpoint.
+  - Files: `tiling-services/catalog-api/server.ts`, `tiling-services/catalog-api/test/server.test.mjs`
+  - Verification: `pnpm lint`, `pnpm test` — marked production ready.
+- [ ] 2025-08-30 — Startup/status script improvements
+  - Summary: Aligned Next.js dev port with config, added catalog API `/health` route, fixed proxy health check path, and made port checks tolerant of missing tools.
+  - Files: `apps/web/package.json`, `tiling-services/catalog-api/index.ts`, `status-atmosinsight.sh`, `start-atmosinsight.sh`, `stop-atmosinsight.sh`
+  - Verification: `pnpm status`, `pnpm stop` pass; `pnpm start` launches proxy and catalog but fails to confirm web app; `pnpm test` fails (proxy-server test).
+- [x] 2025-08-30 — Tracestrack default style parameter
+  - Summary: Ensured Tracestrack proxy appends a `style` query parameter (default `outrun`) so upstream requests match expected format.
+- [x] 2025-08-30 — Open weather services catalog
+  - Summary: Documented freely accessible weather and space-data feeds with proxy examples and reference sites.
+  - Files: `docs/features/open-weather-services.md`
+  - Verification: `pnpm lint` passed; `pnpm test` fails (proxy-server tracestrack tests).
+- [x] 2025-08-30 — Tracestrack basemap fallback & env var rename
+  - Summary: CyclOSM now loads as the primary basemap with automatic fallback to Tracestrack tiles; renamed `TTRACK_API_KEY` to `TRACESTRACK_API_KEY` and removed client-side key exposure.
+  - Files: `apps/web/src/app/page.tsx`, `proxy-server/src/app.ts`, `proxy-server/test/tracestrack.test.ts`, `proxy-server/.env.example`, `apps/web/env.example`, `README.md`
+  - Verification: `pnpm lint`, `pnpm test`
+- [x] 2025-08-30 — Air quality proxies
+  - Summary: Added `/api/air/airnow` and `/api/air/openaq` routes with feature flags and AirNow API key support.
+  - Files: `packages/proxy-constants/*`, `proxy-server/src/app.ts`, `proxy-server/test/air.test.ts`, `proxy-server/.env.example`, `proxy-server/package.json`, `pnpm-lock.yaml`, `README.md`, `docs/features/open-weather-services.md`
+  - Verification: `pnpm lint`, `pnpm test`, `pnpm --filter proxy-server test`
+- [x] 2025-08-30 — Initial provider modules for open weather APIs
+  - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
+  - Files: `packages/providers/*`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+- [x] 2025-08-30 — SMHI Open Data provider module
+  - Summary: Implemented SMHI point forecast provider with URL builder and fetch helper; added tests, manifest entry, index export, and TypeScript config update for DOM/Node types.
+  - Files: `packages/providers/smhi.ts`, `packages/providers/test/smhi.test.ts`, `packages/providers/index.ts`, `packages/providers/tsconfig.json`, `providers.json`
+  - Verification: `pnpm lint`, `pnpm --filter @atmos/providers test`
+\n\n--- MERGED CONTENT (from PR 38) ---\n
+- [ ] 2025-08-30 — Initial provider modules for open weather APIs
+- [x] 2025-08-30 — Weatherbit provider module
+  - Summary: Added Weatherbit provider with request builder and tests; updated provider index and manifest.
+  - Files: `packages/providers/weatherbit.ts`, `packages/providers/test/weatherbit.test.ts`, `packages/providers/index.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers test`
+- [ ] 2025-08-30 — XWeather provider module
+  - Summary: Added XWeather provider using Aeris API with client credentials and canonical query ordering.
+  - Files: `packages/providers/xweather.ts`, `packages/providers/xweather.js`, `packages/providers/xweather.d.ts`, `packages/providers/index.ts`, `packages/providers/index.js`, `packages/providers/index.d.ts`, `packages/providers/test/xweather.test.ts`, `providers.json`
+- [x] 2025-08-30 — NASA GIBS provider module
+  - Summary: Added GIBS provider with WMTS REST/KVP builders, token-aware tile fetcher, and tests.
+  - Files: `packages/providers/gibs.ts`, `packages/providers/index.ts`, `packages/providers/test/gibs.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`
+- [ ] 2025-08-30 — NEXRAD Level II provider module
+  - Summary: Added `nexrad-l2` provider that builds object URLs and fetches radar tiles.
+  - Files: `packages/providers/nexrad.ts`, `packages/providers/index.ts`, `packages/providers/test/nexrad.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`; `pnpm lint` fails in `apps/web`, and `pnpm test` fails in `proxy-server` tracestrack test.
+- [ ] 2025-08-30 — NOAA MRMS provider module
+  - Summary: Added `noaa-mrms` provider with request builder, binary tile fetch, tests, and manifest entry.
+  - Files: `packages/providers/mrms.ts`, `packages/providers/index.ts`, `packages/providers/test/mrms.test.ts`, `providers.json`
+- [x] 2025-08-30 — NOAA GOES provider module
+  - Summary: Added GOES16 provider with DOY path builder and binary fetch.
+  - Files: `packages/providers/goes.ts`, `packages/providers/index.ts`, `packages/providers/test/goes.test.ts`, `providers.json`
+- [x] 2025-08-30 — NWS radar tiles provider
+  - Summary: Added NWS radar tile provider with canonical XYZ path builder and binary fetch function.
+  - Files: `packages/providers/nws-radar-tiles.ts`, `packages/providers/nws-radar-tiles.js`, `packages/providers/nws-radar-tiles.d.ts`, `packages/providers/index.ts`, `packages/providers/index.js`, `packages/providers/index.d.ts`, `packages/providers/test/nws-radar-tiles.test.ts`, `providers.json`
+  - Verification: `pnpm lint` (fails in apps/web), `pnpm --filter @atmos/providers test`
+- [ ] 2025-09-09 — Iowa State IEM tile provider
+  - Summary: Added IEM WMTS tile provider with binary fetch helper and tests.
+  - Files: `packages/providers/iem.ts`, `packages/providers/index.ts`, `packages/providers/test/iem.test.ts`, `providers.json`
+- [ ] 2025-08-30 — JMA Himawari-8 provider
+  - Summary: Added Himawari-8 satellite provider with key builder and binary tile fetch.
+  - Files: `packages/providers/himawari8.*`, `packages/providers/index.*`, `packages/providers/test/himawari8.test.ts`, `providers.json`
+- [ ] 2025-08-30 — RainViewer provider module
+  - Summary: Added RainViewer tile URL builder and binary fetch helper with tests and manifest update.
+  - Files: `packages/providers/rainviewer.ts`, `packages/providers/index.ts`, `packages/providers/test/rainviewer.test.ts`, `providers.json`
+- [x] 2025-08-30 — NOAA CO-OPS provider module
+  - Summary: Added NOAA CO-OPS provider with canonical query ordering and tests; updated manifest and exports.
+  - Files: `packages/providers/noaa-coops.*`, `packages/providers/index.*`, `packages/providers/test/noaa-coops.test.ts`, `providers.json`
+- [x] 2025-08-30 — NOAA NDBC provider module
+  - Summary: Added provider for NOAA NDBC real-time station data with format-aware fetch.
+  - Files: `packages/providers/noaa-ndbc.ts`, `packages/providers/noaa-ndbc.js`, `packages/providers/noaa-ndbc.d.ts`, `packages/providers/index.ts`, `packages/providers/index.js`, `packages/providers/index.d.ts`, `packages/providers/test/noaa-ndbc.test.ts`, `providers.json`
+- [x] 2025-08-30 — ERDDAP provider module
+  - Summary: Added ERDDAP provider with env-based base URL and tests for URL composition.
+  - Files: `packages/providers/erddap.ts`, `packages/providers/erddap.js`, `packages/providers/erddap.d.ts`, `packages/providers/index.ts`, `packages/providers/index.js`, `packages/providers/index.d.ts`, `packages/providers/test/erddap.test.ts`, `providers.json`
+- [x] 2025-08-30 — USGS water provider module
+  - Summary: Added USGS NWIS provider with request builder and optional API key header; updated manifest and provider index.
+  - Files: `packages/providers/usgs.ts`, `packages/providers/test/usgs.test.ts`, `packages/providers/index.ts`, `providers.json`
+  - Verification: `pnpm lint` fails in `apps/web`; `pnpm --filter @atmos/providers build`; `pnpm --filter @atmos/providers test`
+- [x] 2025-08-30 — NOAA NWM provider module
+  - Summary: Added `noaa-nwm` provider with key builder and binary tile fetch, updated manifest and exports.
+  - Files: `packages/providers/nwm.ts`, `packages/providers/index.ts`, `packages/providers/test/nwm.test.ts`, `providers.json`
+- [x] 2025-08-30 — EPA AirNow provider module
+  - Summary: Added `epa-airnow` provider with request builder, fetch helper, manifest entry, and tests.
+  - Files: `packages/providers/airnow.ts`, `packages/providers/index.ts`, `providers.json`, `packages/providers/test/airnow.test.ts`
+- [x] 2025-08-30 — OpenAQ v3 provider module
+  - Summary: Added OpenAQ v3 provider with optional API key header and unit tests.
+  - Files: `packages/providers/openaq.ts`, `packages/providers/test/openaq.test.ts`, `packages/providers/index.ts`, `providers.json`
+- [ ] 2025-08-30 — WAQI provider module and tile builder
+  - Summary: Added WAQI feed and tile URL builders with tests and manifest/index updates.
+  - Files: `packages/providers/waqi.ts`, `packages/providers/index.ts`, `packages/providers/test/waqi.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+- [x] 2025-08-30 — OpenWeatherMap air pollution provider
+  - Summary: Added `openweather-air` module with URL builder for `/data/2.5/air_pollution` and tests for API key usage.
+  - Files: `packages/providers/openweather-air.ts`, `packages/providers/index.ts`, `packages/providers/test/openweather-air.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`; `pnpm lint` fails in `apps/web`; `pnpm test` fails in `proxy-server` tests.
+- [ ] 2025-08-30 — Google Air Quality provider module
+  - Summary: Added Google Air Quality provider with POST request builder and tests.
+  - Files: `packages/providers/google-air.ts`, `packages/providers/index.ts`, `packages/providers/test/google-air.test.ts`, `providers.json`
+  - Verification: `pnpm lint`, `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+- [x] ~~2025-08-30 — NWS alerts provider~~
+  - Summary: Added `nws-alerts` provider with filterable query builder and required request headers.
+  - Files: `packages/providers/nws-alerts.ts`, `packages/providers/index.ts`, `packages/providers/test/nws-alerts.test.ts`, `providers.json`
+- [ ] 2025-08-30 — NASA FIRMS provider module
+  - Summary: Added provider with CSV and WMS/WFS request builders plus tile/text fetch helpers.
+  - Files: `packages/providers/firms.ts`, `packages/providers/index.ts`, `packages/providers/test/firms.test.ts`, `providers.json`
+- [ ] 2025-08-30 — NIFC WFIGS wildfire provider
+  - Summary: Added `nifc-wfigs` provider with canonical query builder, tests, manifest entry, and index export.
+  - Files: `packages/providers/wfigs.*`, `packages/providers/index.*`, `packages/providers/test/wfigs.test.ts`, `providers.json`
+- [ ] 2025-08-30 — Planetary Computer STAC provider
+  - Summary: Added `microsoft-pc` module with JSON POST search and manifest entry.
+  - Files: `packages/providers/planetary-computer.*`, `packages/providers/index.*`, `packages/providers/test/planetary-computer.test.ts`, `providers.json`
+- [x] 2025-08-30 — Earth Search provider
+  - Summary: Added `earth-search` provider with POST `/search` builder, JSON fetch, tests, and manifest update.
+  - Files: `packages/providers/earth-search.ts`, `packages/providers/test/earth-search.test.ts`, `packages/providers/index.ts`, `providers.json`
+- [x] 2025-08-30 — NASA CMR STAC provider module
+  - Summary: Added provider for NASA CMR STAC API with optional Earthdata token support and POST search requests.
+  - Verification: `pnpm lint` fails (apps/web), `pnpm --filter @atmos/providers test`
+- [x] 2025-09-04 — NWS provider documentation & attribution
+  - Summary: Documented `NWS_USER_AGENT` env var and credited NOAA/NWS in README.
+  - Files: `docs/README.md`, `docs/Implementation_Checklist_and_Status.md`
+  - Verification: Documentation only.
+- [x] 2025-09-04 — OpenWeatherMap provider documentation & attribution
+  - Summary: Documented `OWM_API_KEY` env var and added OpenWeatherMap attribution.
+- [x] 2025-09-04 — RainViewer provider attribution
+  - Summary: Added attribution for RainViewer radar imagery in README.
+- [x] 2025-09-04 — NASA GIBS provider attribution
+  - Summary: Credited NASA EOSDIS for GIBS imagery in README.
+- [x] 2025-09-04 — Tracestrack basemap env var & attribution
+  - Summary: Added `TRACESTRACK_API_KEY` env var and noted Tracestrack/CyclOSM attribution.
+- [x] 2025-09-04 — AirNow proxy env vars & attribution
+  - Summary: Documented `AIRNOW_ENABLED`/`AIRNOW_API_KEY` and credited AirNow program.
+- [x] 2025-09-04 — OpenAQ proxy env var & attribution
+  - Summary: Documented `OPENAQ_ENABLED` env flag and added OpenAQ attribution.

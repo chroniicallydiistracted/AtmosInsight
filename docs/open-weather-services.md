@@ -17,6 +17,7 @@ This document catalogs freely accessible, non-proprietary weather and space-data
 | **METAR/ASOS** | Surface observations | Text/CSV via `https://aviationweather.gov`; parse to PMTiles | `/api/obs/metar/latest.json` |
 | **AirNow** | U.S. air quality index | Requires free API key; JSON | `/api/air/airnow/...?lat=..&lon=..` |
 | **OpenAQ** | Global air quality | Public REST, no key | `/api/air/openaq/...` |
+| **WAQI** | Global air quality index | Requires token; JSON & tiles | `/api/air/waqi/...` |
 | **NOAA SWPC** | Space weather (solar wind, Kp, auroral oval) | JSON/CSV; no key | `/api/space/kp/latest.json` |
 
 *All services should be routed through `/api/...` endpoints with caching (`shortLived60` unless otherwise required) and attribution metadata.*

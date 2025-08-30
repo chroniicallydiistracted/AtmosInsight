@@ -12,7 +12,6 @@ export function buildRequest(params) {
     }
     else {
         parts.push(`bbox=${params.bbox.join(',')}`);
-    }
     return `${baseUrl}/wfs?${parts.join('&')}`;
 }
 export async function fetchTile(url) {
@@ -20,6 +19,9 @@ export async function fetchTile(url) {
     const type = res.headers.get('content-type') ?? '';
     if (type.includes('json')) {
         return res.json();
-    }
     return res.arrayBuffer();
-}
+export const slug = 'fmi-opendata';
+export function buildRequest({ path }) {
+    return `${baseUrl}/${path}`;
+export async function fetchJson(url) {
+    return res.json();

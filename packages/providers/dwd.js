@@ -9,11 +9,11 @@ export function buildKvp(params) {
 }
 export function buildWmsParams(params) {
     return buildKvp(params);
-}
 export function buildWfsParams(params) {
-    return buildKvp(params);
-}
 export async function fetchTile(url) {
     const res = await fetch(url);
     return res.arrayBuffer();
-}
+export function buildRequest({ path }) {
+    return `${baseUrl}/${path}`;
+export async function fetchJson(url) {
+    return res.json();

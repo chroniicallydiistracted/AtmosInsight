@@ -6,31 +6,15 @@
     "accessRoute": "REST",
     "baseUrl": "https://api.weather.gov"
   },
-  {
     "slug": "met-norway",
-    "category": "weather",
-    "accessRoute": "REST",
     "baseUrl": "https://api.met.no/weatherapi"
-  },
-  {
     "slug": "open-meteo",
-    "category": "weather",
-    "accessRoute": "REST",
     "baseUrl": "https://api.open-meteo.com"
-  },
-  {
     "slug": "openweather-onecall",
-    "category": "weather",
-    "accessRoute": "REST",
     "baseUrl": "https://api.openweathermap.org"
-  },
-  {
     "slug": "apple-weatherkit",
-    "category": "weather",
-    "accessRoute": "REST",
     "baseUrl": "https://weatherkit.apple.com/api/v1/weather"
   }
-
   {"slug": "nws-weather", "category": "weather", "accessRoute": "REST", "baseUrl": "https://api.weather.gov"},
   {"slug": "met-norway", "category": "weather", "accessRoute": "REST", "baseUrl": "https://api.met.no/weatherapi"},
   {"slug": "open-meteo", "category": "weather", "accessRoute": "REST", "baseUrl": "https://api.open-meteo.com"},
@@ -42,3 +26,84 @@
   {"slug": "dwd-opendata", "category": "weather", "accessRoute": "WMS/WFS", "baseUrl": "https://opendata.dwd.de"}
   {"slug": "eccc-geomet", "category": "weather", "accessRoute": "OGC", "baseUrl": "https://geo.weather.gc.ca/geomet"}
 ]
+    "slug": "smhi-open-data",
+    "baseUrl": "https://opendata-download-metfcst.smhi.se/api"
+    "slug": "weatherbit",
+    "baseUrl": "https://api.weatherbit.io"
+    "slug": "xweather",
+    "baseUrl": "https://api.aerisapi.com"
+    "slug": "visual-crossing",
+    "baseUrl": "https://weather.visualcrossing.com"
+    "slug": "nasa-gibs",
+    "category": "imagery",
+    "accessRoute": "WMTS",
+    "baseUrl": "https://gibs.earthdata.nasa.gov"
+    "slug": "nexrad-l2",
+    "category": "radar",
+    "accessRoute": "S3",
+    "baseUrl": "https://noaa-nexrad-level2.s3.amazonaws.com"
+    "slug": "noaa-mrms",
+    "baseUrl": "https://noaa-mrms-pds.s3.amazonaws.com"
+    "slug": "noaa-goes",
+    "category": "satellite",
+    "baseUrl": "https://noaa-goes16.s3.amazonaws.com"
+    "slug": "nws-radar-tiles",
+    "accessRoute": "XYZ",
+    "baseUrl": "https://tiles.weather.gov"
+    "slug": "iowastate-iem",
+    "baseUrl": "https://mesonet.agron.iastate.edu"
+    "slug": "jma-himawari8",
+    "baseUrl": "https://himawari8.s3.amazonaws.com"
+    "slug": "rainviewer",
+    "baseUrl": "https://api.rainviewer.com"
+    "slug": "noaa-coops",
+    "category": "ocean",
+    "baseUrl": "https://api.tidesandcurrents.noaa.gov/api/prod"
+    "slug": "noaa-ndbc",
+    "baseUrl": "https://www.ndbc.noaa.gov"
+    "slug": "erddap",
+    "baseUrl": "https://coastwatch.pfeg.noaa.gov/erddap"
+    "slug": "usgs-water",
+    "category": "water",
+    "baseUrl": "https://waterservices.usgs.gov/nwis"
+    "slug": "noaa-nwm",
+    "category": "hydrology",
+    "baseUrl": "https://noaa-nwm-pds.s3.amazonaws.com"
+    "slug": "epa-airnow",
+    "category": "air-quality",
+    "baseUrl": "https://www.airnowapi.org"
+    "slug": "openaq-v3",
+    "category": "air quality",
+    "baseUrl": "https://api.openaq.org/v3"
+    "slug": "waqi",
+    "baseUrl": "https://api.waqi.info"
+    "slug": "openweather-air",
+    "slug": "google-air-quality",
+    "baseUrl": "https://airquality.googleapis.com/v1"
+    "slug": "nws-alerts",
+    "category": "alerts",
+    "baseUrl": "https://api.weather.gov/alerts"
+    "slug": "nasa-firms",
+    "category": "fire",
+    "accessRoute": "WMS/WFS",
+    "baseUrl": "https://firms.modaps.eosdis.nasa.gov"
+    "slug": "nifc-wfigs",
+    "category": "wildfire",
+    "baseUrl": "https://services3.arcgis.com"
+    "slug": "microsoft-pc",
+    "baseUrl": "https://planetarycomputer.microsoft.com/api/stac/v1"
+    "slug": "earth-search",
+    "baseUrl": "https://earth-search.aws.element84.com/v1"
+    "slug": "nasa-cmr-stac",
+    "baseUrl": "https://cmr.earthdata.nasa.gov/stac"
+    "slug": "dwd-opendata",
+    "accessRoute": "OGC WMS/WFS",
+    "baseUrl": "https://opendata.dwd.de"
+    "slug": "fmi-opendata",
+    "accessRoute": "OGC WFS/WMS",
+    "baseUrl": "https://opendata.fmi.fi"
+    "slug": "msc-geomet",
+    "accessRoute": "OGC WMS/WFS/WMTS",
+    "baseUrl": "https://geo.weather.gc.ca/geomet"
+    "slug": "smhi-opendata",
+    "baseUrl": "https://opendata-download-metfcst.smhi.se"

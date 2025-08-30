@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { buildRequest, fetchJson } from '../openweather.js';
+import { buildRequest, fetchJson } from '../openweather-air.js';
 
-describe('openweather provider', () => {
+describe('openweather-air provider', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('builds onecall URL', () => {
+  it('builds air pollution URL', () => {
     process.env.OPENWEATHER_API_KEY = 'test';
     const url = buildRequest({ lat: 10, lon: 20 });
-    expect(url).toBe('https://api.openweathermap.org/data/3.0/onecall?lat=10&lon=20&appid=test');
+    expect(url).toBe('https://api.openweathermap.org/data/2.5/air_pollution?lat=10&lon=20&appid=test');
   });
 
   it('calls fetch without headers', async () => {
