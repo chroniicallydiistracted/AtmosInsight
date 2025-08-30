@@ -140,3 +140,6 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 - [ ] 2025-08-30 — NOAA MRMS provider module
   - Summary: Added `noaa-mrms` provider with request builder, binary tile fetch, tests, and manifest entry.
   - Files: `packages/providers/mrms.ts`, `packages/providers/index.ts`, `packages/providers/test/mrms.test.ts`, `providers.json`
+- [x] 2025-08-30 — NOAA GOES provider module
+  - Summary: Added GOES16 provider with DOY path builder and binary fetch.
+  - Files: `packages/providers/goes.ts`, `packages/providers/index.ts`, `packages/providers/test/goes.test.ts`, `providers.json`

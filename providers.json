@@ -64,5 +64,11 @@
     "category": "weather",
     "accessRoute": "REST",
     "baseUrl": "https://noaa-mrms-pds.s3.amazonaws.com"
+  },
+  {
+    "slug": "noaa-goes",
+    "category": "satellite",
+    "accessRoute": "S3",
+    "baseUrl": "https://noaa-goes16.s3.amazonaws.com"
   }
 ]
