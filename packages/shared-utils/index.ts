@@ -1,8 +1,14 @@
 import { readFileSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+// ES module equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Load port configuration from JSON file
-const configPath = join(process.cwd(), 'config', 'ports.json');
+// Use a relative path from the project root
+const configPath = join(__dirname, '..', '..', 'config', 'ports.json');
 const config = JSON.parse(readFileSync(configPath, 'utf8'));
 
 export const PORTS = {

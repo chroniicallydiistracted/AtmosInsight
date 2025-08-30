@@ -9,15 +9,15 @@ dist
 # Playwright
 playwright-report/
 test-results/
-dashboard-app/playwright-report/
-dashboard-app/test-results/
+apps/web/playwright-report/
+apps/web/test-results/
 
 # Env files (never commit secrets)
 .env
 .env.local
 .env.*.local
 proxy-server/.env
-dashboard-app/.env
+apps/web/.env
 
 # Python virtualenvs
 **/.venv/

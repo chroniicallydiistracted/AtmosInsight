@@ -26,6 +26,77 @@ app.use(cors());
 // Add health check endpoint
 app.get('/api/healthz', createHealthCheckEndpoint('proxy-server'));
 
+// Add web app proxy
+app.get('/', async (req, res) => {
+  const targetUrl = `http://localhost:3001${req.originalUrl}`;
+  try {
+    const upstream = await fetchWithRetry(targetUrl, {
+      method: req.method,
+      headers: req.headers as Record<string, string>,
+      body: req.body,
+    });
+
+    const body = await upstream.text();
+    res.status(upstream.status);
+
+    // Copy headers, excluding certain ones
+    upstream.headers.forEach((value: string, key: string) => {
+      const k = key.toLowerCase();
+      if (
+        k === 'content-encoding' ||
+        k === 'content-length' ||
+        k === 'transfer-encoding' ||
+        k === 'cache-control'
+      ) {
+        return;
+      }
+      res.setHeader(key, value);
+    });
+
+    res.send(body);
+  } catch (err) {
+    console.error('Web app proxy error:', err);
+    res.status(HTTP_STATUS.BAD_GATEWAY).json(createErrorResponse(
+      HTTP_STATUS.BAD_GATEWAY,
+      'Proxy error',
+      { originalError: err instanceof Error ? err.message : String(err) }
+    ));
+  }
+});
+
+// Proxy static asset requests
+app.use(/^\/_next\/.*/, async (req, res) => {
+  const targetUrl = `http://localhost:3001${req.originalUrl}`;
+  try {
+    const upstream = await fetchWithRetry(targetUrl, {
+      method: req.method,
+      headers: req.headers as Record<string, string>,
+      body: req.body,
+    });
+
+    const body = await upstream.arrayBuffer();
+    const buffer = Buffer.from(body);
+
+    res.status(upstream.status);
+
+    // Copy content type
+    upstream.headers.forEach((value: string, key: string) => {
+      if (key.toLowerCase() === 'content-type') {
+        res.setHeader(key, value);
+      }
+    });
+
+    res.send(buffer);
+  } catch (err) {
+    console.error('Static asset proxy error:', err);
+    res.status(HTTP_STATUS.BAD_GATEWAY).json(createErrorResponse(
+      HTTP_STATUS.BAD_GATEWAY,
+      'Proxy error',
+      { originalError: err instanceof Error ? err.message : String(err) }
+    ));
+  }
+});
+
 // Add catalog API proxy
 app.use('/api/catalog', async (req, res) => {
   const targetUrl = `http://localhost:${PORTS.CATALOG}${req.originalUrl.replace('/api', '')}`;
@@ -511,6 +582,49 @@ app.get(
   proxyGibsDomains
 );
 app.get('/api/gibs/redirect', ensureGibsEnabled, shortLived60, redirectGibs);
+
+// -----------------
+// Tracestrack Tiles
+// -----------------
+app.get('/api/tracestrack/:style/:z/:x/:y.webp', shortLived60, async (req, res) => {
+  try {
+    const { style, z, x, y } = req.params as Record<string, string>;
+    const apiKey = process.env.TTRACK_API_KEY || 'de6a88653d450364eaf72fd0320291b1';
+    
+    const targetUrl = `https://tile.tracestrack.com/${style}/{z}/{x}/{y}.webp?key=${apiKey}&style=outrun`;
+    
+    console.log(`Fetching Tracestrack tile from: ${targetUrl}`);
+    
+    const upstream = await fetchWithRetry(targetUrl, {});
+    const buffer = Buffer.from(await upstream.arrayBuffer());
+    
+    res.status(upstream.status);
+    
+    // Copy headers, excluding certain ones
+    upstream.headers.forEach((value: string, key: string) => {
+      const k = key.toLowerCase();
+      if (
+        k === 'content-encoding' ||
+        k === 'content-length' ||
+        k === 'transfer-encoding' ||
+        k === 'cache-control'
+      ) {
+        return;
+      }
+      res.setHeader(key, value);
+    });
+    
+    res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minutes for basemap tiles
+    res.send(buffer);
+  } catch (err) {
+    console.error('Tracestrack tile proxy error:', err);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(createErrorResponse(
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      'Proxy error',
+      { originalError: err instanceof Error ? err.message : String(err) }
+    ));
+  }
+});
 
 export { app };
 

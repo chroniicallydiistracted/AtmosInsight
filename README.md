@@ -5,7 +5,7 @@ Atmospheric Weather and Planetary Science Education App
 
 ## Repository Layout
 
-- `dashboard-app/` – React + Vite client with a PMTiles basemap
+- `apps/web/` – Next.js client with Tracestrack basemap tiles
 - `infra/` – Terraform configuration for AWS resources
 - `data-pipelines/` – ETL jobs (placeholder)
 - `tiling-services/` – Tile rendering services (placeholder)
@@ -13,7 +13,7 @@ Atmospheric Weather and Planetary Science Education App
 
 ## Milestones
 
-This commit establishes Milestone M1: foundational infrastructure configuration and a minimal app shell with a self-hosted PMTiles basemap.
+This commit establishes Milestone M1: foundational infrastructure configuration and a minimal app shell with Tracestrack basemap tiles.
 
 ## Environment Variables
 

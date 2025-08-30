@@ -20,23 +20,23 @@ export default function Home() {
   const [mapObj, setMapObj] = useState<maplibregl.Map | null>(null);
 
   useEffect(() => {
-    // Create a custom style with OpenStreetMap CyclOSM basemap via proxy
+    // Create a custom style with Tracestrack basemap via proxy
     const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '';
     const style: StyleSpecification = {
       version: 8,
       sources: {
-        'osm-cyclosm': {
+        'tracestrack-topo': {
           type: 'raster',
-          tiles: [`${apiBase}/api/osm/cyclosm/{z}/{x}/{y}.png`],
+          tiles: [`/tile.tracestrack.com/topo_en/{z}/{x}/{y}.webp?key=${apiBase}&style=outrun`],
           tileSize: 256,
-          attribution: '© OpenStreetMap contributors, © CyclOSM',
+          attribution: '© Tracestrack',
         },
       },
       layers: [
         {
-          id: 'osm-cyclosm-layer',
+          id: 'tracestrack-topo-layer',
           type: 'raster',
-          source: 'osm-cyclosm',
+          source: 'tracestrack-topo',
           minzoom: 0,
           maxzoom: 18,
         },

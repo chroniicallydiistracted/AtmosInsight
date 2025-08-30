@@ -12,7 +12,7 @@ The project requires multiple components (app, infrastructure, pipelines, servic
 
 Adopt a monorepo layout with top-level directories:
 
-- `dashboard-app/`
+- `apps/web/`
 - `infra/`
 - `data-pipelines/`
 - `tiling-services/`

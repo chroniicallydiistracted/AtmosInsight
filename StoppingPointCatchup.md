@@ -28,17 +28,17 @@ Today’s work delivers a production‑ready proxy layer (GIBS/OWM/RainViewer/NW
     - Tests: `proxy-server/test/nws.test.ts`
   - Cache headers normalized (short‑lived 60s across tiles)
 
-- Dashboard App (React + Vite)
+- Web App (Next.js)
   - Playback smoothness utilities
     - FPS clamp (2–8, default 4), gating if insufficient frames, prefetch next frame
-    - Files: `dashboard-app/src/utils/playback.ts` (+ tests)
-    - Timeline integration: `dashboard-app/src/components/Timeline.tsx`
+    - Files: `apps/web/src/utils/playback.ts` (+ tests)
+    - Timeline integration: `apps/web/src/components/Timeline.tsx`
   - Sun/Moon module (deterministic, offline‑capable)
     - Compute azimuth/elevation/phase/distance; `suncalc`
-    - Files: `dashboard-app/src/astro/astro.ts` (+ tests)
-    - UI widget: `dashboard-app/src/components/AstroPanel.tsx`
+    - Files: `apps/web/src/astro/astro.ts` (+ tests)
+    - UI widget: `apps/web/src/components/AstroPanel.tsx`
   - Basemap E2E (Playwright): verifies style load and that tiles paint; asserts no `/cesium` requests
-    - Files: `dashboard-app/e2e/basemap.spec.ts`, `dashboard-app/playwright.config.ts`
+    - Files: `apps/web/e2e/basemap.spec.ts`, `apps/web/playwright.config.ts`
   - Vite dev proxy for `/api/*` to `localhost:3000` for smooth DX
 
 - GLM TOE — High‑Quality Backend
@@ -61,7 +61,7 @@ Today’s work delivers a production‑ready proxy layer (GIBS/OWM/RainViewer/NW
     - File: `.github/workflows/ci.yml`
   - Env hygiene & templates
     - `.gitignore` ignores `.env` and `.venv/` (Python venvs)
-    - `proxy-server/.env.example`, `dashboard-app/.env.example`
+    - `proxy-server/.env.example`, `apps/web/.env.example`
   - Release notes & version bump
     - `dev/update.md` (v0.1.0), `README.md` notes, PR opened (`release/v0.1.0`)
 
@@ -131,7 +131,7 @@ Today’s work delivers a production‑ready proxy layer (GIBS/OWM/RainViewer/NW
   ```
 - App E2E (optional)
   ```bash
-  cd dashboard-app
+  cd apps/web
   npx playwright install --with-deps
   npm run e2e
   ```
