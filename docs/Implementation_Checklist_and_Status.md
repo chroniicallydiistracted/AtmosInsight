@@ -156,3 +156,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
   - Files: `packages/providers/*`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
+- [x] ~~2025-08-30 — NWS alerts provider~~
+  - Summary: Added `nws-alerts` provider with filterable query builder and required request headers.
+  - Files: `packages/providers/nws-alerts.ts`, `packages/providers/index.ts`, `packages/providers/test/nws-alerts.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers test`
