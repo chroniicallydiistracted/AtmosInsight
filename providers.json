@@ -58,5 +58,11 @@
     "category": "radar",
     "accessRoute": "S3",
     "baseUrl": "https://noaa-nexrad-level2.s3.amazonaws.com"
+  },
+  {
+    "slug": "noaa-mrms",
+    "category": "weather",
+    "accessRoute": "REST",
+    "baseUrl": "https://noaa-mrms-pds.s3.amazonaws.com"
   }
 ]
