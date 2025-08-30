@@ -115,8 +115,9 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Switched `proxy-server` to `moduleResolution: bundler` to match workspace defaults and eliminate config drift.
   - Files: `proxy-server/tsconfig.json`, `Findings.md`, `Followups.md`
   - Verification: `pnpm lint`, `pnpm test`, `cd proxy-server && pnpm test`
-
+  - 
 - [x] 2025-08-30 — Tracestrack basemap via proxy
   - Summary: Switched client to proxy-served Tracestrack tiles and moved API key injection server-side.
   - Files: `apps/web/src/app/page.tsx`, `proxy-server/src/app.ts`
   - Verification: `pnpm lint`, `pnpm test`, manual tile fetch. Marked production ready.
+

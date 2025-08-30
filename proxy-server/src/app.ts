@@ -596,7 +596,9 @@ app.get('/api/tracestrack/:style/:z/:x/:y.webp', shortLived60, async (req, res) 
         .json(
           createErrorResponse(
             HTTP_STATUS.SERVICE_UNAVAILABLE,
+
             'TTRACK_API_KEY not configured'
+            
           )
         );
       return;
@@ -604,8 +606,9 @@ app.get('/api/tracestrack/:style/:z/:x/:y.webp', shortLived60, async (req, res) 
 
     const targetUrl = `https://tile.tracestrack.com/${style}/${z}/${x}/${y}.webp?key=${apiKey}`;
 
+
     console.log(`Fetching Tracestrack tile from: ${targetUrl}`);
-    
+
     const upstream = await fetchWithRetry(targetUrl, {});
     const buffer = Buffer.from(await upstream.arrayBuffer());
     
