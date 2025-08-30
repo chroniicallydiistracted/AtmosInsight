@@ -106,5 +106,11 @@
     "category": "weather",
     "accessRoute": "REST",
     "baseUrl": "https://www.ndbc.noaa.gov"
+  },
+  {
+    "slug": "erddap",
+    "category": "ocean",
+    "accessRoute": "REST",
+    "baseUrl": "https://coastwatch.pfeg.noaa.gov/erddap"
   }
 ]

@@ -16,3 +16,4 @@ export * as himawari8 from './himawari8.js';
 export * as rainviewer from './rainviewer.js';
 export * as noaaCoops from './noaa-coops.js';
 export * as noaaNdbc from './noaa-ndbc.js';
+export * as erddap from './erddap.js';
