@@ -70,5 +70,11 @@
     "category": "satellite",
     "accessRoute": "S3",
     "baseUrl": "https://noaa-goes16.s3.amazonaws.com"
+  },
+  {
+    "slug": "nws-radar-tiles",
+    "category": "radar",
+    "accessRoute": "XYZ",
+    "baseUrl": "https://tiles.weather.gov"
   }
 ]

@@ -143,3 +143,7 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 - [x] 2025-08-30 — NOAA GOES provider module
   - Summary: Added GOES16 provider with DOY path builder and binary fetch.
   - Files: `packages/providers/goes.ts`, `packages/providers/index.ts`, `packages/providers/test/goes.test.ts`, `providers.json`
+- [x] 2025-08-30 — NWS radar tiles provider
+  - Summary: Added NWS radar tile provider with canonical XYZ path builder and binary fetch function.
+  - Files: `packages/providers/nws-radar-tiles.ts`, `packages/providers/nws-radar-tiles.js`, `packages/providers/nws-radar-tiles.d.ts`, `packages/providers/index.ts`, `packages/providers/index.js`, `packages/providers/index.d.ts`, `packages/providers/test/nws-radar-tiles.test.ts`, `providers.json`
+  - Verification: `pnpm lint` (fails in apps/web), `pnpm --filter @atmos/providers test`

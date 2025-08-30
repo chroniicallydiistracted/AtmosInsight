@@ -10,3 +10,4 @@ export * as xweather from './xweather.js';
 export * as visualcrossing from './visualcrossing.js';
 export * as gibs from './gibs.js';
 export * as nexrad from './nexrad.js';
+export * as nwsRadarTiles from './nws-radar-tiles.js';
