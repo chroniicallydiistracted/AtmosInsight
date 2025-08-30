@@ -1,0 +1,49 @@
+{
+  "Codegeex.Chat.LanguagePreference": "English",
+  "Codegeex.Comment.LanguagePreference": "English",
+  "Codegeex.SidebarUI.LanguagePreference": "English",
+  "Codegeex.CandidateNum": "2 (medium)",
+  "Codegeex.CompletionDelay": 0.1,
+  "Codegeex.CompletionModel": "CodeGeeX Pro[Beta]",
+  "Codegeex.CommitMessage.LanguagePreference": "English",
+  "Codegeex.RepoIndex": true,
+  "Codegeex.Privacy": true,
+  "Codegeex.Chat.fontSize": 15,
+  "Codegeex.EnableExtension": true,
+  "Codegeex.CommitMessageStyle": "Auto",
+  "Codegeex": {
+    "Chat": {
+      "LanguagePreference": "English",
+      "fontSize": 15
+    },
+    "Comment": {
+      "LanguagePreference": "English"
+    },
+    "SidebarUI": {
+      "LanguagePreference": "English"
+    },
+    "CandidateNum": "2 (medium)",
+    "CompletionDelay": 0.1,
+    "CompletionModel": "CodeGeeX Pro[Beta]",
+    "RepoIndex": true,
+    "Privacy": false
+  },
+  "editor.fontLigatures": true,
+  "chat.tools.terminal.autoApprove": {
+    "enabled": true,
+    "commands": {
+      "rm": false,
+      "rmdir": false,
+      "del": false,
+      "kill": false,
+      "curl": true,
+      "wget": true,
+      "eval": false,
+      "chmod": false,
+      "chown": false,
+      "/^Remove-Item\\b/i": false
+    }
+  },
+  "Codegeex.chat.tools.terminal.autoApprove": { "enabled": true },
+  "Gemini.chat.tools.terminal.autoApprove": { "enabled": true }
+}
