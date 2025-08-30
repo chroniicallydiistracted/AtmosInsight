@@ -199,3 +199,6 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 - [ ] 2025-08-30 — NIFC WFIGS wildfire provider
   - Summary: Added `nifc-wfigs` provider with canonical query builder, tests, manifest entry, and index export.
   - Files: `packages/providers/wfigs.*`, `packages/providers/index.*`, `packages/providers/test/wfigs.test.ts`, `providers.json`
+- [ ] 2025-08-30 — Planetary Computer STAC provider
+  - Summary: Added `microsoft-pc` module with JSON POST search and manifest entry.
+  - Files: `packages/providers/planetary-computer.*`, `packages/providers/index.*`, `packages/providers/test/planetary-computer.test.ts`, `providers.json`

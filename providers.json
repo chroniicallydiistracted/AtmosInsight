@@ -172,5 +172,11 @@
     "category": "wildfire",
     "accessRoute": "REST",
     "baseUrl": "https://services3.arcgis.com"
+  },
+  {
+    "slug": "microsoft-pc",
+    "category": "imagery",
+    "accessRoute": "REST",
+    "baseUrl": "https://planetarycomputer.microsoft.com/api/stac/v1"
   }
 ]
