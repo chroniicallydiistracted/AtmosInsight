@@ -156,3 +156,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
   - Files: `packages/providers/*`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
+- [ ] 2025-08-30 — JMA Himawari-8 provider
+  - Summary: Added Himawari-8 satellite provider with key builder and binary tile fetch.
+  - Files: `packages/providers/himawari8.*`, `packages/providers/index.*`, `packages/providers/test/himawari8.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers test`
