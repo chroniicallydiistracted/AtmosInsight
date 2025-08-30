@@ -55,3 +55,6 @@ infra/proxy-only/.terraform
 
 # Workspace File
 AtmosInsight.code-workspace
+
+# Docs
+Docs/

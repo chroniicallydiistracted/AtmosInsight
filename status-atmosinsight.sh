@@ -80,7 +80,7 @@ echo -e "${BLUE}🔌 Proxy Server (Port $PROXY_PORT)${NC}"
 echo "----------------------------------------"
 
 if check_port $PROXY_PORT; then
-    local details=$(get_port_details $PROXY_PORT)
+    details=$(get_port_details $PROXY_PORT)
     IFS='|' read -r pid cmd user time <<< "$details"
     
     echo -e "${GREEN}✅ Status: RUNNING${NC}"
@@ -107,7 +107,7 @@ echo -e "${BLUE}📚 Catalog API (Port $CATALOG_PORT)${NC}"
 echo "----------------------------------------"
 
 if check_port $CATALOG_PORT; then
-    local details=$(get_port_details $CATALOG_PORT)
+    details=$(get_port_details $CATALOG_PORT)
     IFS='|' read -r pid cmd user time <<< "$details"
     
     echo -e "${GREEN}✅ Status: RUNNING${NC}"
@@ -134,7 +134,7 @@ echo -e "${BLUE}📱 Next.js Web App (Port $WEB_PORT)${NC}"
 echo "----------------------------------------"
 
 if check_port $WEB_PORT; then
-    local details=$(get_port_details $WEB_PORT)
+    details=$(get_port_details $WEB_PORT)
     IFS='|' read -r pid cmd user time <<< "$details"
     
     echo -e "${GREEN}✅ Status: RUNNING${NC}"
@@ -165,9 +165,9 @@ PNPM_PROCESSES=$(pgrep -f "pnpm run dev" 2>/dev/null || true)
 if [ -n "$PNPM_PROCESSES" ]; then
     echo -e "${YELLOW}⚠️  Found additional pnpm processes:${NC}"
     echo "$PNPM_PROCESSES" | while read -r pid; do
-        local cmd=$(ps -p $pid -o comm= 2>/dev/null || echo "unknown")
-        local user=$(ps -p $pid -o user= 2>/dev/null || echo "unknown")
-        local time=$(ps -p $pid -o etime= 2>/dev/null || echo "unknown")
+        cmd=$(ps -p $pid -o comm= 2>/dev/null || echo "unknown")
+        user=$(ps -p $pid -o user= 2>/dev/null || echo "unknown")
+        time=$(ps -p $pid -o etime= 2>/dev/null || echo "unknown")
         echo -e "${BLUE}   PID $pid:${NC} $cmd (User: $user, Uptime: $time)"
     done
 else

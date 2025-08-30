@@ -27,6 +27,14 @@ if ! command -v jq &> /dev/null; then
     exit 1
 fi
 
+# Ensure we have tools to check and manage ports
+if ! command -v lsof &> /dev/null && ! command -v ss &> /dev/null; then
+    echo -e "${RED}❌ Neither 'lsof' nor 'ss' are available; one is required to check ports${NC}"
+    echo -e "${YELLOW}💡 Install 'lsof' (sudo apt install lsof) or ensure 'ss' (iproute2) is available${NC}"
+    exit 1
+fi
+
+
 PROXY_PORT=$(jq -r ".proxy" "$CONFIG_FILE")
 CATALOG_PORT=$(jq -r ".catalog" "$CONFIG_FILE")
 WEB_PORT=$(jq -r ".web" "$CONFIG_FILE")

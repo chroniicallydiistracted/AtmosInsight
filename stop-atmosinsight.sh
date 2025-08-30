@@ -27,6 +27,19 @@ if ! command -v jq &> /dev/null; then
     exit 1
 fi
 
+# Ensure we have tools to check and kill ports
+if ! command -v lsof &> /dev/null && ! command -v ss &> /dev/null; then
+    echo -e "${RED}❌ Neither 'lsof' nor 'ss' are available; one is required to check ports${NC}"
+    echo -e "${YELLOW}💡 Install 'lsof' (sudo apt install lsof) or ensure 'ss' (iproute2) is available${NC}"
+    exit 1
+fi
+
+if ! command -v fuser &> /dev/null && ! command -v pkill &> /dev/null && ! command -v kill &> /dev/null; then
+    echo -e "${RED}❌ None of 'fuser', 'pkill', or 'kill' are available; one is required to stop processes${NC}"
+    echo -e "${YELLOW}💡 Install 'psmisc' (for fuser/pkill) or ensure 'kill' is available in your shell${NC}"
+    exit 1
+fi
+
 PROXY_PORT=$(jq -r ".proxy" "$CONFIG_FILE")
 CATALOG_PORT=$(jq -r ".catalog" "$CONFIG_FILE")
 WEB_PORT=$(jq -r ".web" "$CONFIG_FILE")

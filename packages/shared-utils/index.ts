@@ -7,9 +7,20 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Load port configuration from JSON file
-// Use a relative path from the project root
-const configPath = join(__dirname, '..', '..', 'config', 'ports.json');
-const config = JSON.parse(readFileSync(configPath, 'utf8'));
+// Try absolute workspace path first (requested), then fall back to repo-relative path.
+let config: any = null;
+const absConfigPath = '/AtmosInsight/config/ports.json';
+const relativeConfigPath = join(__dirname, '..', '..', 'config', 'ports.json');
+try {
+  config = JSON.parse(readFileSync(absConfigPath, 'utf8'));
+} catch (e) {
+  try {
+    config = JSON.parse(readFileSync(relativeConfigPath, 'utf8'));
+  } catch (e2) {
+    // Fallback defaults if ports.json is missing
+    config = { proxy: 3000, catalog: 3001, web: 3002, database: 5432 };
+  }
+}
 
 export const PORTS = {
   PROXY: config.proxy,

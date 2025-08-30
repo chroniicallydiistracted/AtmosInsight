@@ -20,6 +20,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"]
+  ,
+  "@atmos/shared-utils": ["../../packages/shared-utils/dist"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

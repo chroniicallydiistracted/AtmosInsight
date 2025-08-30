@@ -4,6 +4,9 @@
   "type": "module",
   "main": "index.js",
   "types": "index.d.ts",
+  "dependencies": {
+    "@atmos/shared-utils": "workspace:*"
+  },
  "scripts": {
     "build": "tsc",
     "test": "vitest run"
