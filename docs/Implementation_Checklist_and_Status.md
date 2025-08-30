@@ -156,3 +156,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
   - Files: `packages/providers/*`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
+- [ ] 2025-08-30 — Planetary Computer STAC provider
+  - Summary: Added `microsoft-pc` module with JSON POST search and manifest entry.
+  - Files: `packages/providers/planetary-computer.*`, `packages/providers/index.*`, `packages/providers/test/planetary-computer.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`

@@ -1,6 +1,32 @@
 [
-  {"slug": "nws-weather", "category": "weather", "accessRoute": "REST", "baseUrl": "https://api.weather.gov"},
-  {"slug": "met-norway", "category": "weather", "accessRoute": "REST", "baseUrl": "https://api.met.no/weatherapi"},
-  {"slug": "open-meteo", "category": "weather", "accessRoute": "REST", "baseUrl": "https://api.open-meteo.com"},
-  {"slug": "openweather-onecall", "category": "weather", "accessRoute": "REST", "baseUrl": "https://api.openweathermap.org"}
+  {
+    "slug": "nws-weather",
+    "category": "weather",
+    "accessRoute": "REST",
+    "baseUrl": "https://api.weather.gov"
+  },
+  {
+    "slug": "met-norway",
+    "category": "weather",
+    "accessRoute": "REST",
+    "baseUrl": "https://api.met.no/weatherapi"
+  },
+  {
+    "slug": "open-meteo",
+    "category": "weather",
+    "accessRoute": "REST",
+    "baseUrl": "https://api.open-meteo.com"
+  },
+  {
+    "slug": "openweather-onecall",
+    "category": "weather",
+    "accessRoute": "REST",
+    "baseUrl": "https://api.openweathermap.org"
+  },
+  {
+    "slug": "microsoft-pc",
+    "category": "imagery",
+    "accessRoute": "REST",
+    "baseUrl": "https://planetarycomputer.microsoft.com/api/stac/v1"
+  }
 ]
