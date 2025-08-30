@@ -34,9 +34,10 @@ describe('Tracestrack tile proxy', () => {
 
     const res = await request(app).get('/api/tracestrack/topo/4/5/6.webp');
     expect(res.status).toBe(200);
-    const calledUrl = fetchSpy.mock.calls[0][0] as string;
-    expect(calledUrl).toBe(
-      'https://tile.tracestrack.com/topo/4/5/6.webp?key=test-key'
-    );
+  const calledUrl = fetchSpy.mock.calls[0][0] as string;
+  // parse URL and assert required parts (allow optional style param)
+  const u = new URL(calledUrl);
+  expect(u.origin + u.pathname).toBe('https://tile.tracestrack.com/topo/4/5/6.webp');
+  expect(u.searchParams.get('key')).toBe('test-key');
   });
 });
