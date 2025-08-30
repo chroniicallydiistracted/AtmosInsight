@@ -121,7 +121,17 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@20.19.11)(tsx@4.20.5)(yaml@2.8.1)
 
-  packages/proxy-constants: {}
+  packages/proxy-constants:
+    devDependencies:
+      '@types/node':
+        specifier: ^20
+        version: 20.19.11
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.2
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@20.19.11)(tsx@4.20.5)(yaml@2.8.1)
 
   packages/shared-utils:
     devDependencies:

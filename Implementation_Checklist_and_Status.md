@@ -115,3 +115,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Switched `proxy-server` to `moduleResolution: bundler` to match workspace defaults and eliminate config drift.
   - Files: `proxy-server/tsconfig.json`, `Findings.md`, `Followups.md`
   - Verification: `pnpm lint`, `pnpm test`, `cd proxy-server && pnpm test`
+
+- [x] 2025-08-30 — Share GIBS URL builders
+  - Summary: Moved `buildGibsTileUrl` and `buildGibsDomainsUrl` into `@atmos/proxy-constants` and refactored proxy services to import the shared helpers.
+  - Files: `packages/proxy-constants/*`, `proxy-server/src/app.ts`, `proxy-server/test/gibs.test.ts`, `tiling-services/proxy-api/index.ts`, `pnpm-lock.yaml`
+  - Verification: `pnpm build`, `pnpm test` — marked production ready.

@@ -2,5 +2,15 @@
   "name": "@atmos/proxy-constants",
   "version": "0.0.0",
   "type": "module",
-  "main": "index.js"
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
 }
