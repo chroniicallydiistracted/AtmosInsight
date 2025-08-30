@@ -196,3 +196,6 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 - [ ] 2025-08-30 — NASA FIRMS provider module
   - Summary: Added provider with CSV and WMS/WFS request builders plus tile/text fetch helpers.
   - Files: `packages/providers/firms.ts`, `packages/providers/index.ts`, `packages/providers/test/firms.test.ts`, `providers.json`
+- [ ] 2025-08-30 — NIFC WFIGS wildfire provider
+  - Summary: Added `nifc-wfigs` provider with canonical query builder, tests, manifest entry, and index export.
+  - Files: `packages/providers/wfigs.*`, `packages/providers/index.*`, `packages/providers/test/wfigs.test.ts`, `providers.json`

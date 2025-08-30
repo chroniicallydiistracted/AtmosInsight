@@ -166,5 +166,11 @@
     "category": "fire",
     "accessRoute": "WMS/WFS",
     "baseUrl": "https://firms.modaps.eosdis.nasa.gov"
+  },
+  {
+    "slug": "nifc-wfigs",
+    "category": "wildfire",
+    "accessRoute": "REST",
+    "baseUrl": "https://services3.arcgis.com"
   }
 ]
