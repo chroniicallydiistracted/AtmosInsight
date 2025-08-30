@@ -156,3 +156,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
   - Files: `packages/providers/*`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
+- [x] 2025-08-30 — NOAA CO-OPS provider module
+  - Summary: Added NOAA CO-OPS provider with canonical query ordering and tests; updated manifest and exports.
+  - Files: `packages/providers/noaa-coops.*`, `packages/providers/index.*`, `packages/providers/test/noaa-coops.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers test`
