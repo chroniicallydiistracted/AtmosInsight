@@ -178,5 +178,11 @@
     "category": "imagery",
     "accessRoute": "REST",
     "baseUrl": "https://planetarycomputer.microsoft.com/api/stac/v1"
+  },
+  {
+    "slug": "earth-search",
+    "category": "satellite",
+    "accessRoute": "REST",
+    "baseUrl": "https://earth-search.aws.element84.com/v1"
   }
 ]

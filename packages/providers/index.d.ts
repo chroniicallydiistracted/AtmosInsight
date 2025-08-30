@@ -28,3 +28,4 @@ export * as googleAir from './google-air.js';
 export * as firms from './firms.js';
 export * as wfigs from './wfigs.js';
 export * as planetaryComputer from './planetary-computer.js';
+export * as earthsearch from './earth-search.js';

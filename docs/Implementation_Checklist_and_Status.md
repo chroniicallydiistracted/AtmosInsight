@@ -202,3 +202,6 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 - [ ] 2025-08-30 — Planetary Computer STAC provider
   - Summary: Added `microsoft-pc` module with JSON POST search and manifest entry.
   - Files: `packages/providers/planetary-computer.*`, `packages/providers/index.*`, `packages/providers/test/planetary-computer.test.ts`, `providers.json`
+- [x] 2025-08-30 — Earth Search provider
+  - Summary: Added `earth-search` provider with POST `/search` builder, JSON fetch, tests, and manifest update.
+  - Files: `packages/providers/earth-search.ts`, `packages/providers/test/earth-search.test.ts`, `packages/providers/index.ts`, `providers.json`
