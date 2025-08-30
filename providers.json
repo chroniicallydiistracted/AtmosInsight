@@ -112,5 +112,11 @@
     "category": "ocean",
     "accessRoute": "REST",
     "baseUrl": "https://coastwatch.pfeg.noaa.gov/erddap"
+  },
+  {
+    "slug": "usgs-water",
+    "category": "water",
+    "accessRoute": "REST",
+    "baseUrl": "https://waterservices.usgs.gov/nwis"
   }
 ]

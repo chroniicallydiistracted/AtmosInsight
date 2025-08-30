@@ -165,3 +165,7 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 - [x] 2025-08-30 — ERDDAP provider module
   - Summary: Added ERDDAP provider with env-based base URL and tests for URL composition.
   - Files: `packages/providers/erddap.ts`, `packages/providers/erddap.js`, `packages/providers/erddap.d.ts`, `packages/providers/index.ts`, `packages/providers/index.js`, `packages/providers/index.d.ts`, `packages/providers/test/erddap.test.ts`, `providers.json`
+- [x] 2025-08-30 — USGS water provider module
+  - Summary: Added USGS NWIS provider with request builder and optional API key header; updated manifest and provider index.
+  - Files: `packages/providers/usgs.ts`, `packages/providers/test/usgs.test.ts`, `packages/providers/index.ts`, `providers.json`
+  - Verification: `pnpm lint` fails in `apps/web`; `pnpm --filter @atmos/providers build`; `pnpm --filter @atmos/providers test`
