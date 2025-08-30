@@ -156,3 +156,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
   - Files: `packages/providers/*`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
+- [ ] 2025-08-30 — Google Air Quality provider module
+  - Summary: Added Google Air Quality provider with POST request builder and tests.
+  - Files: `packages/providers/google-air.ts`, `packages/providers/index.ts`, `packages/providers/test/google-air.test.ts`, `providers.json`
+  - Verification: `pnpm lint`, `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
