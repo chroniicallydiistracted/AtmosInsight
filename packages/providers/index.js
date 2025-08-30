@@ -22,3 +22,4 @@ export * as nwm from './nwm.js';
 export * as airnow from './airnow.js';
 export * as openaq from './openaq.js';
 export * as waqi from './waqi.js';
+export * as openweatherAir from './openweather-air.js';

@@ -142,5 +142,11 @@
     "category": "air-quality",
     "accessRoute": "REST",
     "baseUrl": "https://api.waqi.info"
+  },
+  {
+    "slug": "openweather-air",
+    "category": "air-quality",
+    "accessRoute": "REST",
+    "baseUrl": "https://api.openweathermap.org"
   }
 ]
