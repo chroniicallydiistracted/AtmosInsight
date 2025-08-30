@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import nock from 'nock';
+import { describe, it, expect, afterEach } from 'vitest';
 import { buildRequest, fetchJson } from '../nws.js';
 
 describe('nws provider', () => {
   afterEach(() => {
-    vi.restoreAllMocks();
+    nock.cleanAll();
   });
 
   it('builds points URL', () => {
@@ -12,13 +13,13 @@ describe('nws provider', () => {
   });
 
   it('injects User-Agent header', async () => {
-    const mock = vi.fn().mockResolvedValue({ json: () => Promise.resolve({}) });
-    // @ts-ignore
-    global.fetch = mock;
+    const ua = process.env.NWS_USER_AGENT || '(AtmosInsight, contact@atmosinsight.com)';
+    const scope = nock('https://api.weather.gov')
+      .get('/points/33.45,-112.07')
+      .matchHeader('User-Agent', ua)
+      .reply(200, {});
     const url = buildRequest({ lat: 33.45, lon: -112.07 });
     await fetchJson(url);
-    expect(mock).toHaveBeenCalledWith(url, {
-      headers: { 'User-Agent': process.env.NWS_USER_AGENT || '(AtmosInsight, contact@atmosinsight.com)' },
-    });
+    scope.done();
   });
 });

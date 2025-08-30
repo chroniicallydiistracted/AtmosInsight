@@ -143,9 +143,15 @@ importers:
 
   packages/providers:
     devDependencies:
+      '@types/nock':
+        specifier: ^11.1.0
+        version: 11.1.0
       '@types/node':
         specifier: ^20
         version: 20.19.11
+      nock:
+        specifier: ^14.0.10
+        version: 14.0.10
       typescript:
         specifier: ^5.8.3
         version: 5.9.2
