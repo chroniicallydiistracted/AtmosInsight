@@ -25,3 +25,4 @@ export * as openaq from './openaq.js';
 export * as waqi from './waqi.js';
 export * as openweatherAir from './openweather-air.js';
 export * as googleAir from './google-air.js';
+export * as firms from './firms.js';

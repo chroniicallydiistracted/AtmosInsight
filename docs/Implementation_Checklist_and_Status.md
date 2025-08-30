@@ -193,3 +193,6 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 - [x] ~~2025-08-30 — NWS alerts provider~~
   - Summary: Added `nws-alerts` provider with filterable query builder and required request headers.
   - Files: `packages/providers/nws-alerts.ts`, `packages/providers/index.ts`, `packages/providers/test/nws-alerts.test.ts`, `providers.json`
+- [ ] 2025-08-30 — NASA FIRMS provider module
+  - Summary: Added provider with CSV and WMS/WFS request builders plus tile/text fetch helpers.
+  - Files: `packages/providers/firms.ts`, `packages/providers/index.ts`, `packages/providers/test/firms.test.ts`, `providers.json`

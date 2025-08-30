@@ -160,5 +160,11 @@
     "category": "alerts",
     "accessRoute": "REST",
     "baseUrl": "https://api.weather.gov/alerts"
+  },
+  {
+    "slug": "nasa-firms",
+    "category": "fire",
+    "accessRoute": "WMS/WFS",
+    "baseUrl": "https://firms.modaps.eosdis.nasa.gov"
   }
 ]
