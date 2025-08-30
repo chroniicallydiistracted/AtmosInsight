@@ -156,3 +156,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
   - Files: `packages/providers/*`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
+- [x] 2025-08-30 — NASA GIBS provider module
+  - Summary: Added GIBS provider with WMTS REST/KVP builders, token-aware tile fetcher, and tests.
+  - Files: `packages/providers/gibs.ts`, `packages/providers/index.ts`, `packages/providers/test/gibs.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`
