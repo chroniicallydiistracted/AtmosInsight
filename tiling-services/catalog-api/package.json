@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "test": "node --test",
+    "test": "tsx --test",
     "start": "tsx server.ts",
     "build": "tsc",
     "dev": "tsx server.ts"
