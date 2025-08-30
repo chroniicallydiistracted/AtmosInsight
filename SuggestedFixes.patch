@@ -1,5 +1,0 @@
-diff --git a/proxy-server/tsconfig.json b/proxy-server/tsconfig.json
-@@
--    "moduleResolution": "node",
-+    "moduleResolution": "bundler",
-
