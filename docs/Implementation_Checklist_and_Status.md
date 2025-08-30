@@ -156,3 +156,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
   - Files: `packages/providers/*`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
+- [x] 2025-08-30 — ERDDAP provider module
+  - Summary: Added ERDDAP provider with env-based base URL and tests for URL composition.
+  - Files: `packages/providers/erddap.ts`, `packages/providers/erddap.js`, `packages/providers/erddap.d.ts`, `packages/providers/index.ts`, `packages/providers/index.js`, `packages/providers/index.d.ts`, `packages/providers/test/erddap.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`
