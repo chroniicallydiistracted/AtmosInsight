@@ -12,6 +12,9 @@ export const OWM_ALLOW = new Set([
   'snow',
 ]);
 
+export const AIRNOW_BASE = 'https://www.airnowapi.org';
+export const OPENAQ_BASE = 'https://api.openaq.org/v2';
+
 export interface GibsTileParams {
   epsg: string;
   layer: string;

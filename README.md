@@ -5,7 +5,7 @@ Atmospheric Weather and Planetary Science Education App
 
 ## Repository Layout
 
-- `apps/web/` – Next.js client with Tracestrack basemap tiles
+- `apps/web/` – Next.js client with CyclOSM basemap and Tracestrack fallback
 - `infra/` – Terraform configuration for AWS resources
 - `data-pipelines/` – ETL jobs (placeholder)
 - `tiling-services/` – Tile rendering services (placeholder)
@@ -28,7 +28,7 @@ Scripts and utilities load from this file as the single source of truth for port
 
 ## Milestones
 
-This commit establishes Milestone M1: foundational infrastructure configuration and a minimal app shell with Tracestrack basemap tiles.
+This commit establishes Milestone M1: foundational infrastructure configuration and a minimal app shell with a CyclOSM basemap and Tracestrack fallback tiles.
 
 ## Environment Variables
 
@@ -36,8 +36,12 @@ This commit establishes Milestone M1: foundational infrastructure configuration 
 - `OWM_API_KEY` – OpenWeatherMap tile API key used by the proxy.
 - `RAINVIEWER_ENABLED` – `true|false` to enable/disable RainViewer proxy (default enabled).
 - `GIBS_ENABLED` – `true|false` to enable/disable GIBS proxy (if implemented).
+- `AIRNOW_API_KEY` – API key for U.S. AirNow air-quality data.
+- `AIRNOW_ENABLED` – `true|false` to enable/disable AirNow proxy (default enabled).
+- `OPENAQ_ENABLED` – `true|false` to enable/disable OpenAQ proxy (default enabled).
 - Mapbox/Cesium tokens as required by your chosen basemap providers.
 - `GLM_TOE_ENABLED` – `true|false` to enable experimental GLM TOE tile endpoint.
+- `TRACESTRACK_API_KEY` – API key for Tracestrack basemap tiles used when CyclOSM is unavailable.
 - `GLM_TOE_PY_URL` – If set, proxy `/api/glm-toe/:z/:x/:y.png` to the Python FastAPI service (`tiling-services/glm_toe`).
 - `GLM_USE_ABI_GRID` – When running the Python service, enable precise ABI 2×2 km grid accumulation.
 - `GLM_TILE_CACHE_SIZE` – Python service tile LRU size (default 128).
