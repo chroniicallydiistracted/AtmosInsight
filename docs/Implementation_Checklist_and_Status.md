@@ -156,3 +156,7 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
   - Files: `packages/providers/*`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+- [x] 2025-08-30 — NASA CMR STAC provider module
+  - Summary: Added provider for NASA CMR STAC API with optional Earthdata token support and POST search requests.
+  - Files: `packages/providers/*`, `providers.json`
+  - Verification: `pnpm lint` fails (apps/web), `pnpm --filter @atmos/providers test`
