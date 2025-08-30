@@ -120,3 +120,4 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Mapped hard-coded hex values in the web UI to design tokens and added semantic alert color tokens.
   - Files: `packages/tokens/src/semantic.json`, `apps/web/src/app/page.tsx`, `apps/web/src/app/page.module.css`
   - Verification: `pnpm tokens`, `pnpm lint`, `pnpm --filter web build`, `pnpm test` (fails in `tiling-services/catalog-api` with `ERR_UNKNOWN_FILE_EXTENSION`)
+

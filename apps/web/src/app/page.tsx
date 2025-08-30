@@ -27,7 +27,7 @@ export default function Home() {
       sources: {
         'tracestrack-topo': {
           type: 'raster',
-          tiles: [`/tile.tracestrack.com/topo_en/{z}/{x}/{y}.webp?key=${apiBase}&style=outrun`],
+          tiles: [`${apiBase}/api/tracestrack/topo_en/{z}/{x}/{y}.webp`],
           tileSize: 256,
           attribution: '© Tracestrack',
         },
