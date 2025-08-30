@@ -157,6 +157,12 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Files: `packages/providers/*`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
 
+
+- [ ] 2025-08-30 — Meteomatics weather provider
+  - Summary: Added Meteomatics module with Basic auth header and tests.
+  - Files: `packages/providers/meteomatics*`, `packages/providers/index*`, `packages/providers/test/meteomatics.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
 - [x] 2025-08-30 — Add Apple WeatherKit provider
   - Summary: Implemented WeatherKit module with JWT auth and documented required env vars.
   - Files: `packages/providers/weatherkit.ts`, `packages/providers/index.ts`, `providers.json`, `docs/README.md`, `docs/AGENTS.md`
@@ -176,3 +182,4 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added canonical OGC KVP/WMTS request builder and tile fetcher with tests.
   - Files: `packages/providers/eccc.ts`, `packages/providers/test/eccc.test.ts`, `packages/providers/index.ts`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`
+
