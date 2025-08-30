@@ -115,7 +115,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Switched `proxy-server` to `moduleResolution: bundler` to match workspace defaults and eliminate config drift.
   - Files: `proxy-server/tsconfig.json`, `Findings.md`, `Followups.md`
   - Verification: `pnpm lint`, `pnpm test`, `cd proxy-server && pnpm test`
-- [x] 2025-08-30 — Consolidate port configuration
-  - Summary: Removed `ports-shared.json`, wrapped legacy scripts around standard start/stop/status helpers, and documented `config/ports.json` as the single source of port assignments.
-  - Files: `config/ports.json`, `config/ports-shared.json`, `start-atmosinsight-*.sh`, `status-atmosinsight-*.sh`, `stop-atmosinsight-*.sh`, `README.md`
-  - Verification: `pnpm lint`, `pnpm test`. Marked production ready.
+
+- [x] 2025-08-30 — Tracestrack API key validation and URL fix
+  - Summary: Removed hard-coded Tracestrack API key, enforced `TTRACK_API_KEY` env, returned 503 when missing, and interpolated `z/x/y` in tile URL.
+  - Files: `proxy-server/src/app.ts`, `proxy-server/test/tracestrack.test.ts`
+  - Verification: `pnpm lint`, `pnpm test` (catalog-api failure), `cd proxy-server && pnpm test`
