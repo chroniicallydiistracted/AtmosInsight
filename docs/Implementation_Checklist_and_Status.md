@@ -156,3 +156,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
   - Files: `packages/providers/*`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
+- [x] 2025-08-30 — Add Apple WeatherKit provider
+  - Summary: Implemented WeatherKit module with JWT auth and documented required env vars.
+  - Files: `packages/providers/weatherkit.ts`, `packages/providers/index.ts`, `providers.json`, `docs/README.md`, `docs/AGENTS.md`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`
