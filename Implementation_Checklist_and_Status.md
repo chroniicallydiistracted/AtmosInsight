@@ -152,3 +152,12 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Files: `packages/proxy-constants/*`, `proxy-server/src/app.ts`, `proxy-server/test/air.test.ts`, `proxy-server/.env.example`, `proxy-server/package.json`, `pnpm-lock.yaml`, `README.md`, `docs/features/open-weather-services.md`
   - Verification: `pnpm lint`, `pnpm test`, `pnpm --filter proxy-server test`
 
+- [x] 2025-08-30 — Initial provider modules for open weather APIs
+  - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
+  - Files: `packages/providers/*`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
+- [x] 2025-08-30 — SMHI Open Data provider module
+  - Summary: Implemented SMHI point forecast provider with URL builder and fetch helper; added tests, manifest entry, index export, and TypeScript config update for DOM/Node types.
+  - Files: `packages/providers/smhi.ts`, `packages/providers/test/smhi.test.ts`, `packages/providers/index.ts`, `packages/providers/tsconfig.json`, `providers.json`
+  - Verification: `pnpm lint`, `pnpm --filter @atmos/providers test`
