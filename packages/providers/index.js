@@ -4,3 +4,4 @@ export * as openmeteo from './openmeteo.js';
 export * as openweather from './openweather.js';
 export * as smhi from './smhi.js';
 export * as weatherbit from './weatherbit.js';
+export * as xweather from './xweather.js';
