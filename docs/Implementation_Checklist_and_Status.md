@@ -156,3 +156,34 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
   - Files: `packages/providers/*`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+  - 
+- [x] 2025-08-30 — UK Met Office DataHub provider
+  - Summary: Added `ukmet-datahub` module with request builder, API key header, tests, and manifest update.
+  - Files: `packages/providers/ukmet.ts`, `packages/providers/index.ts`, `packages/providers/test/ukmet.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`
+
+- [ ] 2025-08-30 — Meteomatics weather provider
+  - Summary: Added Meteomatics module with Basic auth header and tests.
+  - Files: `packages/providers/meteomatics*`, `packages/providers/index*`, `packages/providers/test/meteomatics.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
+- [x] 2025-08-30 — Add Apple WeatherKit provider
+  - Summary: Implemented WeatherKit module with JWT auth and documented required env vars.
+  - Files: `packages/providers/weatherkit.ts`, `packages/providers/index.ts`, `providers.json`, `docs/README.md`, `docs/AGENTS.md`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`
+
+- [x] 2025-08-30 — FMI Open Data provider module
+  - Summary: Added `fmi-open-data` provider with stored query builder, tile fetcher, tests, and manifest entry.
+  - Files: `packages/providers/fmi.ts`, `packages/providers/fmi.js`, `packages/providers/fmi.d.ts`, `packages/providers/index.ts`, `packages/providers/index.js`, `packages/providers/index.d.ts`, `packages/providers/test/fmi.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers test`
+
+- [ ] 2025-08-30 — DWD OpenData provider with KVP builder
+  - Summary: Added DWD module with WMS/WFS KVP parameter builder, binary tile fetch helper, manifest entry, and index exports.
+  - Files: `packages/providers/dwd.ts`, `packages/providers/index.ts`, `packages/providers/test/dwd.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`; `pnpm test` fails in `proxy-server` tracestrack test.
+
+- [x] 2025-08-30 — ECCC GeoMet tile provider
+  - Summary: Added canonical OGC KVP/WMTS request builder and tile fetcher with tests.
+  - Files: `packages/providers/eccc.ts`, `packages/providers/test/eccc.test.ts`, `packages/providers/index.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`
+

@@ -257,6 +257,10 @@ Implementation note: A high-quality Python FastAPI microservice (`tiling-service
 - `NWS_USER_AGENT` — e.g., `(Vortexa, email@domain)` per NWS requirement. citeturn0search0turn0search3
 - `RAINVIEWER_ENABLED` — Gate RainViewer integration.
 - `GIBS_ENABLED` — Gate GIBS integration.
+- `WEATHERKIT_TEAM_ID` — Apple Developer team identifier for signing.
+- `WEATHERKIT_SERVICE_ID` — WeatherKit service identifier.
+- `WEATHERKIT_KEY_ID` — Key ID for the WeatherKit private key.
+- `WEATHERKIT_PRIVATE_KEY` — PEM-formatted key used for JWT signing.
 - Mapbox/Cesium tokens as required by your chosen basemap providers.
 
 ---

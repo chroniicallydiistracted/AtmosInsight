@@ -36,6 +36,10 @@ This commit establishes Milestone M1: foundational infrastructure configuration 
 - `OWM_API_KEY` – OpenWeatherMap tile API key used by the proxy.
 - `RAINVIEWER_ENABLED` – `true|false` to enable/disable RainViewer proxy (default enabled).
 - `GIBS_ENABLED` – `true|false` to enable/disable GIBS proxy (if implemented).
+- `WEATHERKIT_TEAM_ID` – Apple Developer team ID for WeatherKit JWTs.
+- `WEATHERKIT_SERVICE_ID` – WeatherKit service identifier.
+- `WEATHERKIT_KEY_ID` – Key ID associated with the WeatherKit private key.
+- `WEATHERKIT_PRIVATE_KEY` – PEM contents used to sign WeatherKit JWTs.
 - Mapbox/Cesium tokens as required by your chosen basemap providers.
 - `GLM_TOE_ENABLED` – `true|false` to enable experimental GLM TOE tile endpoint.
 - `GLM_TOE_PY_URL` – If set, proxy `/api/glm-toe/:z/:x/:y.png` to the Python FastAPI service (`tiling-services/glm_toe`).
