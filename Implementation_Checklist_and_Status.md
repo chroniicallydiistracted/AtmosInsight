@@ -115,3 +115,7 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Switched `proxy-server` to `moduleResolution: bundler` to match workspace defaults and eliminate config drift.
   - Files: `proxy-server/tsconfig.json`, `Findings.md`, `Followups.md`
   - Verification: `pnpm lint`, `pnpm test`, `cd proxy-server && pnpm test`
+- [x] 2025-08-29 — Web Mercator tile prefetch for RainViewer
+  - Summary: Prefetch uses floored zoom and center lat/lon converted to Web Mercator tile indices; utility and tests added.
+  - Files: `apps/web/src/components/RainviewerLayer.tsx`, `packages/shared-utils/tile.ts`, `packages/shared-utils/index.ts`, `packages/shared-utils/test/tile.test.ts`
+  - Verification: `pnpm lint`, `pnpm --filter @atmos/shared-utils test`

@@ -14,6 +14,7 @@ import {
   DEFAULT_FPS,
 } from '@/lib/utils/playback';
 import { createTileCache, loadImage } from '@/lib/utils/tileCache';
+import { latLonToTile } from '@atmos/shared-utils';
 
 interface RainviewerLayerProps {
   map: maplibregl.Map | null;
@@ -87,11 +88,14 @@ export function RainviewerLayer({ map }: RainviewerLayerProps) {
   // Prefetch next frame
   useEffect(() => {
     if (frames.length === 0 || !map) return;
+    const zoom = Math.floor(map.getZoom());
+    const center = map.getCenter();
+    const { x, y } = latLonToTile(center.lat, center.lng, zoom);
     const toPrefetch = prefetchSchedule(frames.length, index);
     for (const idx of toPrefetch) {
       const t = frames[idx];
       const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-      const url = `${apiBase}/api/rainviewer/${t}/256/${map.getZoom()}/${Math.floor(map.getCenter().lng)}/${Math.floor(map.getCenter().lat)}/0/1_0.png`;
+      const url = `${apiBase}/api/rainviewer/${t}/256/${zoom}/${x}/${y}/0/1_0.png`;
       loadImage(url, cache).catch(e => setLastError(String(e)));
     }
   }, [index, frames, map, cache]);
