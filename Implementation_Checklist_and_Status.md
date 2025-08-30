@@ -115,3 +115,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Switched `proxy-server` to `moduleResolution: bundler` to match workspace defaults and eliminate config drift.
   - Files: `proxy-server/tsconfig.json`, `Findings.md`, `Followups.md`
   - Verification: `pnpm lint`, `pnpm test`, `cd proxy-server && pnpm test`
+
+- [ ] 2025-08-29 — Tokenize alert colors and button hovers
+  - Summary: Mapped hard-coded hex values in the web UI to design tokens and added semantic alert color tokens.
+  - Files: `packages/tokens/src/semantic.json`, `apps/web/src/app/page.tsx`, `apps/web/src/app/page.module.css`
+  - Verification: `pnpm tokens`, `pnpm lint`, `pnpm --filter web build`, `pnpm test` (fails in `tiling-services/catalog-api` with `ERR_UNKNOWN_FILE_EXTENSION`)
