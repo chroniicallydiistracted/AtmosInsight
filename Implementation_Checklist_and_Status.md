@@ -122,3 +122,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Verification: `pnpm build`, `pnpm test` — marked production ready.
 
 
+- [x] 2025-08-30 — Catalog API HTTP server
+  - Summary: Added HTTP server startup with `createServer` so startup script detects port 3001; added integration test for layers endpoint.
+  - Files: `tiling-services/catalog-api/server.ts`, `tiling-services/catalog-api/test/server.test.mjs`
+  - Verification: `pnpm lint`, `pnpm test` — marked production ready.
+
