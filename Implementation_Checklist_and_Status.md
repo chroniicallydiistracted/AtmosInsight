@@ -109,7 +109,7 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 - [x] 2025-08-29 — Final lint and test run before PR
   - Summary: Re-ran lint and unit tests after fresh install to ensure green build.
   - Files: `Implementation_Checklist_and_Status.md`
-  - Verification: `pnpm lint`, `pnpm test`
+  - Verification: `pnpm lint`; `pnpm test` fails (missing vitest in @atmos/proxy-constants) but `pnpm --filter proxy-server test` passes.
 
 - [x] 2025-08-29 — Align proxy tsconfig module resolution
   - Summary: Switched `proxy-server` to `moduleResolution: bundler` to match workspace defaults and eliminate config drift.
@@ -136,4 +136,19 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Ensured Tracestrack proxy appends a `style` query parameter (default `outrun`) so upstream requests match expected format.
   - Files: `proxy-server/src/app.ts`
   - Verification: `pnpm lint`, `pnpm test` — marked production ready.
+
+- [x] 2025-08-30 — Open weather services catalog
+  - Summary: Documented freely accessible weather and space-data feeds with proxy examples and reference sites.
+  - Files: `docs/features/open-weather-services.md`
+  - Verification: `pnpm lint` passed; `pnpm test` fails (proxy-server tracestrack tests).
+
+- [x] 2025-08-30 — Tracestrack basemap fallback & env var rename
+  - Summary: CyclOSM now loads as the primary basemap with automatic fallback to Tracestrack tiles; renamed `TTRACK_API_KEY` to `TRACESTRACK_API_KEY` and removed client-side key exposure.
+  - Files: `apps/web/src/app/page.tsx`, `proxy-server/src/app.ts`, `proxy-server/test/tracestrack.test.ts`, `proxy-server/.env.example`, `apps/web/env.example`, `README.md`
+  - Verification: `pnpm lint`, `pnpm test`
+
+- [x] 2025-08-30 — Air quality proxies
+  - Summary: Added `/api/air/airnow` and `/api/air/openaq` routes with feature flags and AirNow API key support.
+  - Files: `packages/proxy-constants/*`, `proxy-server/src/app.ts`, `proxy-server/test/air.test.ts`, `proxy-server/.env.example`, `proxy-server/package.json`, `pnpm-lock.yaml`, `README.md`, `docs/features/open-weather-services.md`
+  - Verification: `pnpm lint`, `pnpm test`, `pnpm --filter proxy-server test`
 

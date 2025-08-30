@@ -20,11 +20,16 @@ export default function Home() {
   const [mapObj, setMapObj] = useState<maplibregl.Map | null>(null);
 
   useEffect(() => {
-    // Create a custom style with Tracestrack basemap via proxy
     const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '';
     const style: StyleSpecification = {
       version: 8,
       sources: {
+        cyclosm: {
+          type: 'raster',
+          tiles: [`${apiBase}/api/osm/cyclosm/{z}/{x}/{y}.png`],
+          tileSize: 256,
+          attribution: '© OpenStreetMap contributors, © CyclOSM',
+        },
         'tracestrack-topo': {
           type: 'raster',
           tiles: [`${apiBase}/api/tracestrack/topo_en/{z}/{x}/{y}.webp`],
@@ -34,9 +39,17 @@ export default function Home() {
       },
       layers: [
         {
-          id: 'tracestrack-topo-layer',
+          id: 'basemap-cyclosm',
+          type: 'raster',
+          source: 'cyclosm',
+          minzoom: 0,
+          maxzoom: 18,
+        },
+        {
+          id: 'basemap-tracestrack',
           type: 'raster',
           source: 'tracestrack-topo',
+          layout: { visibility: 'none' },
           minzoom: 0,
           maxzoom: 18,
         },
@@ -45,11 +58,21 @@ export default function Home() {
 
     const map = new maplibregl.Map({
       container: mapRef.current as HTMLDivElement,
-      style: style,
+      style,
       center: [-112.074037, 33.448376], // Phoenix, AZ coordinates
       zoom: 8,
       maxZoom: 18,
       minZoom: 0,
+      attributionControl: false,
+    });
+
+    map.addControl(new maplibregl.AttributionControl({ compact: true }));
+
+    map.on('error', e => {
+      if (e.sourceId === 'cyclosm') {
+        map.setLayoutProperty('basemap-cyclosm', 'visibility', 'none');
+        map.setLayoutProperty('basemap-tracestrack', 'visibility', 'visible');
+      }
     });
 
     // Store map reference globally for debugging
