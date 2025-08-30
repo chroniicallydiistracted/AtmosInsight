@@ -115,3 +115,8 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Switched `proxy-server` to `moduleResolution: bundler` to match workspace defaults and eliminate config drift.
   - Files: `proxy-server/tsconfig.json`, `Findings.md`, `Followups.md`
   - Verification: `pnpm lint`, `pnpm test`, `cd proxy-server && pnpm test`
+
+- [x] 2025-08-30 — Tracestrack API key validation and URL fix
+  - Summary: Removed hard-coded Tracestrack API key, enforced `TTRACK_API_KEY` env, returned 503 when missing, and interpolated `z/x/y` in tile URL.
+  - Files: `proxy-server/src/app.ts`, `proxy-server/test/tracestrack.test.ts`
+  - Verification: `pnpm lint`, `pnpm test` (catalog-api failure), `cd proxy-server && pnpm test`
