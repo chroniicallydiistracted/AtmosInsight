@@ -20,8 +20,21 @@ proxy-server/.env
 dashboard-app/.env
 
 # Python virtualenvs
-.venv/
 **/.venv/
+**/venv/
+**/venv/lib/
+**/venv/lib/python3.12/
+**/venv/lib/python3.12/site-packages/
+**/venv/lib/python3.12/site-packages/yaml/
+**/venv/lib/python3.12/site-packages/yaml/parser.py
+**/venv/lib/python3.12/site-packages/yaml/scanner.py
+**/tiling-services/glm_toe/venv/
+**/tiling-services/glm_toe/venv/lib/
+**/tiling-services/glm_toe/venv/lib/python3.12/
+**/tiling-services/glm_toe/venv/lib/python3.12/site-packages/
+**/tiling-services/glm_toe/venv/lib/python3.12/site-packages/yaml/
+**/tiling-services/glm_toe/venv/lib/python3.12/site-packages/yaml/parser.py
+**/tiling-services/glm_toe/venv/lib/python3.12/site-packages/yaml/scanner.py
 
 # Python bytecode/cache
 __pycache__/
