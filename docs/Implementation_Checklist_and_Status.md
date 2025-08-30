@@ -153,3 +153,6 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 - [ ] 2025-08-30 — JMA Himawari-8 provider
   - Summary: Added Himawari-8 satellite provider with key builder and binary tile fetch.
   - Files: `packages/providers/himawari8.*`, `packages/providers/index.*`, `packages/providers/test/himawari8.test.ts`, `providers.json`
+- [ ] 2025-08-30 — RainViewer provider module
+  - Summary: Added RainViewer tile URL builder and binary fetch helper with tests and manifest update.
+  - Files: `packages/providers/rainviewer.ts`, `packages/providers/index.ts`, `packages/providers/test/rainviewer.test.ts`, `providers.json`

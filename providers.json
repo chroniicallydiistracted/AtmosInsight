@@ -88,5 +88,11 @@
     "category": "satellite",
     "accessRoute": "REST",
     "baseUrl": "https://himawari8.s3.amazonaws.com"
+  },
+  {
+    "slug": "rainviewer",
+    "category": "weather",
+    "accessRoute": "REST",
+    "baseUrl": "https://api.rainviewer.com"
   }
 ]
