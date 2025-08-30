@@ -52,5 +52,11 @@
     "category": "imagery",
     "accessRoute": "WMTS",
     "baseUrl": "https://gibs.earthdata.nasa.gov"
+  },
+  {
+    "slug": "nexrad-l2",
+    "category": "radar",
+    "accessRoute": "S3",
+    "baseUrl": "https://noaa-nexrad-level2.s3.amazonaws.com"
   }
 ]

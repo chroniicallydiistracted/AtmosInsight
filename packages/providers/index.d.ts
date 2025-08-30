@@ -7,3 +7,4 @@ export * as weatherbit from './weatherbit.js';
 export * as xweather from './xweather.js';
 export * as visualcrossing from './visualcrossing.js';
 export * as gibs from './gibs.js';
+export * as nexrad from './nexrad.js';

@@ -133,3 +133,7 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added GIBS provider with WMTS REST/KVP builders, token-aware tile fetcher, and tests.
   - Files: `packages/providers/gibs.ts`, `packages/providers/index.ts`, `packages/providers/test/gibs.test.ts`, `providers.json`
   - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`
+- [ ] 2025-08-30 — NEXRAD Level II provider module
+  - Summary: Added `nexrad-l2` provider that builds object URLs and fetches radar tiles.
+  - Files: `packages/providers/nexrad.ts`, `packages/providers/index.ts`, `packages/providers/test/nexrad.test.ts`, `providers.json`
+  - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`; `pnpm lint` fails in `apps/web`, and `pnpm test` fails in `proxy-server` tracestrack test.
