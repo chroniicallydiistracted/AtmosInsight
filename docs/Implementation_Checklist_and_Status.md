@@ -159,3 +159,6 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 - [x] 2025-08-30 — NOAA CO-OPS provider module
   - Summary: Added NOAA CO-OPS provider with canonical query ordering and tests; updated manifest and exports.
   - Files: `packages/providers/noaa-coops.*`, `packages/providers/index.*`, `packages/providers/test/noaa-coops.test.ts`, `providers.json`
+- [x] 2025-08-30 — NOAA NDBC provider module
+  - Summary: Added provider for NOAA NDBC real-time station data with format-aware fetch.
+  - Files: `packages/providers/noaa-ndbc.ts`, `packages/providers/noaa-ndbc.js`, `packages/providers/noaa-ndbc.d.ts`, `packages/providers/index.ts`, `packages/providers/index.js`, `packages/providers/index.d.ts`, `packages/providers/test/noaa-ndbc.test.ts`, `providers.json`

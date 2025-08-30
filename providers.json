@@ -100,5 +100,11 @@
     "category": "ocean",
     "accessRoute": "REST",
     "baseUrl": "https://api.tidesandcurrents.noaa.gov/api/prod"
+  },
+  {
+    "slug": "noaa-ndbc",
+    "category": "weather",
+    "accessRoute": "REST",
+    "baseUrl": "https://www.ndbc.noaa.gov"
   }
 ]
