@@ -205,3 +205,6 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 - [x] 2025-08-30 — Earth Search provider
   - Summary: Added `earth-search` provider with POST `/search` builder, JSON fetch, tests, and manifest update.
   - Files: `packages/providers/earth-search.ts`, `packages/providers/test/earth-search.test.ts`, `packages/providers/index.ts`, `providers.json`
+- [x] 2025-08-30 — NASA CMR STAC provider module
+  - Summary: Added provider for NASA CMR STAC API with optional Earthdata token support and POST search requests.
+  - Verification: `pnpm lint` fails (apps/web), `pnpm --filter @atmos/providers test`

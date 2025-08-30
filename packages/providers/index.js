@@ -29,3 +29,4 @@ export * as firms from './firms.js';
 export * as wfigs from './wfigs.js';
 export * as planetaryComputer from './planetary-computer.js';
 export * as earthsearch from './earth-search.js';
+export * as cmrstac from './cmr-stac.js';

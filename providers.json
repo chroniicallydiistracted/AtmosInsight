@@ -184,5 +184,11 @@
     "category": "satellite",
     "accessRoute": "REST",
     "baseUrl": "https://earth-search.aws.element84.com/v1"
+  },
+  {
+    "slug": "nasa-cmr-stac",
+    "category": "satellite",
+    "accessRoute": "REST",
+    "baseUrl": "https://cmr.earthdata.nasa.gov/stac"
   }
 ]
