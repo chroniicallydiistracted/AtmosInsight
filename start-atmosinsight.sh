@@ -44,9 +44,9 @@ echo ""
 check_port() {
     local port=$1
     # Try multiple methods to check port usage
-    if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
+    if command -v lsof >/dev/null 2>&1 && lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
         return 0  # Port is in use
-    elif ss -tlnp | grep -q ":$port "; then
+    elif command -v ss >/dev/null 2>&1 && ss -tlnp | grep -q ":$port "; then
         return 0  # Port is in use (using ss)
     else
         return 1  # Port is free

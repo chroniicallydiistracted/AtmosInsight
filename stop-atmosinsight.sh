@@ -44,9 +44,9 @@ echo ""
 check_port() {
     local port=$1
     # Try multiple methods to check port usage
-    if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
+    if command -v lsof >/dev/null 2>&1 && lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
         return 0  # Port is in use
-    elif ss -tlnp | grep -q ":$port "; then
+    elif command -v ss >/dev/null 2>&1 && ss -tlnp | grep -q ":$port "; then
         return 0  # Port is in use (using ss)
     else
         return 1  # Port is free
@@ -60,11 +60,13 @@ get_port_info() {
         # Try lsof first, then ss as fallback
         local pid=$(lsof -ti:$port 2>/dev/null)
         if [ -z "$pid" ]; then
-            # Fallback to ss command
-            local ss_output=$(ss -tlnp | grep ":$port ")
-            echo -e "${BLUE}🔍 Debug: ss output for port $port: $ss_output${NC}" >&2
-            pid=$(echo "$ss_output" | sed 's/.*pid=\([0-9]*\).*/\1/')
-            echo -e "${BLUE}🔍 Debug: Extracted PID: $pid${NC}" >&2
+            # Fallback to ss command if available
+            if command -v ss >/dev/null 2>&1; then
+                local ss_output=$(ss -tlnp | grep ":$port ")
+                echo -e "${BLUE}🔍 Debug: ss output for port $port: $ss_output${NC}" >&2
+                pid=$(echo "$ss_output" | sed 's/.*pid=\([0-9]*\).*/\1/')
+                echo -e "${BLUE}🔍 Debug: Extracted PID: $pid${NC}" >&2
+            fi
         fi
         
         if [ -n "$pid" ]; then
