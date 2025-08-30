@@ -19,3 +19,4 @@ export * as noaaNdbc from './noaa-ndbc.js';
 export * as erddap from './erddap.js';
 export * as usgs from './usgs.js';
 export * as nwm from './nwm.js';
+export * as airnow from './airnow.js';

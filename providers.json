@@ -124,5 +124,11 @@
     "category": "hydrology",
     "accessRoute": "S3",
     "baseUrl": "https://noaa-nwm-pds.s3.amazonaws.com"
+  },
+  {
+    "slug": "epa-airnow",
+    "category": "air-quality",
+    "accessRoute": "REST",
+    "baseUrl": "https://www.airnowapi.org"
   }
 ]

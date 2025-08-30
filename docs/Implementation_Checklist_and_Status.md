@@ -172,3 +172,6 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 - [x] 2025-08-30 — NOAA NWM provider module
   - Summary: Added `noaa-nwm` provider with key builder and binary tile fetch, updated manifest and exports.
   - Files: `packages/providers/nwm.ts`, `packages/providers/index.ts`, `packages/providers/test/nwm.test.ts`, `providers.json`
+- [x] 2025-08-30 — EPA AirNow provider module
+  - Summary: Added `epa-airnow` provider with request builder, fetch helper, manifest entry, and tests.
+  - Files: `packages/providers/airnow.ts`, `packages/providers/index.ts`, `providers.json`, `packages/providers/test/airnow.test.ts`
