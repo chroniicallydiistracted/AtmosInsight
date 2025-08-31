@@ -26,8 +26,8 @@
     "./dist/tokens-light.css": "./dist/tokens-light.css"
   },
   "scripts": {
-    "build": "node build.js",
-    "watch": "node build.js --watch",
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
     "clean": "rimraf dist"
   },
   "devDependencies": {

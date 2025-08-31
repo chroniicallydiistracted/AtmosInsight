@@ -70,3 +70,5 @@ packages/**/*.js
 packages/**/index.d.ts
 packages/**/*.js.map
 !**/dist/**
+!packages/tokens/build.mjs
+!packages/tokens/build.mjs
