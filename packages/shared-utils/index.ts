@@ -7,15 +7,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Load port configuration from JSON file
-// Try absolute workspace path first (requested), then fall back to repo-relative path.
+// Try repo-relative path first, then fall back to absolute path.
 let config: any = null;
-const absConfigPath = '/AtmosInsight/config/ports.json';
 const relativeConfigPath = join(__dirname, '..', '..', 'config', 'ports.json');
+const absConfigPath = '/AtmosInsight/config/ports.json';
 try {
-  config = JSON.parse(readFileSync(absConfigPath, 'utf8'));
+  config = JSON.parse(readFileSync(relativeConfigPath, 'utf8'));
 } catch (e) {
   try {
-    config = JSON.parse(readFileSync(relativeConfigPath, 'utf8'));
+    config = JSON.parse(readFileSync(absConfigPath, 'utf8'));
   } catch (e2) {
     // Fallback defaults if ports.json is missing
     config = { proxy: 3000, catalog: 3001, web: 3002, database: 5432 };
@@ -27,6 +27,13 @@ export const PORTS = {
   CATALOG: config.catalog,
   WEB: config.web,
   DATABASE: config.database
+};
+
+// HTTP client configuration constants
+export const HTTP_CONFIG = {
+  DEFAULT_TIMEOUT_MS: parseInt(process.env.HTTP_TIMEOUT_MS || '10000'),
+  DEFAULT_RETRIES: parseInt(process.env.HTTP_RETRIES || '3'),
+  DEFAULT_BACKOFF_MS: parseInt(process.env.HTTP_BACKOFF_MS || '500')
 };
 
 // Standardized error response format
@@ -175,9 +182,9 @@ export function createHealthCheckEndpoint(serviceName: string) {
 export async function fetchWithRetry(
   url: string,
   options: RequestInit = {},
-  retries: number = 3,
-  timeoutMs: number = 10000,
-  backoffMs: number = 500
+  retries: number = HTTP_CONFIG.DEFAULT_RETRIES,
+  timeoutMs: number = HTTP_CONFIG.DEFAULT_TIMEOUT_MS,
+  backoffMs: number = HTTP_CONFIG.DEFAULT_BACKOFF_MS
 ): Promise<Response> {
   let attempt = 0;
   let delay = backoffMs;

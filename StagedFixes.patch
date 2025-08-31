@@ -1,0 +1,44 @@
+diff --git a/proxy-server/.env b/proxy-server/.env
+index xxxxxxx..xxxxxxx 100644
+--- a/proxy-server/.env
++++ b/proxy-server/.env
+@@ -47,7 +47,7 @@
+ GLM_TOE_ENABLED=true
+
+ # Tracestrack API key for basemap tiles
+-TTRACK_API_KEY=de6a88653d450364eaf72fd0320291b1
++TRACESTRACK_API_KEY=de6a88653d450364eaf72fd0320291b1
+
+ # Optional outgoing HTTP(S) proxy for upstream requests
+ # HTTPS_PROXY=
+diff --git a/packages/shared-utils/index.ts b/packages/shared-utils/index.ts
+index xxxxxxx..xxxxxxx 100644
+--- a/packages/shared-utils/index.ts
++++ b/packages/shared-utils/index.ts
+@@ -9,8 +9,8 @@
+ const __filename = fileURLToPath(import.meta.url);
+ const __dirname = dirname(__filename);
+
+-// Load port configuration from JSON file
+-// Try absolute workspace path first (requested), then fall back to repo-relative path.
++// Load port configuration from JSON file
++// Try repo-relative path first, then fall back to absolute path
+ let config: any = null;
+-const absConfigPath = '/AtmosInsight/config/ports.json';
+ const relativeConfigPath = join(__dirname, '..', '..', 'config', 'ports.json');
++const absConfigPath = '/AtmosInsight/config/ports.json';
+ try {
+   config = JSON.parse(readFileSync(relativeConfigPath, 'utf8'));
+diff --git a/packages/tokens/src/semantic.json b/packages/tokens/src/semantic.json
+index xxxxxxx..xxxxxxx 100644
+--- a/packages/tokens/src/semantic.json
++++ b/packages/tokens/src/semantic.json
+@@ -1,7 +1,7 @@
+ {
+   "color": {
+     "text": {
+-      "base": { "value": "#ffffff" },
++      "base": { "value": "{color.neutral.50}" },
+       "muted": { "value": "#94a3b8" }
+     },
+     "alert": {
