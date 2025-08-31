@@ -78,9 +78,26 @@ Common environment variables used by services in this repo:
 
 
 
-# Optional outgoing HTTP(S) proxy for upstream requests
-# HTTPS_PROXY=
-# HTTP_PROXY=
+# Web App .env.local.examples
+
+- `NEXT_PUBLIC_API_BASE_URL` - 
+- `NEXT_PUBLIC_DEV_PORT` - 
+- `NEXT_PUBLIC_PLAYBACK_FPS` - 
+- `NEXT_PUBLIC_ENABLE_TILE_CACHE` - 
+- `NEXT_PUBLIC_TILE_CACHE_SIZE` - 
+- `NEXT_PUBLIC_TILE_CACHE_TTL` - 
+- `NEXT_PUBLIC_TILE_CACHE_MAX_AGE ` - 
+- `NEXT_PUBLIC_TILE_CACHE_MAX_ENTRIES` - 
+- `NEXT_PUBLIC_TILE_CACHE_MAX_SIZE` - 
+- `NEXT_PUBLIC_TILE_CACHE_MAX_AGE` - 
+- `NEXT_PUBLIC_TILE_CACHE_MAX_ENTRIES` - 
+- `NEXT_PUBLIC_TILE_CACHE_MAX_SIZE` - 
+- `NEXT_PUBLIC_TILE_CACHE_MAX_AGE` - 
+- `NEXT_PUBLIC_TILE_CACHE_MAX_ENTRIES` - 
+- `NEXT_PUBLIC_TILE_CACHE_MAX_SIZE` - 
+- `NEXT_PUBLIC_TILE_CACHE_MAX_AGE` - 
+
+
 
 # Optional outgoing SOCKS proxy for upstream requests
 # SOCKS_PROXY=
