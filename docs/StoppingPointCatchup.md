@@ -17,7 +17,7 @@ Today’s work delivers a production‑ready proxy layer (GIBS/OWM/RainViewer/NW
   - OpenWeatherMap tiles proxy + allowlist + 60s cache
     - Endpoint: `/api/owm/:layer/:z/:x/:y.png`
     - Files: `proxy-server/src/owm.ts`
-    - Tests: `proxy-server/test/owm.test.ts` (skips if `OWM_API_KEY` unset)
+    - Tests: `proxy-server/test/owm.test.ts` (skips if `OPENWEATHER_API_KEY` unset)
   - RainViewer frames proxy + fallback + 60s cache
     - Endpoint: `/api/rainviewer/:ts/:size/:z/:x/:y/:color/:options.png`
     - Files: `proxy-server/src/rainviewer.ts`
@@ -63,7 +63,7 @@ Today’s work delivers a production‑ready proxy layer (GIBS/OWM/RainViewer/NW
     - `.gitignore` ignores `.env` and `.venv/` (Python venvs)
     - `proxy-server/.env.example`, `apps/web/.env.example`
   - Release notes & version bump
-    - `dev/update.md` (v0.1.0), `README.md` notes, PR opened (`release/v0.1.0`)
+    - `dev/update.md` (v0.1.0), `README_MAIN.md` notes, PR opened (`release/v0.1.0`)
 
 ## Partially Implemented / Deferred
 

@@ -39,7 +39,7 @@ resource "aws_lambda_function" "proxy_api" {
   environment {
     variables = {
       NWS_USER_AGENT   = var.nws_user_agent
-      OWM_API_KEY      = var.owm_api_key
+      OPENWEATHER_API_KEY = var.openweather_api_key
       RAINVIEWER_ENABLED = "true"
       GIBS_ENABLED     = "true"
       GLM_TOE_PY_URL   = var.glm_toe_py_url

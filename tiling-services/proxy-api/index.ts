@@ -188,8 +188,9 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
       const [, layer, z, x, y] = m;
       if (!OWM_ALLOW.has(layer))
         return json(400, { error: 'unknown or blocked layer' });
-      const apiKey = process.env.OWM_API_KEY;
-      if (!apiKey) return json(503, { error: 'OWM_API_KEY not configured' });
+      const apiKey = process.env.OPENWEATHER_API_KEY;
+      if (!apiKey)
+        return json(503, { error: 'OPENWEATHER_API_KEY not configured' });
       const url = buildOwmTileUrl({ layer, z, x, y, apiKey });
       const upstream = await fetchWithRetry(url, {});
       const buf = Buffer.from(await upstream.arrayBuffer());

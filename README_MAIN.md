@@ -33,7 +33,8 @@ This commit establishes Milestone M1: foundational infrastructure configuration 
 ## Environment Variables
 
 - `NWS_USER_AGENT` – Required User-Agent string for National Weather Service API requests.
-- `OWM_API_KEY` – OpenWeatherMap tile API key used by the proxy.
+- `OPENWEATHER_API_KEY` – OpenWeatherMap tile API key used by the proxy.
+- `NEXT_PUBLIC_API_BASE_URL` – Base URL for frontend requests to the proxy.
 - `RAINVIEWER_ENABLED` – `true|false` to enable/disable RainViewer proxy (default enabled).
 - `GIBS_ENABLED` – `true|false` to enable/disable GIBS proxy (if implemented).
 - `WEATHERKIT_TEAM_ID` – Apple Developer team ID for WeatherKit JWTs.
@@ -156,7 +157,8 @@ Scripts and utilities load from this file as the single source of truth for port
 This commit establishes Milestone M1: foundational infrastructure configuration and a minimal app shell with Tracestrack basemap tiles.
 ## Environment Variables
 - `NWS_USER_AGENT` – Required User-Agent string for National Weather Service API requests.
-- `OWM_API_KEY` – OpenWeatherMap tile API key used by the proxy.
+- `OPENWEATHER_API_KEY` – OpenWeatherMap tile API key used by the proxy.
+- `NEXT_PUBLIC_API_BASE_URL` – Base URL for frontend requests to the proxy.
 - `RAINVIEWER_ENABLED` – `true|false` to enable/disable RainViewer proxy (default enabled).
 - `GIBS_ENABLED` – `true|false` to enable/disable GIBS proxy (if implemented).
 - `CESIUM_ION_KEY` – Cesium ion tokens as required.

@@ -47,7 +47,7 @@ variable "nws_user_agent" {
   default     = ""
 }
 
-variable "owm_api_key" {
+variable "openweather_api_key" {
   description = "OpenWeatherMap API key for tile proxy"
   type        = string
   sensitive   = true

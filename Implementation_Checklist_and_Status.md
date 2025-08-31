@@ -144,12 +144,12 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 
 - [x] 2025-08-30 — Tracestrack basemap fallback & env var rename
   - Summary: CyclOSM now loads as the primary basemap with automatic fallback to Tracestrack tiles; renamed `TTRACK_API_KEY` to `TRACESTRACK_API_KEY` and removed client-side key exposure.
-  - Files: `apps/web/src/app/page.tsx`, `proxy-server/src/app.ts`, `proxy-server/test/tracestrack.test.ts`, `proxy-server/.env.example`, `apps/web/env.example`, `README.md`
+  - Files: `apps/web/src/app/page.tsx`, `proxy-server/src/app.ts`, `proxy-server/test/tracestrack.test.ts`, `proxy-server/.env.example`, `apps/web/env.example`, `README_MAIN.md`
   - Verification: `pnpm lint`, `pnpm test`
 
 - [x] 2025-08-30 — Air quality proxies
   - Summary: Added `/api/air/airnow` and `/api/air/openaq` routes with feature flags and AirNow API key support.
-  - Files: `packages/proxy-constants/*`, `proxy-server/src/app.ts`, `proxy-server/test/air.test.ts`, `proxy-server/.env.example`, `proxy-server/package.json`, `pnpm-lock.yaml`, `README.md`, `docs/features/open-weather-services.md`
+  - Files: `packages/proxy-constants/*`, `proxy-server/src/app.ts`, `proxy-server/test/air.test.ts`, `proxy-server/.env.example`, `proxy-server/package.json`, `pnpm-lock.yaml`, `README_MAIN.md`, `docs/features/open-weather-services.md`
   - Verification: `pnpm lint`, `pnpm test`, `pnpm --filter proxy-server test`
 
 - [ ] 2025-08-30 — Initial provider modules for open weather APIs
@@ -169,7 +169,7 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 
 - [x] 2025-08-30 — Add Apple WeatherKit provider
   - Summary: Implemented WeatherKit module with JWT auth and documented required env vars.
-  - Files: `packages/providers/weatherkit.ts`, `packages/providers/index.ts`, `providers.json`, `docs/README.md`, `docs/AGENTS.md`
+  - Files: `packages/providers/weatherkit.ts`, `packages/providers/index.ts`, `providers.json`, `README_MAIN.md`, `docs/AGENTS.md`
   - Verification: `pnpm --filter @atmos/providers build`, `pnpm --filter @atmos/providers test`
 
 - [x] 2025-08-30 — FMI Open Data provider module
@@ -299,11 +299,11 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Verification: `pnpm lint` passed; `pnpm test` fails (proxy-server tracestrack tests).
 - [x] 2025-08-30 — Tracestrack basemap fallback & env var rename
   - Summary: CyclOSM now loads as the primary basemap with automatic fallback to Tracestrack tiles; renamed `TTRACK_API_KEY` to `TRACESTRACK_API_KEY` and removed client-side key exposure.
-  - Files: `apps/web/src/app/page.tsx`, `proxy-server/src/app.ts`, `proxy-server/test/tracestrack.test.ts`, `proxy-server/.env.example`, `apps/web/env.example`, `README.md`
+  - Files: `apps/web/src/app/page.tsx`, `proxy-server/src/app.ts`, `proxy-server/test/tracestrack.test.ts`, `proxy-server/.env.example`, `apps/web/env.example`, `README_MAIN.md`
   - Verification: `pnpm lint`, `pnpm test`
 - [x] 2025-08-30 — Air quality proxies
   - Summary: Added `/api/air/airnow` and `/api/air/openaq` routes with feature flags and AirNow API key support.
-  - Files: `packages/proxy-constants/*`, `proxy-server/src/app.ts`, `proxy-server/test/air.test.ts`, `proxy-server/.env.example`, `proxy-server/package.json`, `pnpm-lock.yaml`, `README.md`, `docs/features/open-weather-services.md`
+  - Files: `packages/proxy-constants/*`, `proxy-server/src/app.ts`, `proxy-server/test/air.test.ts`, `proxy-server/.env.example`, `proxy-server/package.json`, `pnpm-lock.yaml`, `README_MAIN.md`, `docs/features/open-weather-services.md`
   - Verification: `pnpm lint`, `pnpm test`, `pnpm --filter proxy-server test`
 - [x] 2025-08-30 — Initial provider modules for open weather APIs
   - Summary: Added `@atmos/providers` package with NWS Weather, MET Norway, Open-Meteo, and OpenWeather One Call modules plus provider manifest.
@@ -402,18 +402,32 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Added provider for NASA CMR STAC API with optional Earthdata token support and POST search requests.
   - Verification: `pnpm lint` fails (apps/web), `pnpm --filter @atmos/providers test`
 - [x] 2025-09-04 — NWS provider documentation & attribution
-  - Summary: Documented `NWS_USER_AGENT` env var and credited NOAA/NWS in README.
-  - Files: `docs/README.md`, `docs/Implementation_Checklist_and_Status.md`
+  - Summary: Documented `NWS_USER_AGENT` env var and credited NOAA/NWS in README_MAIN.md.
+  - Files: `README_MAIN.md`, `Implementation_Checklist_and_Status.md`
   - Verification: Documentation only.
 - [x] 2025-09-04 — OpenWeatherMap provider documentation & attribution
   - Summary: Documented `OWM_API_KEY` env var and added OpenWeatherMap attribution.
 - [x] 2025-09-04 — RainViewer provider attribution
-  - Summary: Added attribution for RainViewer radar imagery in README.
+  - Summary: Added attribution for RainViewer radar imagery in README_MAIN.md.
 - [x] 2025-09-04 — NASA GIBS provider attribution
-  - Summary: Credited NASA EOSDIS for GIBS imagery in README.
+  - Summary: Credited NASA EOSDIS for GIBS imagery in README_MAIN.md.
 - [x] 2025-09-04 — Tracestrack basemap env var & attribution
   - Summary: Added `TRACESTRACK_API_KEY` env var and noted Tracestrack/CyclOSM attribution.
 - [x] 2025-09-04 — AirNow proxy env vars & attribution
   - Summary: Documented `AIRNOW_ENABLED`/`AIRNOW_API_KEY` and credited AirNow program.
 - [x] 2025-09-04 — OpenAQ proxy env var & attribution
   - Summary: Documented `OPENAQ_ENABLED` env flag and added OpenAQ attribution.
+- [x] 2025-08-28 — Repository audit docs
+  - Summary: Added top-level Findings, SuggestedFixes patch, and Followups plan.
+  - Files: `Findings.md`, `SuggestedFixes.patch`, `Followups.md`
+  - Verification: Documentation only; `pnpm test` run.
+
+- [x] 2025-09-29 — OpenWeather env var rename & NWS client fix
+  - Summary: Standardized `OPENWEATHER_API_KEY`, replaced hard-coded User-Agent, and routed NWS provider through `fetchWithRetry`.
+  - Files: `proxy-server/src/app.ts`, `tiling-services/proxy-api/index.ts`, `packages/providers/nws.ts`, `packages/providers/nws.js`, `README_MAIN.md`, `infra/*`, `Findings.md`, `Followups.md`, `SuggestedFixes.patch`, `docs/AGENTS.md`
+  - Verification: `pnpm lint`; `pnpm test` (fails: providers build error).
+
+- [ ] 2025-09-30 — Rename primary README and audit references
+  - Summary: Moved main docs to `README_MAIN.md`, relocated implementation log to repo root, renamed `SuggestedFixes.patch`, and updated references; removed `any` type from `apps/web/src/app/page.tsx`.
+  - Files: `README_MAIN.md`, `Implementation_Checklist_and_Status.md`, `docs/AGENTS.md`, `docs/StoppingPointCatchup.md`, `Followups.md`, `apps/web/src/app/page.tsx`
+  - Verification: `pnpm lint` (after fix), `pnpm test` (expected failure: providers build error).

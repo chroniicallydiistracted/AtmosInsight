@@ -68,8 +68,8 @@ export default function Home() {
 
     map.addControl(new maplibregl.AttributionControl({ compact: true }));
 
-    map.on('error', (e: any) => {
-      const err = e as any;
+    map.on('error', e => {
+      const err = e as maplibregl.MapLibreEvent & { sourceId?: string };
       if (err && err.sourceId === 'cyclosm') {
         map.setLayoutProperty('basemap-cyclosm', 'visibility', 'none');
         map.setLayoutProperty('basemap-tracestrack', 'visibility', 'visible');

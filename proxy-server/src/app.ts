@@ -302,7 +302,7 @@ app.get('/api/osm/cyclosm/:z/:x/:y.png', shortLived60, async (req, res) => {
           targetUrl,
           {
             headers: {
-              'User-Agent': 'AtmosInsight/1.0 (https://github.com/your-repo)',
+              'User-Agent': DEFAULT_NWS_USER_AGENT,
               Accept: 'image/png,image/*,*/*',
             },
             signal: AbortSignal.timeout(5000), // 5 second timeout
@@ -356,12 +356,14 @@ app.get('/api/owm/:layer/:z/:x/:y.png', shortLived60, async (req, res) => {
       return;
     }
 
-    const apiKey = process.env.OWM_API_KEY;
+    const apiKey = process.env.OPENWEATHER_API_KEY;
     if (!apiKey) {
-      res.status(HTTP_STATUS.SERVICE_UNAVAILABLE).json(createErrorResponse(
-        HTTP_STATUS.SERVICE_UNAVAILABLE,
-        'OWM_API_KEY not configured'
-      ));
+      res.status(HTTP_STATUS.SERVICE_UNAVAILABLE).json(
+        createErrorResponse(
+          HTTP_STATUS.SERVICE_UNAVAILABLE,
+          'OPENWEATHER_API_KEY not configured'
+        )
+      );
       return;
     }
 
