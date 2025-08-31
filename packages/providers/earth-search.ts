@@ -14,7 +14,10 @@ export function buildRequest({ bbox, datetime, collections }: Params) {
   } as const;
 }
 
-export async function fetchJson({ url, body }: ReturnType<typeof buildRequest>): Promise<any> {
+export async function fetchJson({
+  url,
+  body,
+}: ReturnType<typeof buildRequest>): Promise<any> {
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

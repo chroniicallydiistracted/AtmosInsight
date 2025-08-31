@@ -17,12 +17,16 @@ describe('nasa gibs provider', () => {
       x: '2',
       ext: 'png',
     });
-    expect(url).toBe('https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/BlueMarble_ShadedRelief/default/250m/3/1/2.png');
+    expect(url).toBe(
+      'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/BlueMarble_ShadedRelief/default/250m/3/1/2.png'
+    );
   });
 
   it('builds XYZ alias URL for EPSG:3857', () => {
     const url = buildRequest({ type: 'xyz', z: '3', y: '1', x: '2' });
-    expect(url).toBe('https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/2020-06-01/GoogleMapsCompatible_Level3/3/1/2.jpg');
+    expect(url).toBe(
+      'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/2020-06-01/GoogleMapsCompatible_Level3/3/1/2.jpg'
+    );
   });
 
   it('builds DescribeDomains URL', () => {
@@ -32,12 +36,16 @@ describe('nasa gibs provider', () => {
       tms: '250m',
       range: '2000-01-01--2020-01-01',
     });
-    expect(url).toBe('https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/1.0.0/BlueMarble_ShadedRelief/default/250m/all/2000-01-01--2020-01-01.xml');
+    expect(url).toBe(
+      'https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/1.0.0/BlueMarble_ShadedRelief/default/250m/all/2000-01-01--2020-01-01.xml'
+    );
   });
 
   it('appends EARTHDATA token when fetching tile', async () => {
     process.env.EARTHDATA_TOKEN = 'secret';
-    const mock = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)) });
+    const mock = vi.fn().mockResolvedValue({
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+    });
     // @ts-ignore
     global.fetch = mock;
     const url = buildRequest({
@@ -53,4 +61,3 @@ describe('nasa gibs provider', () => {
     expect(mock).toHaveBeenCalledWith(`${url}?token=secret`);
   });
 });
-

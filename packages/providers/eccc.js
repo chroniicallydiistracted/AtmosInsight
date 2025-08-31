@@ -1,35 +1,29 @@
 export const slug = 'eccc-geomet';
 export const baseUrl = 'https://geo.weather.gc.ca/geomet';
 export function buildRequest(params) {
-    const { urlTemplate, ...rest } = params;
-    if (urlTemplate) {
-        let path = urlTemplate.replace(/\{(\w+)\}/g, (_match, key) => {
-            if (!(key in rest))
-                throw new Error(`Missing parameter ${key}`);
-            return encodeURIComponent(rest[key]);
-        });
-        return `${baseUrl.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+  const { urlTemplate, ...rest } = params;
+  if (urlTemplate) {
+    let path = urlTemplate.replace(/\{(\w+)\}/g, (_match, key) => {
+      if (!(key in rest)) throw new Error(`Missing parameter ${key}`);
+      return encodeURIComponent(rest[key]);
+    });
+    return `${baseUrl.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+  }
+  const keys = Object.keys(rest).sort();
+  const search = new URLSearchParams();
+  for (const key of keys) {
+    const value = rest[key];
+    if (value === undefined || value === null) continue;
+    if (Array.isArray(value)) {
+      search.set(key, value.join(','));
+    } else {
+      search.set(key, String(value));
     }
-    const keys = Object.keys(rest).sort();
-    const search = new URLSearchParams();
-    for (const key of keys) {
-        const value = rest[key];
-        if (value === undefined || value === null)
-            continue;
-        if (Array.isArray(value)) {
-            search.set(key, value.join(','));
-        }
-        else {
-            search.set(key, String(value));
-        }
-    }
-    const query = search
-        .toString()
-        .replace(/%3A/g, ':')
-        .replace(/%2C/g, ',');
-    return query ? `${baseUrl}?${query}` : baseUrl;
+  }
+  const query = search.toString().replace(/%3A/g, ':').replace(/%2C/g, ',');
+  return query ? `${baseUrl}?${query}` : baseUrl;
 }
 export async function fetchTile(url) {
-    const res = await fetch(url);
-    return res.arrayBuffer();
+  const res = await fetch(url);
+  return res.arrayBuffer();
 }

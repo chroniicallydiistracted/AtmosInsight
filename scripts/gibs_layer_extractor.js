@@ -12,7 +12,7 @@ const WMTS_URL =
   'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/wmts.cgi?SERVICE=WMTS&REQUEST=GetCapabilities';
 
 // Helpers
-const toArray = (x) => (Array.isArray(x) ? x : x ? [x] : []);
+const toArray = x => (Array.isArray(x) ? x : x ? [x] : []);
 function textOf(v) {
   if (typeof v === 'string') return v;
   if (v && typeof v === 'object' && '#text' in v) {
@@ -52,7 +52,7 @@ async function fetchAndExtractLayers() {
 
       // Extract Time Dimension
       const timeDimension = toArray(L?.Dimension).find(
-        (dim) => textOf(dim?.Identifier) === 'Time'
+        dim => textOf(dim?.Identifier) === 'Time'
       );
       if (timeDimension) {
         layerInfo.timeOptions = {
@@ -65,15 +65,15 @@ async function fetchAndExtractLayers() {
       const tileMatrixSetLinks = toArray(L?.TileMatrixSetLink);
       for (const tmsLink of tileMatrixSetLinks) {
         const tileMatrixSet = textOf(tmsLink?.TileMatrixSet);
-        const tileMatrixSetLimits = toArray(tmsLink?.TileMatrixSetLimits?.TileMatrixLimits).map(
-          (limit) => ({
-            tileMatrix: textOf(limit?.TileMatrix),
-            minTileRow: textOf(limit?.MinTileRow),
-            maxTileRow: textOf(limit?.MaxTileRow),
-            minTileCol: textOf(limit?.MinTileCol),
-            maxTileCol: textOf(limit?.MaxTileCol),
-          })
-        );
+        const tileMatrixSetLimits = toArray(
+          tmsLink?.TileMatrixSetLimits?.TileMatrixLimits
+        ).map(limit => ({
+          tileMatrix: textOf(limit?.TileMatrix),
+          minTileRow: textOf(limit?.MinTileRow),
+          maxTileRow: textOf(limit?.MaxTileRow),
+          minTileCol: textOf(limit?.MinTileCol),
+          maxTileCol: textOf(limit?.MaxTileCol),
+        }));
         layerInfo.tileMatrixSets.push({
           name: tileMatrixSet,
           limits: tileMatrixSetLimits,
@@ -81,7 +81,7 @@ async function fetchAndExtractLayers() {
       }
 
       // Extract ResourceURLs
-      const resourceUrls = toArray(L?.ResourceURL).map((url) => ({
+      const resourceUrls = toArray(L?.ResourceURL).map(url => ({
         format: url?.format,
         resourceType: url?.resourceType,
         template: url?.template,

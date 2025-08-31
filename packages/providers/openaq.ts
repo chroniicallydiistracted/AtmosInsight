@@ -7,7 +7,11 @@ export interface Params {
   parameter: string;
 }
 
-export function buildRequest({ coordinates, radius, parameter }: Params): string {
+export function buildRequest({
+  coordinates,
+  radius,
+  parameter,
+}: Params): string {
   return `${baseUrl}/latest?coordinates=${coordinates}&radius=${radius}&parameter=${parameter}`;
 }
 

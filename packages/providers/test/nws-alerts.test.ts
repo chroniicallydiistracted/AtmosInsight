@@ -7,8 +7,14 @@ describe('nws alerts provider', () => {
   });
 
   it('builds alerts URL with filters', () => {
-    const url = buildRequest({ status: 'actual', area: 'AZ', urgency: 'Immediate' });
-    expect(url).toBe('https://api.weather.gov/alerts?status=actual&area=AZ&urgency=Immediate');
+    const url = buildRequest({
+      status: 'actual',
+      area: 'AZ',
+      urgency: 'Immediate',
+    });
+    expect(url).toBe(
+      'https://api.weather.gov/alerts?status=actual&area=AZ&urgency=Immediate'
+    );
   });
 
   it('injects headers', async () => {
@@ -19,7 +25,9 @@ describe('nws alerts provider', () => {
     await fetchJson(url);
     expect(mock).toHaveBeenCalledWith(url, {
       headers: {
-        'User-Agent': process.env.NWS_USER_AGENT || '(AtmosInsight, contact@atmosinsight.com)',
+        'User-Agent':
+          process.env.NWS_USER_AGENT ||
+          '(AtmosInsight, contact@atmosinsight.com)',
         Accept: 'application/geo+json',
       },
     });

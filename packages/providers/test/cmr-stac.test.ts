@@ -27,7 +27,10 @@ describe('cmr-stac provider', () => {
     const mock = vi.fn().mockResolvedValue({ json: () => Promise.resolve({}) });
     // @ts-ignore
     global.fetch = mock;
-    const { url, body } = buildRequest({ catalog: 'LANCE', bbox: [1, 2, 3, 4] });
+    const { url, body } = buildRequest({
+      catalog: 'LANCE',
+      bbox: [1, 2, 3, 4],
+    });
     await fetchJson(url, body);
     expect(mock).toHaveBeenCalledWith(url, {
       method: 'POST',
@@ -43,7 +46,10 @@ describe('cmr-stac provider', () => {
     const mock = vi.fn().mockResolvedValue({ json: () => Promise.resolve({}) });
     // @ts-ignore
     global.fetch = mock;
-    const { url, body } = buildRequest({ catalog: 'LANCE', bbox: [1, 2, 3, 4] });
+    const { url, body } = buildRequest({
+      catalog: 'LANCE',
+      bbox: [1, 2, 3, 4],
+    });
     await fetchJson(url, body);
     expect(mock).toHaveBeenCalledWith(url, {
       method: 'POST',

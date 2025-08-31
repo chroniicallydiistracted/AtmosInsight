@@ -26,7 +26,7 @@ export const PORTS = {
   PROXY: config.proxy,
   CATALOG: config.catalog,
   WEB: config.web,
-  DATABASE: config.database
+  DATABASE: config.database,
 };
 
 // Standardized error response format
@@ -36,7 +36,11 @@ export interface ErrorResponse {
   details?: Record<string, unknown>;
 }
 
-export function createErrorResponse(status: number, error: string, details?: Record<string, unknown>): ErrorResponse {
+export function createErrorResponse(
+  status: number,
+  error: string,
+  details?: Record<string, unknown>
+): ErrorResponse {
   return { status, error, details };
 }
 
@@ -47,7 +51,11 @@ export interface SuccessResponse<T = unknown> {
   headers?: Record<string, string>;
 }
 
-export function createSuccessResponse<T>(status: number, data: T, headers?: Record<string, string>): SuccessResponse<T> {
+export function createSuccessResponse<T>(
+  status: number,
+  data: T,
+  headers?: Record<string, string>
+): SuccessResponse<T> {
   return { status, data, headers };
 }
 
@@ -64,7 +72,7 @@ export const HTTP_STATUS = {
   INTERNAL_SERVER_ERROR: 500,
   BAD_GATEWAY: 502,
   SERVICE_UNAVAILABLE: 503,
-  GATEWAY_TIMEOUT: 504
+  GATEWAY_TIMEOUT: 504,
 };
 
 // Common headers
@@ -75,35 +83,41 @@ export const HEADERS = {
   XML: { 'Content-Type': 'application/xml' },
   CACHE_SHORT: { 'Cache-Control': 'public, max-age=60' },
   CACHE_MEDIUM: { 'Cache-Control': 'public, max-age=300' },
-  CACHE_LONG: { 'Cache-Control': 'public, max-age=3600' }
+  CACHE_LONG: { 'Cache-Control': 'public, max-age=3600' },
 };
 
 // Port checking utility
 export function isPortInUse(port: number): Promise<boolean> {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const { exec } = require('child_process');
 
     // Try multiple methods to check port usage
-    exec(`lsof -Pi :${port} -sTCP:LISTEN -t 2>/dev/null`, (error: any, stdout: string) => {
-      if (!error && stdout) {
-        resolve(true);
-        return;
-      }
-
-      exec(`ss -tlnp | grep ":${port} " 2>/dev/null`, (error2: any, stdout2: string) => {
-        if (!error2 && stdout2) {
+    exec(
+      `lsof -Pi :${port} -sTCP:LISTEN -t 2>/dev/null`,
+      (error: any, stdout: string) => {
+        if (!error && stdout) {
           resolve(true);
-        } else {
-          resolve(false);
+          return;
         }
-      });
-    });
+
+        exec(
+          `ss -tlnp | grep ":${port} " 2>/dev/null`,
+          (error2: any, stdout2: string) => {
+            if (!error2 && stdout2) {
+              resolve(true);
+            } else {
+              resolve(false);
+            }
+          }
+        );
+      }
+    );
   });
 }
 
 // Process killing utility
 export async function killProcessOnPort(port: number): Promise<boolean> {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const { exec } = require('child_process');
 
     // Try to kill using lsof first
@@ -115,17 +129,20 @@ export async function killProcessOnPort(port: number): Promise<boolean> {
             // Wait a moment for graceful shutdown
             setTimeout(() => {
               // Check if process is still running
-              exec(`ps -p ${pid.trim()} -o comm= 2>/dev/null`, (checkError: any) => {
-                if (!checkError) {
-                  // If still running, force kill
-                  exec(`kill -KILL ${pid.trim()}`, (forceKillError: any) => {
-                    resolve(!forceKillError);
-                  });
-                } else {
-                  // Process terminated gracefully
-                  resolve(true);
+              exec(
+                `ps -p ${pid.trim()} -o comm= 2>/dev/null`,
+                (checkError: any) => {
+                  if (!checkError) {
+                    // If still running, force kill
+                    exec(`kill -KILL ${pid.trim()}`, (forceKillError: any) => {
+                      resolve(!forceKillError);
+                    });
+                  } else {
+                    // Process terminated gracefully
+                    resolve(true);
+                  }
                 }
-              });
+              );
             }, 3000);
           } else {
             // Failed to send termination signal, try force kill
@@ -158,14 +175,14 @@ export function createHealthCheckEndpoint(serviceName: string) {
       res.status(200).json({
         service: serviceName,
         status: 'healthy',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     } catch (error) {
       res.status(500).json({
         service: serviceName,
         status: 'unhealthy',
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
   };

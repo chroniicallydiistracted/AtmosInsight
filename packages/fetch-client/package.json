@@ -7,7 +7,7 @@
   "dependencies": {
     "@atmos/shared-utils": "workspace:*"
   },
- "scripts": {
+  "scripts": {
     "build": "tsc",
     "test": "vitest run"
   },

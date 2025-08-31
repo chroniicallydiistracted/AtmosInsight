@@ -9,7 +9,9 @@ describe('met norway provider', () => {
 
   it('builds locationforecast URL', () => {
     const url = buildRequest({ lat: 59.91, lon: 10.75, format: 'compact' });
-    expect(url).toBe('https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=59.91&lon=10.75');
+    expect(url).toBe(
+      'https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=59.91&lon=10.75'
+    );
   });
 
   it('injects User-Agent header', async () => {

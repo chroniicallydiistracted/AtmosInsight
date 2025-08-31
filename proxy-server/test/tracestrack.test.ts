@@ -23,21 +23,21 @@ describe('Tracestrack tile proxy', () => {
 
   it('requests tile with interpolated coordinates when key present', async () => {
     process.env.TRACESTRACK_API_KEY = 'test-key';
-    const fetchSpy = vi
-      .spyOn(globalThis, 'fetch')
-      .mockResolvedValue(
-        new Response('ok', {
-          status: 200,
-          headers: { 'content-type': 'image/webp' },
-        }) as any
-      );
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response('ok', {
+        status: 200,
+        headers: { 'content-type': 'image/webp' },
+      }) as any
+    );
 
     const res = await request(app).get('/api/tracestrack/topo/4/5/6.webp');
     expect(res.status).toBe(200);
-  const calledUrl = fetchSpy.mock.calls[0][0] as string;
-  // parse URL and assert required parts (allow optional style param)
-  const u = new URL(calledUrl);
-  expect(u.origin + u.pathname).toBe('https://tile.tracestrack.com/topo/4/5/6.webp');
-  expect(u.searchParams.get('key')).toBe('test-key');
+    const calledUrl = fetchSpy.mock.calls[0][0] as string;
+    // parse URL and assert required parts (allow optional style param)
+    const u = new URL(calledUrl);
+    expect(u.origin + u.pathname).toBe(
+      'https://tile.tracestrack.com/topo/4/5/6.webp'
+    );
+    expect(u.searchParams.get('key')).toBe('test-key');
   });
 });

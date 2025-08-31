@@ -12,7 +12,9 @@ const manifest = JSON.parse(
 
 describe('provider manifest', () => {
   it('matches exports and is sorted', () => {
-    const exportedSlugs = Object.values(providers).map((p: any) => p.slug).sort();
+    const exportedSlugs = Object.values(providers)
+      .map((p: any) => p.slug)
+      .sort();
     const manifestSlugs = manifest.map((p: any) => p.slug);
     expect(manifestSlugs).toEqual([...manifestSlugs].sort());
     expect(manifestSlugs).toEqual(exportedSlugs);

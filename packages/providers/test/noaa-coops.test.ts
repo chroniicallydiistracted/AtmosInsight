@@ -16,7 +16,9 @@ describe('noaa-coops provider', () => {
       time_zone: 'gmt',
       format: 'json',
     });
-    expect(url).toBe('https://api.tidesandcurrents.noaa.gov/api/prod?product=water_level&station=8724580&begin_date=20200101&end_date=20200102&units=metric&time_zone=gmt&format=json');
+    expect(url).toBe(
+      'https://api.tidesandcurrents.noaa.gov/api/prod?product=water_level&station=8724580&begin_date=20200101&end_date=20200102&units=metric&time_zone=gmt&format=json'
+    );
   });
 
   it('calls fetch without headers', async () => {

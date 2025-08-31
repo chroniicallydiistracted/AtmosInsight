@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from '../server.ts';
 
-test('serves catalog layers over HTTP', async (t) => {
+test('serves catalog layers over HTTP', async t => {
   const server = createServer().listen(0);
   t.after(() => server.close());
   const port = server.address().port;

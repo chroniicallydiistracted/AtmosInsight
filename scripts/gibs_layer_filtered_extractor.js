@@ -18,7 +18,7 @@ const WMTS_URL =
 const keyword = process.argv[2];
 
 // Helpers
-const toArray = (x) => (Array.isArray(x) ? x : x ? [x] : []);
+const toArray = x => (Array.isArray(x) ? x : x ? [x] : []);
 function textOf(v) {
   if (typeof v === 'string') return v;
   if (v && typeof v === 'object' && '#text' in v) {
@@ -65,7 +65,7 @@ async function fetchAndExtractLayers() {
       // Extract Time Dimension - get all values first for filtering
       let allTimeValues = [];
       const timeDimension = toArray(L?.Dimension).find(
-        (dim) => textOf(dim?.Identifier) === 'Time'
+        dim => textOf(dim?.Identifier) === 'Time'
       );
       if (timeDimension) {
         allTimeValues = toArray(timeDimension?.Value).map(textOf);
@@ -97,7 +97,9 @@ async function fetchAndExtractLayers() {
       // 2. Identifier Keyword Filter: Case-insensitive substring search
       let passesKeywordFilter = true;
       if (keyword) {
-        if (!layerInfo.identifier.toLowerCase().includes(keyword.toLowerCase())) {
+        if (
+          !layerInfo.identifier.toLowerCase().includes(keyword.toLowerCase())
+        ) {
           passesKeywordFilter = false;
         }
       }
@@ -108,7 +110,9 @@ async function fetchAndExtractLayers() {
 
       // If filters passed, now set the time values for output (only the most recent)
       if (allTimeValues.length > 0) {
-        layerInfo.timeOptions.values = [allTimeValues[allTimeValues.length - 1]];
+        layerInfo.timeOptions.values = [
+          allTimeValues[allTimeValues.length - 1],
+        ];
       } else {
         layerInfo.timeOptions.values = [];
       }
@@ -117,15 +121,15 @@ async function fetchAndExtractLayers() {
       const tileMatrixSetLinks = toArray(L?.TileMatrixSetLink);
       for (const tmsLink of tileMatrixSetLinks) {
         const tileMatrixSet = textOf(tmsLink?.TileMatrixSet);
-        const tileMatrixSetLimits = toArray(tmsLink?.TileMatrixSetLimits?.TileMatrixLimits).map(
-          (limit) => ({
-            tileMatrix: textOf(limit?.TileMatrix),
-            minTileRow: textOf(limit?.MinTileRow),
-            maxTileRow: textOf(limit?.MaxTileRow),
-            minTileCol: textOf(limit?.MinTileCol),
-            maxTileCol: textOf(limit?.MaxTileCol),
-          })
-        );
+        const tileMatrixSetLimits = toArray(
+          tmsLink?.TileMatrixSetLimits?.TileMatrixLimits
+        ).map(limit => ({
+          tileMatrix: textOf(limit?.TileMatrix),
+          minTileRow: textOf(limit?.MinTileRow),
+          maxTileRow: textOf(limit?.MaxTileRow),
+          minTileCol: textOf(limit?.MinTileCol),
+          maxTileCol: textOf(limit?.MaxTileCol),
+        }));
         layerInfo.tileMatrixSets.push({
           name: tileMatrixSet,
           limits: tileMatrixSetLimits,
@@ -133,7 +137,7 @@ async function fetchAndExtractLayers() {
       }
 
       // Extract ResourceURLs (only if passed filters)
-      const resourceUrls = toArray(L?.ResourceURL).map((url) => ({
+      const resourceUrls = toArray(L?.ResourceURL).map(url => ({
         format: url?.format,
         resourceType: url?.resourceType,
         template: url?.template,
@@ -142,7 +146,10 @@ async function fetchAndExtractLayers() {
       layerInfo.resourceUrls = resourceUrls;
 
       // --- Clean up layerInfo for cleaner output ---
-      if (layerInfo.timeOptions && Object.keys(layerInfo.timeOptions).length === 0) {
+      if (
+        layerInfo.timeOptions &&
+        Object.keys(layerInfo.timeOptions).length === 0
+      ) {
         delete layerInfo.timeOptions;
       }
       if (layerInfo.tileMatrixSets.length === 0) {
@@ -160,13 +167,17 @@ async function fetchAndExtractLayers() {
     if (extractedData.length === 0) {
       outputString = 'No layers found matching the criteria.';
     } else {
-      extractedData.forEach((layer) => {
+      extractedData.forEach(layer => {
         outputString += `--- Layer: ${layer.identifier} ---
 `;
         outputString += `Title: ${layer.title}
 `;
 
-        if (layer.timeOptions && layer.timeOptions.values && layer.timeOptions.values.length > 0) {
+        if (
+          layer.timeOptions &&
+          layer.timeOptions.values &&
+          layer.timeOptions.values.length > 0
+        ) {
           outputString += `Most Recent Time: ${layer.timeOptions.values[0]} (Default: ${layer.timeOptions.default})
 `;
         }
@@ -175,16 +186,26 @@ async function fetchAndExtractLayers() {
           outputString += `
 Tile Matrix Sets:
 `;
-          layer.tileMatrixSets.forEach((tms) => {
+          layer.tileMatrixSets.forEach(tms => {
             outputString += `  - Name: ${tms.name}
 `;
             if (tms.limits && tms.limits.length > 0) {
-              const matrixLevels = tms.limits.map(limit => limit.tileMatrix).join(', ');
+              const matrixLevels = tms.limits
+                .map(limit => limit.tileMatrix)
+                .join(', ');
               // Calculate overall min/max for rows and columns
-              const allMinRows = tms.limits.map(limit => parseInt(limit.minTileRow, 10));
-              const allMaxRows = tms.limits.map(limit => parseInt(limit.maxTileRow, 10));
-              const allMinCols = tms.limits.map(limit => parseInt(limit.minTileCol, 10));
-              const allMaxCols = tms.limits.map(limit => parseInt(limit.maxTileCol, 10));
+              const allMinRows = tms.limits.map(limit =>
+                parseInt(limit.minTileRow, 10)
+              );
+              const allMaxRows = tms.limits.map(limit =>
+                parseInt(limit.maxTileRow, 10)
+              );
+              const allMinCols = tms.limits.map(limit =>
+                parseInt(limit.minTileCol, 10)
+              );
+              const allMaxCols = tms.limits.map(limit =>
+                parseInt(limit.maxTileCol, 10)
+              );
 
               const overallMinRow = Math.min(...allMinRows);
               const overallMaxRow = Math.max(...allMaxRows);
@@ -205,15 +226,14 @@ Tile Matrix Sets:
           outputString += `
 Resource URLs:
 `;
-          layer.resourceUrls.forEach((url) => {
+          layer.resourceUrls.forEach(url => {
             outputString += `  - Template: ${url.template}
 `;
             outputString += `    Format: ${url.format}, Type: ${url.resourceType}, Ext: ${url.ext}
 `;
           });
         }
-        outputString += 
-`
+        outputString += `
 --------------------------------------------------
 `;
       });

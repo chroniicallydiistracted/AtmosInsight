@@ -26,10 +26,7 @@ export function buildRequest(params: Params): string {
       search.set(key, String(value));
     }
   }
-  const query = search
-    .toString()
-    .replace(/%3A/g, ':')
-    .replace(/%2C/g, ',');
+  const query = search.toString().replace(/%3A/g, ':').replace(/%2C/g, ',');
   return query ? `${baseUrl}?${query}` : baseUrl;
 }
 

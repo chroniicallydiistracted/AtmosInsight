@@ -15,9 +15,9 @@ describe('nexrad provider', () => {
   });
 
   it('fetches array buffer', async () => {
-    const mock = vi
-      .fn()
-      .mockResolvedValue({ arrayBuffer: () => Promise.resolve(new ArrayBuffer(1)) });
+    const mock = vi.fn().mockResolvedValue({
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(1)),
+    });
     // @ts-ignore
     global.fetch = mock;
     const url = buildRequest({ station: 'KABR', datetime: new Date(0) });
@@ -25,4 +25,3 @@ describe('nexrad provider', () => {
     expect(mock).toHaveBeenCalledWith(url);
   });
 });
-

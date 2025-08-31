@@ -9,7 +9,13 @@ export interface Params {
   endDT: string;
 }
 
-export function buildRequest({ service, sites, parameterCd, startDT, endDT }: Params): string {
+export function buildRequest({
+  service,
+  sites,
+  parameterCd,
+  startDT,
+  endDT,
+}: Params): string {
   const params = new URLSearchParams({
     format: 'json',
     sites,

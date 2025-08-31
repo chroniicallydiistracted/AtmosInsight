@@ -15,8 +15,18 @@ describe('rainviewer provider', () => {
     const mock = vi.fn().mockResolvedValue({ json });
     // @ts-ignore
     global.fetch = mock;
-    const url = await buildRequest({ ts: 1, size: 256, z: 2, x: 3, y: 4, color: 5, options: '0_0' });
-    expect(mock).toHaveBeenCalledWith('https://api.rainviewer.com/public/weather-maps.json');
+    const url = await buildRequest({
+      ts: 1,
+      size: 256,
+      z: 2,
+      x: 3,
+      y: 4,
+      color: 5,
+      options: '0_0',
+    });
+    expect(mock).toHaveBeenCalledWith(
+      'https://api.rainviewer.com/public/weather-maps.json'
+    );
     expect(url).toBe('https://tile.test/v2/radar/1/256/2/3/4/5/0_0.png');
   });
 
@@ -29,4 +39,3 @@ describe('rainviewer provider', () => {
     expect(mock).toHaveBeenCalledWith('https://tile.test/tile.png');
   });
 });
-

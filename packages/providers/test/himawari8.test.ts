@@ -9,6 +9,8 @@ describe('himawari8 provider', () => {
       datetime: dt,
       region: 'R01/0/0.png',
     });
-    expect(url).toBe('https://himawari8.s3.amazonaws.com/prod/2025/01/02/030405/R01/0/0.png');
+    expect(url).toBe(
+      'https://himawari8.s3.amazonaws.com/prod/2025/01/02/030405/R01/0/0.png'
+    );
   });
 });

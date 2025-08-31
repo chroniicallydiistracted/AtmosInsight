@@ -17,7 +17,8 @@ describe('eccc geomet provider', () => {
 
   it('builds wmts REST path', () => {
     const url = buildRequest({
-      urlTemplate: 'wmts/1.0.0/{layer}/{style}/{tileMatrixSet}/{tileMatrix}/{tileRow}/{tileCol}.png',
+      urlTemplate:
+        'wmts/1.0.0/{layer}/{style}/{tileMatrixSet}/{tileMatrix}/{tileRow}/{tileCol}.png',
       layer: 'RDPS.CONUS_T',
       style: 'default',
       tileMatrixSet: 'EPSG4326',

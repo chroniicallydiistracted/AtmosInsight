@@ -1,5 +1,6 @@
 export const slug = 'ukmet-datahub';
-export const baseUrl = 'https://api-metoffice.apiconnect.ibmcloud.com/metoffice/production/v0';
+export const baseUrl =
+  'https://api-metoffice.apiconnect.ibmcloud.com/metoffice/production/v0';
 
 export interface Params {
   path: string;

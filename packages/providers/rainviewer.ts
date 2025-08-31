@@ -33,4 +33,3 @@ export async function fetchTile(url: string): Promise<ArrayBuffer> {
   const res = await fetch(url);
   return res.arrayBuffer();
 }
-

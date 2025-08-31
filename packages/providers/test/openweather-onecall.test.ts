@@ -10,7 +10,9 @@ describe('openweather provider', () => {
   it('builds onecall URL', () => {
     process.env.OPENWEATHER_API_KEY = 'test';
     const url = buildRequest({ lat: 10, lon: 20 });
-    expect(url).toBe('https://api.openweathermap.org/data/3.0/onecall?lat=10&lon=20&appid=test');
+    expect(url).toBe(
+      'https://api.openweathermap.org/data/3.0/onecall?lat=10&lon=20&appid=test'
+    );
   });
 
   it('calls fetch without headers', async () => {

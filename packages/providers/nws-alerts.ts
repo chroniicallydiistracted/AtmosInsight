@@ -21,7 +21,8 @@ export function buildRequest(params: Params = {}): string {
 }
 
 export async function fetchJson(url: string): Promise<any> {
-  const ua = process.env.NWS_USER_AGENT || '(AtmosInsight, contact@atmosinsight.com)';
+  const ua =
+    process.env.NWS_USER_AGENT || '(AtmosInsight, contact@atmosinsight.com)';
   const res = await fetch(url, {
     headers: {
       'User-Agent': ua,

@@ -9,7 +9,9 @@ describe('visual-crossing provider', () => {
   it('builds service URL', () => {
     process.env.VISUAL_CROSSING_API_KEY = 'test';
     const url = buildRequest({ endpoint: 'timeline', location: 'Austin,TX' });
-    expect(url).toBe('https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline?location=Austin%2CTX&key=test');
+    expect(url).toBe(
+      'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline?location=Austin%2CTX&key=test'
+    );
   });
 
   it('calls fetch without headers', async () => {

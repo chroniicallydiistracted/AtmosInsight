@@ -14,7 +14,12 @@ describe('waqi provider', () => {
 
   it('builds tile URL', () => {
     process.env.WAQI_TOKEN = 'test';
-    const url = buildTileUrl({ host: 'https://tiles.waqi.info', z: 1, x: 2, y: 3 });
+    const url = buildTileUrl({
+      host: 'https://tiles.waqi.info',
+      z: 1,
+      x: 2,
+      y: 3,
+    });
     expect(url).toBe('https://tiles.waqi.info/tile/1/2/3.png?token=test');
   });
 

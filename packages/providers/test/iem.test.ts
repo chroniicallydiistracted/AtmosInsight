@@ -8,7 +8,9 @@ describe('iowastate-iem provider', () => {
 
   it('builds tile URL', () => {
     const url = buildRequest({ layer: 'n0q', z: 4, x: 2, y: 1 });
-    expect(url).toBe('https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/n0q/4/2/1.png');
+    expect(url).toBe(
+      'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/n0q/4/2/1.png'
+    );
   });
 
   it('fetches binary tile', async () => {

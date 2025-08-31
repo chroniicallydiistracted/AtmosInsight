@@ -12,7 +12,10 @@ export function buildRequest({ lat, lon, format }: Params): string {
 }
 
 export async function fetchJson(url: string): Promise<any> {
-  const ua = process.env.METNO_USER_AGENT || process.env.NWS_USER_AGENT || '(AtmosInsight, contact@atmosinsight.com)';
+  const ua =
+    process.env.METNO_USER_AGENT ||
+    process.env.NWS_USER_AGENT ||
+    '(AtmosInsight, contact@atmosinsight.com)';
   const res = await fetch(url, {
     headers: {
       'User-Agent': ua,

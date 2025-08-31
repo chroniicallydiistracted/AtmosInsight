@@ -13,7 +13,9 @@ describe('nws radar tiles provider', () => {
 
   it('fetches tile as arrayBuffer', async () => {
     const mockBuffer = new ArrayBuffer(8);
-    const mock = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(mockBuffer) });
+    const mock = vi
+      .fn()
+      .mockResolvedValue({ arrayBuffer: () => Promise.resolve(mockBuffer) });
     // @ts-ignore
     global.fetch = mock;
     const url = buildRequest({ layer: 'conus', z: 3, x: 2, y: 1 });

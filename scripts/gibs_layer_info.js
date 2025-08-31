@@ -30,7 +30,7 @@ console.log = (...args) => {
 };
 
 // Helpers
-const toArray = (x) => (Array.isArray(x) ? x : x ? [x] : []);
+const toArray = x => (Array.isArray(x) ? x : x ? [x] : []);
 function textOf(v) {
   if (typeof v === 'string') return v;
   if (v && typeof v === 'object' && '#text' in v) {

@@ -44,7 +44,10 @@ describe('fetchWithRetry', () => {
     vi.useFakeTimers();
     const error = new Error('network');
     const res200 = new Response('ok', { status: 200 });
-    const mock = vi.fn().mockRejectedValueOnce(error).mockResolvedValueOnce(res200);
+    const mock = vi
+      .fn()
+      .mockRejectedValueOnce(error)
+      .mockResolvedValueOnce(res200);
     // @ts-ignore
     global.fetch = mock;
     const promise = fetchWithRetry('http://example.com', {}, 1, 1000, 1);

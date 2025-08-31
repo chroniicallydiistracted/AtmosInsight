@@ -17,7 +17,12 @@ export interface Request {
   };
 }
 
-export function buildRequest({ catalog, bbox, datetime, collections }: Params): Request {
+export function buildRequest({
+  catalog,
+  bbox,
+  datetime,
+  collections,
+}: Params): Request {
   const body: any = { bbox };
   if (datetime) body.datetime = datetime;
   if (collections) body.collections = collections;

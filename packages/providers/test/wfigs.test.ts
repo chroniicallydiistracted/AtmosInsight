@@ -7,7 +7,12 @@ describe('nifc-wfigs provider', () => {
   });
 
   it('builds query URL', () => {
-    const url = buildRequest({ layerId: 0, where: '1=1', outFields: '*', f: 'geojson' });
+    const url = buildRequest({
+      layerId: 0,
+      where: '1=1',
+      outFields: '*',
+      f: 'geojson',
+    });
     expect(url).toBe(
       'https://services3.arcgis.com/T4QMspbfLg3qTGWY/ArcGIS/rest/services/WFIGS_Incident_Locations/FeatureServer/0/query?f=geojson&outFields=%2A&where=1%3D1'
     );
@@ -17,7 +22,12 @@ describe('nifc-wfigs provider', () => {
     const mock = vi.fn().mockResolvedValue({ json: () => Promise.resolve({}) });
     // @ts-ignore
     global.fetch = mock;
-    const url = buildRequest({ layerId: 0, where: '1=1', outFields: '*', f: 'geojson' });
+    const url = buildRequest({
+      layerId: 0,
+      where: '1=1',
+      outFields: '*',
+      f: 'geojson',
+    });
     await fetchJson(url);
     expect(mock).toHaveBeenCalledWith(url);
   });

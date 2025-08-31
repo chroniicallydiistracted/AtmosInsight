@@ -16,8 +16,8 @@ describe('Air quality proxies', () => {
 
   it('proxies AirNow requests and appends API key', async () => {
     const scope = nock('https://www.airnowapi.org')
-  .get('/aq/data')
-  .query((q: Record<string, any>) => q.API_KEY === 'test-key')
+      .get('/aq/data')
+      .query((q: Record<string, any>) => q.API_KEY === 'test-key')
       .reply(200, [{ AQI: 50 }]);
 
     const res = await request(app).get(
@@ -31,8 +31,8 @@ describe('Air quality proxies', () => {
 
   it('proxies OpenAQ requests', async () => {
     const scope = nock('https://api.openaq.org')
-  .get('/v2/latest')
-  .query((q: Record<string, any>) => q.coordinates === '37,-122')
+      .get('/v2/latest')
+      .query((q: Record<string, any>) => q.coordinates === '37,-122')
       .reply(200, { results: [{ location: 'test' }] });
 
     const res = await request(app).get(

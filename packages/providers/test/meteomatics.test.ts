@@ -14,7 +14,9 @@ describe('meteomatics provider', () => {
       lon: 20,
       format: 'json',
     });
-    expect(url).toBe('https://api.meteomatics.com/2024-01-01T00:00:00Z/temperature/10,20/json');
+    expect(url).toBe(
+      'https://api.meteomatics.com/2024-01-01T00:00:00Z/temperature/10,20/json'
+    );
   });
 
   it('injects Basic auth header', async () => {

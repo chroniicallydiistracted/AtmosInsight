@@ -1,6 +1,7 @@
 export const slug = 'nifc-wfigs';
 export const baseUrl = 'https://services3.arcgis.com';
-const servicePath = 'T4QMspbfLg3qTGWY/ArcGIS/rest/services/WFIGS_Incident_Locations/FeatureServer';
+const servicePath =
+  'T4QMspbfLg3qTGWY/ArcGIS/rest/services/WFIGS_Incident_Locations/FeatureServer';
 
 export interface Params {
   layerId: string | number;
@@ -22,4 +23,3 @@ export async function fetchJson(url: string): Promise<any> {
   const res = await fetch(url);
   return res.json();
 }
-

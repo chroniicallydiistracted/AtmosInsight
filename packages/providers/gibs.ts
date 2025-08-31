@@ -36,7 +36,16 @@ export type Params = RestParams | KvpParams | XyzParams;
 
 export function buildRequest(params: Params): string {
   if (params.type === 'kvp') {
-    const { epsg, layer, tileMatrixSet, tileMatrix, tileRow, tileCol, format, time } = params;
+    const {
+      epsg,
+      layer,
+      tileMatrixSet,
+      tileMatrix,
+      tileRow,
+      tileCol,
+      format,
+      time,
+    } = params;
     const timePart = time ? `&time=${time}` : '';
     return `${baseUrl}/wmts/epsg${epsg}/best/wmts.cgi?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=${layer}&STYLE=&TILEMATRIXSET=${tileMatrixSet}&TILEMATRIX=${tileMatrix}&TILEROW=${tileRow}&TILECOL=${tileCol}&FORMAT=${encodeURIComponent(format)}${timePart}`;
   }
@@ -61,14 +70,20 @@ export interface DomainsParams {
   range: string;
 }
 
-export function buildDomainsRequest({ epsg, layer, tms, range }: DomainsParams): string {
+export function buildDomainsRequest({
+  epsg,
+  layer,
+  tms,
+  range,
+}: DomainsParams): string {
   return `${baseUrl}/wmts/epsg${epsg}/best/1.0.0/${layer}/default/${tms}/all/${range}.xml`;
 }
 
 export async function fetchTile(url: string): Promise<ArrayBuffer> {
   const token = process.env.EARTHDATA_TOKEN;
-  const fullUrl = token ? `${url}${url.includes('?') ? '&' : '?'}token=${token}` : url;
+  const fullUrl = token
+    ? `${url}${url.includes('?') ? '&' : '?'}token=${token}`
+    : url;
   const res = await fetch(fullUrl);
   return res.arrayBuffer();
 }
-

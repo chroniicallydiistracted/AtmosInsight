@@ -9,7 +9,7 @@ const WMTS_URL =
   'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/wmts.cgi?SERVICE=WMTS&REQUEST=GetCapabilities';
 
 // Helpers
-const toArray = (x) => (Array.isArray(x) ? x : x ? [x] : []);
+const toArray = x => (Array.isArray(x) ? x : x ? [x] : []);
 function textOf(v) {
   if (typeof v === 'string') return v;
   if (v && typeof v === 'object' && '#text' in v) {

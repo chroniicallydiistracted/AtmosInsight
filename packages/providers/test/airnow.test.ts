@@ -16,7 +16,9 @@ describe('airnow provider', () => {
   });
 
   it('throws if API key missing', () => {
-    expect(() => buildRequest({ lat: 10, lon: 20 })).toThrow('AIRNOW_API_KEY missing');
+    expect(() => buildRequest({ lat: 10, lon: 20 })).toThrow(
+      'AIRNOW_API_KEY missing'
+    );
   });
 
   it('calls fetch without headers', async () => {

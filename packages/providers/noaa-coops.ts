@@ -11,7 +11,15 @@ export interface Params {
   format: string;
 }
 
-export function buildRequest({ product, station, begin_date, end_date, units, time_zone, format }: Params): string {
+export function buildRequest({
+  product,
+  station,
+  begin_date,
+  end_date,
+  units,
+  time_zone,
+  format,
+}: Params): string {
   const params = new URLSearchParams();
   params.append('product', product);
   params.append('station', station);

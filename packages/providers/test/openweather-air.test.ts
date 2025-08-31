@@ -9,7 +9,9 @@ describe('openweather-air provider', () => {
   it('builds air pollution URL', () => {
     process.env.OPENWEATHER_API_KEY = 'test';
     const url = buildRequest({ lat: 10, lon: 20 });
-    expect(url).toBe('https://api.openweathermap.org/data/2.5/air_pollution?lat=10&lon=20&appid=test');
+    expect(url).toBe(
+      'https://api.openweathermap.org/data/2.5/air_pollution?lat=10&lon=20&appid=test'
+    );
   });
 
   it('calls fetch without headers', async () => {

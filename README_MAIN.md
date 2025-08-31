@@ -11,7 +11,6 @@ Atmospheric Weather and Planetary Science Education App
 - `tiling-services/` – Tile rendering services (placeholder)
 - `docs/` – Documentation and ADRs
 
-
 ## Port configuration
 
 All local service ports are defined in `config/ports.json`:
@@ -61,47 +60,43 @@ Common environment variables used by services in this repo:
 
 # AWS infrastructure
 
-- `AWS_ACCESS_KEY_ID` - 
-- `AWS_SECRET_ACCESS_KEY` - 
-- `ALERTS_TABLE` - 
-- `DYNAMODB_ENDPOINT` - 
-- `DIST_ARN` - 
-- `DIST_ID` - 
-- `APP_BUCKET` - 
-- `AWS_DEFAULT_REGION` - 
-- `AWS_PROFILE` - 
-- `LAMBDA_FUNCTION_NAME` - 
-- `LAMBDA_URL_HOST` - 
-- `DOMAIN` - 
-- `CERT_ARN` - 
-- `HOSTED_ZONE_ID` - 
-
-
+- `AWS_ACCESS_KEY_ID` -
+- `AWS_SECRET_ACCESS_KEY` -
+- `ALERTS_TABLE` -
+- `DYNAMODB_ENDPOINT` -
+- `DIST_ARN` -
+- `DIST_ID` -
+- `APP_BUCKET` -
+- `AWS_DEFAULT_REGION` -
+- `AWS_PROFILE` -
+- `LAMBDA_FUNCTION_NAME` -
+- `LAMBDA_URL_HOST` -
+- `DOMAIN` -
+- `CERT_ARN` -
+- `HOSTED_ZONE_ID` -
 
 # Web App .env.local.examples
 
-- `NEXT_PUBLIC_API_BASE_URL` - 
-- `NEXT_PUBLIC_DEV_PORT` - 
-- `NEXT_PUBLIC_PLAYBACK_FPS` - 
-- `NEXT_PUBLIC_ENABLE_TILE_CACHE` - 
-- `NEXT_PUBLIC_TILE_CACHE_SIZE` - 
-- `NEXT_PUBLIC_TILE_CACHE_TTL` - 
-- `NEXT_PUBLIC_TILE_CACHE_MAX_AGE ` - 
-- `NEXT_PUBLIC_TILE_CACHE_MAX_ENTRIES` - 
-- `NEXT_PUBLIC_TILE_CACHE_MAX_SIZE` - 
-- `NEXT_PUBLIC_TILE_CACHE_MAX_AGE` - 
-- `NEXT_PUBLIC_TILE_CACHE_MAX_ENTRIES` - 
-- `NEXT_PUBLIC_TILE_CACHE_MAX_SIZE` - 
-- `NEXT_PUBLIC_TILE_CACHE_MAX_AGE` - 
-- `NEXT_PUBLIC_TILE_CACHE_MAX_ENTRIES` - 
-- `NEXT_PUBLIC_TILE_CACHE_MAX_SIZE` - 
-- `NEXT_PUBLIC_TILE_CACHE_MAX_AGE` - 
-
-
+- `NEXT_PUBLIC_API_BASE_URL` -
+- `NEXT_PUBLIC_DEV_PORT` -
+- `NEXT_PUBLIC_PLAYBACK_FPS` -
+- `NEXT_PUBLIC_ENABLE_TILE_CACHE` -
+- `NEXT_PUBLIC_TILE_CACHE_SIZE` -
+- `NEXT_PUBLIC_TILE_CACHE_TTL` -
+- `NEXT_PUBLIC_TILE_CACHE_MAX_AGE ` -
+- `NEXT_PUBLIC_TILE_CACHE_MAX_ENTRIES` -
+- `NEXT_PUBLIC_TILE_CACHE_MAX_SIZE` -
+- `NEXT_PUBLIC_TILE_CACHE_MAX_AGE` -
+- `NEXT_PUBLIC_TILE_CACHE_MAX_ENTRIES` -
+- `NEXT_PUBLIC_TILE_CACHE_MAX_SIZE` -
+- `NEXT_PUBLIC_TILE_CACHE_MAX_AGE` -
+- `NEXT_PUBLIC_TILE_CACHE_MAX_ENTRIES` -
+- `NEXT_PUBLIC_TILE_CACHE_MAX_SIZE` -
+- `NEXT_PUBLIC_TILE_CACHE_MAX_AGE` -
 
 # Optional outgoing SOCKS proxy for upstream requests
-# SOCKS_PROXY=
 
+# SOCKS_PROXY=
 
 # Feature Toggles
 
@@ -206,7 +201,9 @@ Tokens are built with Style Dictionary in `packages/tokens` and emitted as CSS v
 - Basemap tiles by Tracestrack and CyclOSM © OpenStreetMap contributors.
 - Air quality data from AirNow (U.S. EPA) and OpenAQ.
 - Mapbox/Cesium tokens as required by your chosen basemap providers.
+
 ## Attribution
+
 - National Weather Service data courtesy of NOAA/NWS.
 - OpenWeatherMap layers © OpenWeatherMap.
 - RainViewer radar imagery © RainViewer.

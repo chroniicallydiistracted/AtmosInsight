@@ -13,7 +13,8 @@ describe('nws provider', () => {
   });
 
   it('injects User-Agent header', async () => {
-    const ua = process.env.NWS_USER_AGENT || '(AtmosInsight, contact@atmosinsight.com)';
+    const ua =
+      process.env.NWS_USER_AGENT || '(AtmosInsight, contact@atmosinsight.com)';
     const scope = nock('https://api.weather.gov')
       .get('/points/33.45,-112.07')
       .matchHeader('User-Agent', ua)

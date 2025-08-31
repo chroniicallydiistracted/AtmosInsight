@@ -202,7 +202,9 @@ export function GlmLegend({ map, layerId = 'glm_toe_layer' }: GlmLegendProps) {
                   className="text-xs bg-gray-700 rounded px-2 py-1 flex-1"
                 />
                 <button
-                  onClick={() => setTISO(new Date().toISOString().slice(0, 19) + 'Z')}
+                  onClick={() =>
+                    setTISO(new Date().toISOString().slice(0, 19) + 'Z')
+                  }
                   className="text-xs bg-gray-700 hover:bg-gray-600 rounded px-2 py-1"
                 >
                   Now
@@ -218,31 +220,44 @@ export function GlmLegend({ map, layerId = 'glm_toe_layer' }: GlmLegendProps) {
 
             <div className="flex flex-wrap gap-1">
               <button
-                onClick={() => setTISO(new Date().toISOString().slice(0, 19) + 'Z')}
+                onClick={() =>
+                  setTISO(new Date().toISOString().slice(0, 19) + 'Z')
+                }
                 className="text-xs bg-gray-700 hover:bg-gray-600 rounded px-2 py-1"
               >
                 End=Now
               </button>
               <button
-                onClick={() => setTISO(
-                  new Date(Date.now() - 60_000).toISOString().slice(0, 19) + 'Z'
-                )}
+                onClick={() =>
+                  setTISO(
+                    new Date(Date.now() - 60_000).toISOString().slice(0, 19) +
+                      'Z'
+                  )
+                }
                 className="text-xs bg-gray-700 hover:bg-gray-600 rounded px-2 py-1"
               >
                 Now-1m
               </button>
               <button
-                onClick={() => setTISO(
-                  new Date(Date.now() - 5 * 60_000).toISOString().slice(0, 19) + 'Z'
-                )}
+                onClick={() =>
+                  setTISO(
+                    new Date(Date.now() - 5 * 60_000)
+                      .toISOString()
+                      .slice(0, 19) + 'Z'
+                  )
+                }
                 className="text-xs bg-gray-700 hover:bg-gray-600 rounded px-2 py-1"
               >
                 Now-5m
               </button>
               <button
-                onClick={() => setTISO(
-                  new Date(Date.now() - 10 * 60_000).toISOString().slice(0, 19) + 'Z'
-                )}
+                onClick={() =>
+                  setTISO(
+                    new Date(Date.now() - 10 * 60_000)
+                      .toISOString()
+                      .slice(0, 19) + 'Z'
+                  )
+                }
                 className="text-xs bg-gray-700 hover:bg-gray-600 rounded px-2 py-1"
               >
                 Now-10m

@@ -16,14 +16,20 @@ describe('firms provider', () => {
   it('builds WMS URL with MAP_KEY', () => {
     process.env.FIRMS_MAP_KEY = 'test';
     const params = { SERVICE: 'WMS', REQUEST: 'GetMap' };
-    const url = buildRequest({ mode: 'wms', dataset: 'VIIRS_SNPP_NRT', params });
+    const url = buildRequest({
+      mode: 'wms',
+      dataset: 'VIIRS_SNPP_NRT',
+      params,
+    });
     const search = new URLSearchParams(params);
     search.set('MAP_KEY', 'test');
     expect(url).toBe(`${BASE}/wms/VIIRS_SNPP_NRT?${search.toString()}`);
   });
 
   it('fetchTile returns text for CSV', async () => {
-    const mock = vi.fn().mockResolvedValue({ text: () => Promise.resolve('ok') });
+    const mock = vi
+      .fn()
+      .mockResolvedValue({ text: () => Promise.resolve('ok') });
     // @ts-ignore
     global.fetch = mock;
     const url = `${BASE}/api/area/csv/foo`;
@@ -33,7 +39,9 @@ describe('firms provider', () => {
 
   it('fetchTile returns arrayBuffer for WMS', async () => {
     const buf = new ArrayBuffer(8);
-    const mock = vi.fn().mockResolvedValue({ arrayBuffer: () => Promise.resolve(buf) });
+    const mock = vi
+      .fn()
+      .mockResolvedValue({ arrayBuffer: () => Promise.resolve(buf) });
     // @ts-ignore
     global.fetch = mock;
     const url = `${BASE}/wms/VIIRS_SNPP_NRT?SERVICE=WMS`;
