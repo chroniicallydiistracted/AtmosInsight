@@ -417,3 +417,12 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Summary: Documented `AIRNOW_ENABLED`/`AIRNOW_API_KEY` and credited AirNow program.
 - [x] 2025-09-04 — OpenAQ proxy env var & attribution
   - Summary: Documented `OPENAQ_ENABLED` env flag and added OpenAQ attribution.
+- [x] 2025-08-28 — Repository audit docs
+  - Summary: Added top-level Findings, SuggestedFixes patch, and Followups plan.
+  - Files: `Findings.md`, `SuggestedFixes.patch`, `Followups.md`
+  - Verification: Documentation only; `pnpm test` run.
+
+- [x] 2025-09-29 — OpenWeather env var rename & NWS client fix
+  - Summary: Standardized `OPENWEATHER_API_KEY`, replaced hard-coded User-Agent, and routed NWS provider through `fetchWithRetry`.
+  - Files: `proxy-server/src/app.ts`, `tiling-services/proxy-api/index.ts`, `packages/providers/nws.ts`, `packages/providers/nws.js`, `docs/README.md`, `infra/*`, `Findings.md`, `Followups.md`, `StagedFixes.patch`, `docs/AGENTS.md`
+  - Verification: `pnpm lint`; `pnpm test` (fails: providers build error).

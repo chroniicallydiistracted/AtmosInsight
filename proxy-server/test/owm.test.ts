@@ -4,7 +4,7 @@ import { app } from '../src/app.js';
 
 describe('OWM tiles proxy', () => {
   beforeAll(() => {
-    // Leave OWM_API_KEY as-is from env; tests will skip if missing
+    // Leave OPENWEATHER_API_KEY as-is from env; tests will skip if missing
   });
 
   it('rejects unknown layer', async () => {
@@ -12,7 +12,7 @@ describe('OWM tiles proxy', () => {
     expect(res.status).toBe(400);
   });
 
-  it.skipIf(!process.env.OWM_API_KEY)(
+  it.skipIf(!process.env.OPENWEATHER_API_KEY)(
     'returns 200 for clouds_new when key is set',
     async () => {
       const res = await request(app).get('/api/owm/clouds_new/3/2/1.png');

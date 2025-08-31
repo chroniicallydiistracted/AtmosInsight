@@ -19,7 +19,7 @@ purpleair_api_key =
 firms_api_key =
 az511_api_key =
 earthdata_api_key =
-owm_api_key =
+openweather_api_key =
 mapy_api_key =
 
 # Optional GLM TOE Python service URL. Leave empty to disable proxying.

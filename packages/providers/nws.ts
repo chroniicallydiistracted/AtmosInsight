@@ -1,3 +1,6 @@
+import { DEFAULT_NWS_USER_AGENT } from '@atmos/proxy-constants';
+import { fetchWithRetry } from '@atmos/fetch-client';
+
 export const slug = 'nws-weather';
 export const baseUrl = 'https://api.weather.gov';
 
@@ -11,11 +14,9 @@ export function buildRequest({ lat, lon }: Params): string {
 }
 
 export async function fetchJson(url: string): Promise<any> {
-  const ua = process.env.NWS_USER_AGENT || '(AtmosInsight, contact@atmosinsight.com)';
-  const res = await fetch(url, {
-    headers: {
-      'User-Agent': ua,
-    },
+  const ua = process.env.NWS_USER_AGENT || DEFAULT_NWS_USER_AGENT;
+  const res = await fetchWithRetry(url, {
+    headers: { 'User-Agent': ua },
   });
   return res.json();
 }
