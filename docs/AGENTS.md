@@ -53,7 +53,7 @@ Additional directive (2025-08-28): Prioritize highest quality. When trade-offs a
 
 - Implement proxy pass-through for OWM map layers (e.g., `clouds_new`, `precipitation_new`) using the **official** format:  
   `https://tile.openweathermap.org/map/{layer}/{z}/{x}/{y}.png?appid={API key}`. citeturn2view0
-- Add `OWM_API_KEY` env; blocklist unknown `layer` names; cache **60s**.
+- Add `OPENWEATHER_API_KEY` env; blocklist unknown `layer` names; cache **60s**.
 - [x] ~~`/api/owm/:layer/:z/:x/:y.png` → upstream; returns **200** for baseline layers with valid key.~~
 
 ### 1.4 RainViewer radar frames
@@ -205,7 +205,7 @@ Implementation note: A high-quality Python FastAPI microservice (`tiling-service
 - [ ] CI runs unit/integration/E2E (headless browser) on PR.
 - [ ] PR template enforces: Scope, URLs touched, screenshots/GIFs, and **checklist mapping** to this AGENTS.md.
 - [ ] Update `README.md` with env vars:
-  - `OWM_API_KEY`, `RAINVIEWER_ENABLED=true|false`, `NWS_USER_AGENT="(Vortexa, contact@example.com)"`, `GIBS_ENABLED=true|false`, any Mapbox/Cesium tokens.
+  - `OPENWEATHER_API_KEY`, `RAINVIEWER_ENABLED=true|false`, `NWS_USER_AGENT="(Vortexa, contact@example.com)"`, `GIBS_ENABLED=true|false`, any Mapbox/Cesium tokens.
 - [ ] Add **references** section at end of README pointing to external docs used below.
 
 ---
@@ -253,7 +253,7 @@ Implementation note: A high-quality Python FastAPI microservice (`tiling-service
 
 ## 16) Env Vars (placeholders only; do not commit secrets)
 
-- `OWM_API_KEY` — OpenWeatherMap tile access.
+- `OPENWEATHER_API_KEY` — OpenWeatherMap tile access.
 - `NWS_USER_AGENT` — e.g., `(Vortexa, email@domain)` per NWS requirement. citeturn0search0turn0search3
 - `RAINVIEWER_ENABLED` — Gate RainViewer integration.
 - `GIBS_ENABLED` — Gate GIBS integration.
