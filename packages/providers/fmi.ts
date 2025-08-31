@@ -4,34 +4,30 @@ export const baseUrl = 'https://opendata.fmi.fi';
 export interface BaseParams {
   storedquery_id: string;
 }
+
 export interface LatLonParams extends BaseParams {
   latlon: [number, number];
+}
+
 export interface BBoxParams extends BaseParams {
   bbox: [number, number, number, number];
+}
+
 export type Params = LatLonParams | BBoxParams;
+
 export function buildRequest(params: Params): string {
   const parts = [
     'service=WFS',
     'request=getFeature',
     `storedquery_id=${params.storedquery_id}`,
   ];
+
   if ('latlon' in params) {
     const [lat, lon] = params.latlon;
     parts.push(`latlon=${lat},${lon}`);
   } else {
     parts.push(`bbox=${params.bbox.join(',')}`);
   }
+
   return `${baseUrl}/wfs?${parts.join('&')}`;
-export async function fetchTile(url: string): Promise<any> {
-  const res = await fetch(url);
-  const type = res.headers.get('content-type') ?? '';
-  if (type.includes('json')) {
-    return res.json();
-  return res.arrayBuffer();
-export const slug = 'fmi-opendata';
-export interface Params {
-  path: string;
-export function buildRequest({ path }: Params): string {
-  return `${baseUrl}/${path}`;
-export async function fetchJson(url: string): Promise<any> {
-  return res.json();
+}

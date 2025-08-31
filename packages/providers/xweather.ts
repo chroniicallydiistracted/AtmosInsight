@@ -14,7 +14,7 @@ export function buildRequest({
   if (!clientId) throw new Error('XWEATHER_CLIENT_ID missing');
   const clientSecret = process.env.XWEATHER_CLIENT_SECRET;
   if (!clientSecret) throw new Error('XWEATHER_CLIENT_SECRET missing');
-  const merged = {
+  const merged: Record<string, string> = {
     ...params,
     client_id: clientId,
     client_secret: clientSecret,

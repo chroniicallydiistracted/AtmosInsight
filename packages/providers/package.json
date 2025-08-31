@@ -8,6 +8,10 @@
     "build": "tsc",
     "test": "vitest run"
   },
+  "dependencies": {
+    "@atmos/fetch-client": "workspace:*",
+    "@atmos/proxy-constants": "workspace:*"
+  },
   "devDependencies": {
     "@types/node": "^20",
     "@types/nock": "^11.1.0",
