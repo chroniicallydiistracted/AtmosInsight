@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'dwd-opendata';
 export const baseUrl = 'https://opendata.dwd.de';
 

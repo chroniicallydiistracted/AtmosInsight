@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'earth-search';
 export const baseUrl = 'https://earth-search.aws.element84.com/v1';
 
@@ -18,7 +19,7 @@ export async function fetchJson({
   url,
   body,
 }: ReturnType<typeof buildRequest>): Promise<any> {
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

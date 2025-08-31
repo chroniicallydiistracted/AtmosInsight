@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'google-air-quality';
 export const baseUrl = 'https://airquality.googleapis.com/v1';
 
@@ -29,7 +30,7 @@ export function buildRequest({ lat, lon }: Params): Request {
 }
 
 export async function fetchJson({ url, body }: Request): Promise<any> {
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

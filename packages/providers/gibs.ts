@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'nasa-gibs';
 export const baseUrl = 'https://gibs.earthdata.nasa.gov';
 
@@ -84,6 +85,6 @@ export async function fetchTile(url: string): Promise<ArrayBuffer> {
   const fullUrl = token
     ? `${url}${url.includes('?') ? '&' : '?'}token=${token}`
     : url;
-  const res = await fetch(fullUrl);
+  const res = await fetchWithRetry(fullUrl);
   return res.arrayBuffer();
 }

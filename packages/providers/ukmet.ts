@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'ukmet-datahub';
 export const baseUrl =
   'https://api-metoffice.apiconnect.ibmcloud.com/metoffice/production/v0';
@@ -16,7 +17,7 @@ export function buildRequest({ path, ...query }: Params): string {
 }
 
 export async function fetchJson(url: string): Promise<any> {
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: {
       apikey: process.env.UKMET_API_KEY as string,
     },

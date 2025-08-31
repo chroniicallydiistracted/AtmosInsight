@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'jma-himawari8';
 export const baseUrl = 'https://himawari8.s3.amazonaws.com';
 
@@ -19,6 +20,6 @@ export function buildRequest({ product, datetime, region }: Params): string {
 }
 
 export async function fetchTile(url: string): Promise<ArrayBuffer> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   return res.arrayBuffer();
 }

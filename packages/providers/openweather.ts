@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'openweather-onecall';
 export const baseUrl = 'https://api.openweathermap.org';
 
@@ -18,6 +19,6 @@ export function buildRequest({ lat, lon }: Params): string {
 }
 
 export async function fetchJson(url: string): Promise<any> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   return res.json();
 }

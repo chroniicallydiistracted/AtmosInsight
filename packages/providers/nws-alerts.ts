@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'nws-alerts';
 export const baseUrl = 'https://api.weather.gov/alerts';
 
@@ -23,7 +24,7 @@ export function buildRequest(params: Params = {}): string {
 export async function fetchJson(url: string): Promise<any> {
   const ua =
     process.env.NWS_USER_AGENT || '(AtmosInsight, contact@atmosinsight.com)';
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: {
       'User-Agent': ua,
       Accept: 'application/geo+json',

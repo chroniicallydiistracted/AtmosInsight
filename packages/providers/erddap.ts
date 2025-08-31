@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'erddap';
 
 export interface Params {
@@ -12,6 +13,6 @@ export function buildRequest({ dataset, query }: Params): string {
 }
 
 export async function fetchJson(url: string): Promise<any> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   return res.json();
 }

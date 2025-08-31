@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'noaa-nwm';
 export const baseUrl = 'https://noaa-nwm-pds.s3.amazonaws.com';
 
@@ -20,6 +21,6 @@ export function buildRequest({ product, datetime }: Params): string {
 }
 
 export async function fetchTile(url: string): Promise<ArrayBuffer> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   return res.arrayBuffer();
 }

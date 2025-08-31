@@ -59,3 +59,14 @@ AtmosInsight.code-workspace
 # Docs and Local Ref
 Docs/
 *.xlsx
+# build output (source trees)
+packages/**/**/*.js
+packages/**/**/*.js.map
+packages/**/index.js
+packages/**/index.d.ts
+
+# build artifacts in source trees (keep dist/)
+packages/**/*.js
+packages/**/index.d.ts
+packages/**/*.js.map
+!**/dist/**

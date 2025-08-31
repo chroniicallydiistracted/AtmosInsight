@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'microsoft-pc';
 export const baseUrl = 'https://planetarycomputer.microsoft.com/api/stac/v1';
 
@@ -24,7 +25,7 @@ export function buildRequest({ bbox, datetime, collections }: Params): Request {
 }
 
 export async function fetchJson({ url, body }: Request): Promise<any> {
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

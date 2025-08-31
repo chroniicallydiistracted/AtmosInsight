@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'nasa-firms';
 export const baseUrl = 'https://firms.modaps.eosdis.nasa.gov';
 
@@ -17,7 +18,7 @@ export function buildRequest(p: Params): string {
 }
 
 export async function fetchTile(url: string): Promise<ArrayBuffer | string> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   if (url.includes('/api/area/csv/')) {
     return res.text();
   }

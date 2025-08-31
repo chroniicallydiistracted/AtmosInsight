@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'nasa-cmr-stac';
 export const baseUrl = 'https://cmr.earthdata.nasa.gov/stac';
 
@@ -40,7 +41,7 @@ export async function fetchJson(url: string, body: any): Promise<any> {
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),

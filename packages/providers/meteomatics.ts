@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'meteomatics';
 export const baseUrl = 'https://api.meteomatics.com';
 
@@ -25,7 +26,7 @@ export async function fetchJson(url: string): Promise<any> {
   if (!user || !password)
     throw new Error('METEOMATICS_USER or METEOMATICS_PASSWORD missing');
   const auth = Buffer.from(`${user}:${password}`).toString('base64');
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: {
       Authorization: `Basic ${auth}`,
     },

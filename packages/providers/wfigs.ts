@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'nifc-wfigs';
 export const baseUrl = 'https://services3.arcgis.com';
 const servicePath =
@@ -20,6 +21,6 @@ export function buildRequest({ layerId, where, outFields, f }: Params): string {
 }
 
 export async function fetchJson(url: string): Promise<any> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   return res.json();
 }

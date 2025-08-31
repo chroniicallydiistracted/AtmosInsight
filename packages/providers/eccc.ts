@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'eccc-geomet';
 export const baseUrl = 'https://geo.weather.gc.ca/geomet';
 
@@ -31,6 +32,6 @@ export function buildRequest(params: Params): string {
 }
 
 export async function fetchTile(url: string): Promise<ArrayBuffer> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   return res.arrayBuffer();
 }

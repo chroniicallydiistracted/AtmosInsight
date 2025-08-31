@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'noaa-coops';
 export const baseUrl = 'https://api.tidesandcurrents.noaa.gov/api/prod';
 
@@ -32,6 +33,6 @@ export function buildRequest({
 }
 
 export async function fetchJson(url: string): Promise<any> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   return res.json();
 }

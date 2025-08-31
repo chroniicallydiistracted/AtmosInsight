@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'usgs-water';
 export const baseUrl = 'https://waterservices.usgs.gov/nwis';
 
@@ -29,6 +30,6 @@ export function buildRequest({
 export async function fetchJson(url: string): Promise<any> {
   const apiKey = process.env.USGS_API_KEY;
   const init = apiKey ? { headers: { 'X-Api-Key': apiKey } } : undefined;
-  const res = init ? await fetch(url, init) : await fetch(url);
+  const res = init ? await fetchWithRetry(url, init) : await fetchWithRetry(url);
   return res.json();
 }

@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'epa-airnow';
 export const baseUrl = 'https://www.airnowapi.org';
 
@@ -19,6 +20,6 @@ export function buildRequest({ lat, lon }: Params): string {
 }
 
 export async function fetchJson(url: string): Promise<any> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   return res.json();
 }

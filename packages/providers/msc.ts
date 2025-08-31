@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'msc-geomet';
 export const baseUrl = 'https://geo.weather.gc.ca/geomet';
 
@@ -10,6 +11,6 @@ export function buildRequest({ path }: Params): string {
 }
 
 export async function fetchJson(url: string): Promise<any> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   return res.json();
 }

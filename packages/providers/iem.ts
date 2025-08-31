@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'iowastate-iem';
 export const baseUrl = 'https://mesonet.agron.iastate.edu';
 
@@ -13,7 +14,7 @@ export function buildRequest({ layer, z, x, y }: Params): string {
 }
 
 export async function fetchTile(url: string): Promise<Buffer> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   const buf = Buffer.from(await res.arrayBuffer());
   return buf;
 }

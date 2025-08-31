@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'visual-crossing';
 export const baseUrl = 'https://weather.visualcrossing.com';
 
@@ -14,6 +15,6 @@ export function buildRequest({ endpoint, location }: Params): string {
 }
 
 export async function fetchJson(url: string): Promise<any> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   return res.json();
 }

@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'nexrad-l2';
 export const baseUrl = 'https://noaa-nexrad-level2.s3.amazonaws.com';
 
@@ -18,6 +19,6 @@ export function buildRequest({ station, datetime }: Params): string {
 }
 
 export async function fetchTile(url: string): Promise<ArrayBuffer> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   return res.arrayBuffer();
 }

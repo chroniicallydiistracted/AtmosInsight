@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'nws-radar-tiles';
 export const baseUrl = 'https://tiles.weather.gov';
 
@@ -13,6 +14,6 @@ export function buildRequest({ layer, z, x, y }: Params): string {
 }
 
 export async function fetchTile(url: string): Promise<ArrayBuffer> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   return res.arrayBuffer();
 }

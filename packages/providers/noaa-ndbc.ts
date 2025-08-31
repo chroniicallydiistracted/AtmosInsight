@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'noaa-ndbc';
 export const baseUrl = 'https://www.ndbc.noaa.gov';
 
@@ -14,6 +15,6 @@ export async function fetch(
   url: string,
   format: Params['format']
 ): Promise<any> {
-  const res = await globalThis.fetch(url);
+  const res = await fetchWithRetry(url);
   return format === 'json' ? res.json() : res.text();
 }

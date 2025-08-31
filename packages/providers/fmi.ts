@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'fmi-open-data';
 export const baseUrl = 'https://opendata.fmi.fi';
 

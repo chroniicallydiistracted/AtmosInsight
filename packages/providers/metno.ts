@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'met-norway';
 export const baseUrl = 'https://api.met.no/weatherapi';
 
@@ -16,7 +17,7 @@ export async function fetchJson(url: string): Promise<any> {
     process.env.METNO_USER_AGENT ||
     process.env.NWS_USER_AGENT ||
     '(AtmosInsight, contact@atmosinsight.com)';
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: {
       'User-Agent': ua,
     },

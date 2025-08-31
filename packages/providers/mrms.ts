@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'noaa-mrms';
 export const baseUrl = 'https://noaa-mrms-pds.s3.amazonaws.com';
 
@@ -22,7 +23,7 @@ export function buildRequest({ product, datetime }: Params): string {
 }
 
 export async function fetchTile(url: string): Promise<ArrayBuffer> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
   return res.arrayBuffer();
 }

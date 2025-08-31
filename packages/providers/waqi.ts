@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'waqi';
 export const baseUrl = 'https://api.waqi.info';
 
@@ -26,6 +27,6 @@ export function buildTileUrl({ host, z, x, y }: TileParams): string {
 }
 
 export async function fetchJson(url: string): Promise<any> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   return res.json();
 }

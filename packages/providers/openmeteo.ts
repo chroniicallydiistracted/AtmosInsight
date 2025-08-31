@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'open-meteo';
 export const baseUrl = 'https://api.open-meteo.com';
 
@@ -12,6 +13,6 @@ export function buildRequest({ latitude, longitude, hourly }: Params): string {
 }
 
 export async function fetchJson(url: string): Promise<any> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   return res.json();
 }

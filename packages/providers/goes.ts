@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'noaa-goes';
 export const baseUrl = 'https://noaa-goes16.s3.amazonaws.com';
 
@@ -20,6 +21,6 @@ export function buildRequest({ satellite, product, datetime }: Params): string {
 }
 
 export async function fetchBinary(url: string): Promise<ArrayBuffer> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   return res.arrayBuffer();
 }

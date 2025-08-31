@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'rainviewer';
 export const baseUrl = 'https://api.rainviewer.com';
 
@@ -21,7 +22,7 @@ export async function buildRequest({
   options,
 }: Params): Promise<string> {
   const indexUrl = `${baseUrl}/public/weather-maps.json`;
-  const res = await fetch(indexUrl);
+  const res = await fetchWithRetry(indexUrl);
   const data = await res.json();
   const frames = [...(data.radar?.past || []), ...(data.radar?.nowcast || [])];
   const frame = frames.find((f: any) => f.time === ts);
@@ -30,6 +31,6 @@ export async function buildRequest({
 }
 
 export async function fetchTile(url: string): Promise<ArrayBuffer> {
-  const res = await fetch(url);
+  const res = await fetchWithRetry(url);
   return res.arrayBuffer();
 }

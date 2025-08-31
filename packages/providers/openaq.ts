@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'openaq-v3';
 export const baseUrl = 'https://api.openaq.org/v3';
 
@@ -19,6 +20,6 @@ export async function fetchJson(url: string): Promise<any> {
   const headers: Record<string, string> = {};
   const key = process.env.OPENAQ_API_KEY;
   if (key) headers['X-API-Key'] = key;
-  const res = await fetch(url, { headers });
+  const res = await fetchWithRetry(url, { headers });
   return res.json();
 }

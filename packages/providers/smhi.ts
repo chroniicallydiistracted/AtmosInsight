@@ -1,3 +1,4 @@
+import { fetchWithRetry } from '@atmos/fetch-client';
 export const slug = 'smhi-open-data';
 export const baseUrl = 'https://opendata-download-metfcst.smhi.se/api';
 

@@ -1,4 +1,5 @@
 import { createSign } from 'crypto';
+import { fetchWithRetry } from '@atmos/fetch-client';
 
 export const slug = 'apple-weatherkit';
 export const baseUrl = 'https://weatherkit.apple.com/api/v1/weather';
@@ -44,7 +45,7 @@ export async function fetchJson(
   url: string,
   token: string = generateJwt()
 ): Promise<any> {
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
