@@ -28,8 +28,9 @@ describe('ukmet provider', () => {
       longitude: -0.1,
     });
     await fetchJson(url);
-    expect(mock).toHaveBeenCalledWith(url, {
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
       headers: { apikey: 'abc' },
-    });
+      signal: expect.any(AbortSignal)
+    }));
   });
 });

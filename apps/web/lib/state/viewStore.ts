@@ -11,6 +11,8 @@ export interface ViewState {
   zoom: number;
   timeISO: string;
   activeLayers: LayerState[];
+  workspace?: string;
+  compareMode?: boolean;
   setTime: (iso: string) => void;
   toggleLayer: (id: string) => void;
   setOpacity: (id: string, value: number) => void;
@@ -23,6 +25,8 @@ export const useViewStore = create<ViewState>((set, get) => ({
   zoom: 0,
   timeISO: new Date().toISOString(),
   activeLayers: [],
+  workspace: undefined,
+  compareMode: false,
   setTime: iso => set({ timeISO: iso }),
   toggleLayer: id => {
     const exists = get().activeLayers.find(l => l.id === id);
@@ -38,6 +42,6 @@ export const useViewStore = create<ViewState>((set, get) => ({
         l.id === id ? { ...l, opacity: value } : l
       ),
     }),
-  setWorkspace: () => {},
-  setCompare: () => {},
+  setWorkspace: id => set({ workspace: id }),
+  setCompare: enabled => set({ compareMode: enabled }),
 }));

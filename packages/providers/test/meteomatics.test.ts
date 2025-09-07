@@ -34,8 +34,9 @@ describe('meteomatics provider', () => {
     });
     await fetchJson(url);
     const auth = Buffer.from('user:pass').toString('base64');
-    expect(mock).toHaveBeenCalledWith(url, {
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
       headers: { Authorization: `Basic ${auth}` },
-    });
+      signal: expect.any(AbortSignal)
+    }));
   });
 });

@@ -33,8 +33,9 @@ describe('weatherkit provider', () => {
       dataSets: ['currentWeather'],
     });
     await fetchJson(url, 'mock');
-    expect(mockFetch).toHaveBeenCalledWith(url, {
+    expect(mockFetch).toHaveBeenCalledWith(url, expect.objectContaining({
       headers: { Authorization: 'Bearer mock' },
-    });
+      signal: expect.any(AbortSignal)
+    }));
   });
 });

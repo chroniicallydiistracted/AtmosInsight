@@ -23,13 +23,14 @@ describe('nws alerts provider', () => {
     global.fetch = mock;
     const url = buildRequest({ area: 'AZ' });
     await fetchJson(url);
-    expect(mock).toHaveBeenCalledWith(url, {
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
       headers: {
         'User-Agent':
           process.env.NWS_USER_AGENT ||
           '(AtmosInsight, contact@atmosinsight.com)',
         Accept: 'application/geo+json',
       },
-    });
+      signal: expect.any(AbortSignal)
+    }));
   });
 });

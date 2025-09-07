@@ -22,6 +22,8 @@ describe('nexrad provider', () => {
     global.fetch = mock;
     const url = buildRequest({ station: 'KABR', datetime: new Date(0) });
     await fetchTile(url);
-    expect(mock).toHaveBeenCalledWith(url);
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
+      signal: expect.any(AbortSignal)
+    }));
   });
 });

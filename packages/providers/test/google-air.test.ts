@@ -22,10 +22,11 @@ describe('google air quality provider', () => {
     global.fetch = mock;
     const req = buildRequest({ lat: 1, lon: 2 });
     await fetchJson(req);
-    expect(mock).toHaveBeenCalledWith(req.url, {
+    expect(mock).toHaveBeenCalledWith(req.url, expect.objectContaining({
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req.body),
-    });
+      signal: expect.any(AbortSignal)
+    }));
   });
 });

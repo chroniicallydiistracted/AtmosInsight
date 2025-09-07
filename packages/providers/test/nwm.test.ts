@@ -25,6 +25,8 @@ describe('noaa-nwm provider', () => {
       datetime: new Date(Date.UTC(2025, 0, 1, 12)),
     });
     await fetchTile(url);
-    expect(mock).toHaveBeenCalledWith(url);
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
+      signal: expect.any(AbortSignal)
+    }));
   });
 });

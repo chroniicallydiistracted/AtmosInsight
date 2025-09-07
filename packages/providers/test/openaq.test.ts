@@ -29,7 +29,10 @@ describe('openaq provider', () => {
       parameter: 'pm25',
     });
     await fetchJson(url);
-    expect(mock).toHaveBeenCalledWith(url, { headers: { 'X-API-Key': 'key' } });
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
+      headers: { 'X-API-Key': 'key' },
+      signal: expect.any(AbortSignal)
+    }));
   });
 
   it('omits API key header when absent', async () => {
@@ -42,6 +45,9 @@ describe('openaq provider', () => {
       parameter: 'pm25',
     });
     await fetchJson(url);
-    expect(mock).toHaveBeenCalledWith(url, { headers: {} });
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
+      headers: {},
+      signal: expect.any(AbortSignal)
+    }));
   });
 });

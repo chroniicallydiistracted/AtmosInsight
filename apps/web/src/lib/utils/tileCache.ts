@@ -56,8 +56,9 @@ export async function loadImage(
   try {
     await p;
     cache.set(url, img);
-  } catch {
-    // Do not cache failures
+  } catch (error) {
+    // Do not cache failures, but log for debugging
+    console.debug('Tile cache: Failed to load image', { url, error: error instanceof Error ? error.message : error });
   }
   return img;
 }

@@ -24,6 +24,8 @@ describe('noaa-mrms provider', () => {
     // @ts-ignore
     global.fetch = mock;
     await fetchTile(url);
-    expect(mock).toHaveBeenCalledWith(url);
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
+      signal: expect.any(AbortSignal)
+    }));
   });
 });

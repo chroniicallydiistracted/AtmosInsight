@@ -21,7 +21,9 @@ describe('iowastate-iem provider', () => {
     global.fetch = mock;
     const url = buildRequest({ layer: 'n0q', z: 4, x: 2, y: 1 });
     const buf = await fetchTile(url);
-    expect(mock).toHaveBeenCalledWith(url);
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
+      signal: expect.any(AbortSignal)
+    }));
     expect(buf).toBeInstanceOf(Buffer);
     expect(buf.length).toBe(0);
   });

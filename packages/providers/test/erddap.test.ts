@@ -19,6 +19,8 @@ describe('erddap provider', () => {
     global.fetch = mock;
     const url = buildRequest({ dataset: 'test-ds', query: 'var=value' });
     await fetchJson(url);
-    expect(mock).toHaveBeenCalledWith(url);
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
+      signal: expect.any(AbortSignal)
+    }));
   });
 });

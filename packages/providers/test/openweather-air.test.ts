@@ -21,6 +21,8 @@ describe('openweather-air provider', () => {
     global.fetch = mock;
     const url = buildRequest({ lat: 10, lon: 20 });
     await fetchJson(url);
-    expect(mock).toHaveBeenCalledWith(url);
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
+      signal: expect.any(AbortSignal)
+    }));
   });
 });

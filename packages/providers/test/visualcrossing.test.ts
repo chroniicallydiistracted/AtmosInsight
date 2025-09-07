@@ -21,6 +21,8 @@ describe('visual-crossing provider', () => {
     global.fetch = mock;
     const url = buildRequest({ endpoint: 'timeline', location: 'Austin,TX' });
     await fetchJson(url);
-    expect(mock).toHaveBeenCalledWith(url);
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
+      signal: expect.any(AbortSignal)
+    }));
   });
 });

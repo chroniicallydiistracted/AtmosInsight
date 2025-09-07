@@ -33,9 +33,10 @@ describe('usgs-water provider', () => {
       endDT: '2024-01-02',
     });
     await fetchJson(url);
-    expect(mock).toHaveBeenCalledWith(url, {
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
       headers: { 'X-Api-Key': 'test-key' },
-    });
+      signal: expect.any(AbortSignal)
+    }));
   });
 
   it('calls fetch without header when no key', async () => {
@@ -50,6 +51,8 @@ describe('usgs-water provider', () => {
       endDT: '2024-01-02',
     });
     await fetchJson(url);
-    expect(mock).toHaveBeenCalledWith(url);
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
+      signal: expect.any(AbortSignal)
+    }));
   });
 });

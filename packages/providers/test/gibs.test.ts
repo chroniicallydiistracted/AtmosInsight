@@ -58,6 +58,8 @@ describe('nasa gibs provider', () => {
       ext: 'png',
     });
     await fetchTile(url);
-    expect(mock).toHaveBeenCalledWith(`${url}?token=secret`);
+    expect(mock).toHaveBeenCalledWith(`${url}?token=secret`, expect.objectContaining({
+      signal: expect.any(AbortSignal)
+    }));
   });
 });

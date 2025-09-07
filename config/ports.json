@@ -2,8 +2,5 @@
   "proxy": 3000,
   "catalog": 3001,
   "web": 3002,
-  "database": {
-    "min": 3306,
-    "max": 5432
-  }
+  "database": 3306
 }

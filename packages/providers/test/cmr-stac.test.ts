@@ -32,14 +32,15 @@ describe('cmr-stac provider', () => {
       bbox: [1, 2, 3, 4],
     });
     await fetchJson(url, body);
-    expect(mock).toHaveBeenCalledWith(url, {
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'Bearer token',
       },
       body: JSON.stringify({ bbox: [1, 2, 3, 4] }),
-    });
+      signal: expect.any(AbortSignal)
+    }));
   });
 
   it('omits Authorization header when token missing', async () => {
@@ -51,12 +52,13 @@ describe('cmr-stac provider', () => {
       bbox: [1, 2, 3, 4],
     });
     await fetchJson(url, body);
-    expect(mock).toHaveBeenCalledWith(url, {
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ bbox: [1, 2, 3, 4] }),
-    });
+      signal: expect.any(AbortSignal)
+    }));
   });
 });

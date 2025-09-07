@@ -20,7 +20,9 @@ describe('nws radar tiles provider', () => {
     global.fetch = mock;
     const url = buildRequest({ layer: 'conus', z: 3, x: 2, y: 1 });
     const data = await fetchTile(url);
-    expect(mock).toHaveBeenCalledWith(url);
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
+      signal: expect.any(AbortSignal)
+    }));
     expect(data).toBe(mockBuffer);
   });
 });

@@ -25,7 +25,10 @@ describe('rainviewer provider', () => {
       options: '0_0',
     });
     expect(mock).toHaveBeenCalledWith(
-      'https://api.rainviewer.com/public/weather-maps.json'
+      'https://api.rainviewer.com/public/weather-maps.json',
+      expect.objectContaining({
+        signal: expect.any(AbortSignal)
+      })
     );
     expect(url).toBe('https://tile.test/v2/radar/1/256/2/3/4/5/0_0.png');
   });
@@ -36,6 +39,8 @@ describe('rainviewer provider', () => {
     // @ts-ignore
     global.fetch = mock;
     await fetchTile('https://tile.test/tile.png');
-    expect(mock).toHaveBeenCalledWith('https://tile.test/tile.png');
+    expect(mock).toHaveBeenCalledWith('https://tile.test/tile.png', expect.objectContaining({
+      signal: expect.any(AbortSignal)
+    }));
   });
 });

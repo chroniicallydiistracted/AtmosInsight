@@ -28,6 +28,9 @@ describe('tomorrowio provider', () => {
       timesteps: 'hourly',
     });
     await fetchJson(url);
-    expect(mock).toHaveBeenCalledWith(url, { headers: { apikey: 'test-key' } });
+    expect(mock).toHaveBeenCalledWith(url, expect.objectContaining({
+      headers: { apikey: 'test-key' },
+      signal: expect.any(AbortSignal)
+    }));
   });
 });

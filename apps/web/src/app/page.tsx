@@ -68,22 +68,29 @@ export default function Home() {
 
     map.addControl(new maplibregl.AttributionControl({ compact: true }));
 
-    map.on('error', (e: any) => {
-      const err = e as any;
-      if (err && err.sourceId === 'cyclosm') {
+    map.on('error', (e: maplibregl.ErrorEvent) => {
+      const err = e.error;
+      if (err && 'sourceId' in err && err.sourceId === 'cyclosm') {
         map.setLayoutProperty('basemap-cyclosm', 'visibility', 'none');
         map.setLayoutProperty('basemap-tracestrack', 'visibility', 'visible');
       }
     });
 
-    // Store map reference globally for debugging
-    (window as { __map?: maplibregl.Map }).__map = map;
+    // Store map reference globally for debugging (development only)
+    if (process.env.NODE_ENV === 'development') {
+      (window as { __map?: maplibregl.Map }).__map = map;
+    }
     setMapObj(map);
 
     function addAlertsLayer() {
       const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '';
       fetch(`${apiBase}/api/nws/alerts/active`)
-        .then(r => r.json())
+        .then(r => {
+          if (!r.ok) {
+            throw new Error(`Failed to fetch alerts: ${r.status} ${r.statusText}`);
+          }
+          return r.json();
+        })
         .then(geojson => {
           if (!map.getSource('nws-alerts')) {
             map.addSource('nws-alerts', {
@@ -194,7 +201,10 @@ export default function Home() {
             src?.setData(geojson as unknown as GeoJSON.GeoJSON);
           }
         })
-        .catch(() => {});
+        .catch((error) => {
+          console.error('Failed to load NWS alerts:', error);
+          // Could show user notification here in the future
+        });
     }
 
     map.on('load', () => {

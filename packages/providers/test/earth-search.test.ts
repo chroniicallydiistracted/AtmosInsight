@@ -32,10 +32,11 @@ describe('earth-search provider', () => {
       collections: ['sentinel-2'],
     });
     await fetchJson(req);
-    expect(mock).toHaveBeenCalledWith(req.url, {
+    expect(mock).toHaveBeenCalledWith(req.url, expect.objectContaining({
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req.body),
-    });
+      signal: expect.any(AbortSignal)
+    }));
   });
 });
