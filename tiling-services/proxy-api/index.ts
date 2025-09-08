@@ -361,8 +361,8 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
       const apiKey = await getApiKey('TRACESTRACK_API_KEY', 'TRACESTRACK_API_KEY_SECRET');
       if (!apiKey) return json(503, { error: 'TRACESTRACK_API_KEY not configured' });
       const params = new URLSearchParams(event.rawQueryString || '');
-      const styleParam = params.get('style');
-      const extra = styleParam ? `&style=${encodeURIComponent(styleParam)}` : '';
+      const styleParam = params.get('style') || 'outrun';
+      const extra = `&style=${encodeURIComponent(styleParam)}`;
       const url = `https://tile.tracestrack.com/${style}/${z}/${x}/${y}.webp?key=${encodeURIComponent(apiKey)}${extra}`;
       const upstream = await fetchWithRetry(url, {});
       const buf = Buffer.from(await upstream.arrayBuffer());

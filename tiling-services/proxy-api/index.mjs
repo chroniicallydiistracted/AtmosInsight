@@ -1,2 +1,736 @@
-// AtmosInsight Lambda Bundle - Auto-generated
-var b="(AtmosInsight, contact@atmosinsight.com)",N="https://gibs.earthdata.nasa.gov/wmts",L="https://tile.openweathermap.org/map",B=new Set(["clouds_new","precipitation_new","pressure_new","wind_new","temp_new","rain","snow"]);function C({epsg:p,layer:n,time:f,tms:w,z:o,y:t,x:a,ext:r}){let e=f?`${f}/`:"";return`${N}/epsg${p}/best/${n}/default/${e}${w}/${o}/${t}/${a}.${r}`}function K({epsg:p,layer:n,tms:f,range:w}){return`${N}/epsg${p}/best/1.0.0/${n}/default/${f}/all/${w}.xml`}import{readFileSync as W}from"fs";import{join as Y,dirname as D}from"path";import{fileURLToPath as z}from"url";var k=z(import.meta.url),j=D(k),T=null,q="/AtmosInsight/config/ports.json",F=Y(j,"..","..","config","ports.json");try{T=JSON.parse(W(q,"utf8"))}catch{try{T=JSON.parse(W(F,"utf8"))}catch{T={proxy:3e3,catalog:3001,web:3002,database:5432}}}var at={PROXY:T.proxy,CATALOG:T.catalog,WEB:T.web,DATABASE:T.database};async function g(p,n={},f=3,w=1e4,o=500){let t=0,a=o;for(;;)try{let r=AbortSignal.timeout(w),e=n.signal?AbortSignal.any([n.signal,r]):r,c=await fetch(p,{...n,signal:e});if(c.status===429&&t<f){await new Promise(s=>setTimeout(s,a)),a*=2,t++;continue}return c}catch(r){if(t>=f)throw r;await new Promise(e=>setTimeout(e,a)),a*=2,t++}}async function A(p,n){let f=n?process.env[n]:null;return f&&console.log(`Would fetch secret: ${f}`),process.env[p]||""}var Q={"Content-Type":"application/json"},I={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"GET, POST, PUT, DELETE, OPTIONS","Access-Control-Allow-Headers":"Content-Type, Authorization, X-Requested-With","Access-Control-Max-Age":"86400"};function u(p,n,f={}){return{statusCode:p,headers:{...Q,...I,...f},body:JSON.stringify(n)}}function R(p,n,f={}){return{statusCode:p,headers:{...I,...f},body:n}}function E(p,n,f,w={}){return{statusCode:p,isBase64Encoded:!0,headers:{"Content-Type":f,...I,...w},body:Buffer.from(n).toString("base64")}}function H({layer:p,z:n,x:f,y:w,apiKey:o}){return`${L}/${p}/${n}/${f}/${w}.png?appid=${encodeURIComponent(o)}`}var x=null,G=0,X=6e4;async function O(){let p=Date.now();if(x&&p-G<X)return x;let n=await g("https://api.rainviewer.com/public/weather-maps.json");if(!n.ok)throw new Error(`rainviewer index ${n.status}`);return x=await n.json(),G=p,x}function U({index:p,ts:n,size:f,z:w,x:o,y:t,color:a,options:r}){let e=f==="512"?"512":"256",c=Number(n);if(!Number.isFinite(c))return null;let s=[...p?.radar?.past||[],...p?.radar?.nowcast||[]];if(!s.length)return null;let i=s.find(l=>l.time===c);return i||(i=s.filter(m=>m.time<=c).sort((m,d)=>d.time-m.time)[0]||s.sort((m,d)=>d.time-m.time)[0]),i?`${p.host}${i.path}/${e}/${w}/${o}/${t}/${a}/${r}.png`:null}function h(p={}){return{"Cache-Control":"public, max-age=60",...p}}function P(p={}){return{"Cache-Control":"public, max-age=300",...p}}var ut=async p=>{let n=p.rawPath||"/",f=p.rawQueryString?`?${p.rawQueryString}`:"",w=p.requestContext?.http?.method||"GET";try{if(w==="OPTIONS")return{statusCode:200,headers:I,body:""};if(n.startsWith("/api/catalog/")){let t=(process.env.CATALOG_API_BASE||"").replace(/\/$/,"");if(!t)return u(503,{error:"CATALOG_API_BASE not configured"});let a=`${t}${n.replace("/api","")}${f}`,r=await g(a,{}),e=await r.text();return R(r.status,e,h({"Content-Type":r.headers.get("content-type")||"application/json"}))}if(n==="/api/healthz")return R(200,"ok",{"Content-Type":"text/plain"});if(n.startsWith("/api/nws/alerts")){let t=process.env.NWS_USER_AGENT||b,a="https://api.weather.gov"+n.replace("/api/nws","")+f,r=await g(a,{headers:{"User-Agent":t,Accept:"application/geo+json"}}),e=await r.text();return{statusCode:r.status,headers:h({"Content-Type":r.headers.get("content-type")||"application/geo+json"}),body:e}}let o=n.match(/^\/api\/owm\/([^/]+)\/(\d+)\/(\d+)\/(\d+)\.png$/);if(o){let[,t,a,r,e]=o;if(!B.has(t))return u(400,{error:"unknown or blocked layer"});let c=await A("OPENWEATHER_API_KEY","OPENWEATHER_API_KEY_SECRET");if(!c)return u(503,{error:"OPENWEATHER_API_KEY not configured"});let s=H({layer:t,z:a,x:r,y:e,apiKey:c}),i=await g(s,{}),l=Buffer.from(await i.arrayBuffer());return E(i.status,l,i.headers.get("content-type")||"image/png",h())}if(o=n.match(/^\/api\/osm\/cyclosm\/(\d+)\/(\d+)\/(\d+)\.png$/),o){let[,t,a,r]=o,e=["a","b","c"],c=null;for(let s of e)try{let i=`https://${s}.tile.openstreetmap.fr/cyclosm/${t}/${a}/${r}.png`,l=await g(i,{headers:{"User-Agent":process.env.NWS_USER_AGENT||b,Accept:"image/png,image/*,*/*"}},2,1e4);if(l.ok){let m=Buffer.from(await l.arrayBuffer());return E(200,m,l.headers.get("content-type")||"image/png",P())}}catch(i){c=i;continue}return u(503,{error:"OpenStreetMap tile servers unavailable",detail:String(c??"")})}if(o=n.match(/^\/api\/basemap\/carto\/([^/]+)\/(\d+)\/(\d+)\/(\d+)\.png$/),o){let[,t,a,r,e]=o,s=["light_all","dark_all","voyager","positron"].includes(t)?t:"light_all",i=["a","b","c","d"],l=i[parseInt(r)%i.length];try{let m=`https://${l}.basemaps.cartocdn.com/${s}/${a}/${r}/${e}.png`,d=await g(m,{headers:{"User-Agent":process.env.NWS_USER_AGENT||b,Accept:"image/png,image/*,*/*"}});if(d.ok){let _=Buffer.from(await d.arrayBuffer());return E(d.status,_,d.headers.get("content-type")||"image/png",P())}return u(d.status,{error:"Carto basemap unavailable"})}catch(m){return u(503,{error:"Carto service unavailable",detail:String(m)})}}if(o=n.match(/^\/api\/basemap\/osm\/(\d+)\/(\d+)\/(\d+)\.png$/),o){let[,t,a,r]=o,e=["a","b","c"],c=null;for(let s of e)try{let i=`https://${s}.tile.openstreetmap.org/${t}/${a}/${r}.png`,l=await g(i,{headers:{"User-Agent":`AtmosInsight/1.0 (${process.env.NWS_USER_AGENT||b})`,Accept:"image/png,image/*,*/*",Referer:"https://weather.westfam.media"}});if(l.ok){let m=Buffer.from(await l.arrayBuffer());return E(200,m,l.headers.get("content-type")||"image/png",P())}}catch(i){c=i;continue}return u(503,{error:"OSM standard tile servers unavailable",detail:String(c??"")})}if(o=n.match(/^\/api\/tracestrack\/([^/]+)\/(\d+)\/(\d+)\/(\d+)\.webp$/),o){let[,t,a,r,e]=o,c=await A("TRACESTRACK_API_KEY","TRACESTRACK_API_KEY_SECRET");if(!c)return u(503,{error:"TRACESTRACK_API_KEY not configured"});let i=new URLSearchParams(p.rawQueryString||"").get("style"),l=i?`&style=${encodeURIComponent(i)}`:"",m=`https://tile.tracestrack.com/${t}/${a}/${r}/${e}.webp?key=${encodeURIComponent(c)}${l}`,d=await g(m,{}),_=Buffer.from(await d.arrayBuffer());return E(d.status,_,d.headers.get("content-type")||"image/webp",P())}if(n==="/api/rainviewer/index.json"){let t=await O();return u(200,t,h())}if(o=n.match(/^\/api\/rainviewer\/(\d+)\/(256|512)\/(\d+)\/(\d+)\/(\d+)\/([^/]+)\/([^/]+)\.png$/),o){let[,t,a,r,e,c,s,i]=o,l=await O(),m=U({index:l,ts:t,size:a,z:r,x:e,y:c,color:s,options:i});if(!m)return u(404,{error:"frame not found"});let d=await g(m,{}),_=Buffer.from(await d.arrayBuffer());return E(d.status,_,d.headers.get("content-type")||"image/png",h())}if(o=n.match(/^\/api\/rainviewer\/(\d+)\/(\d+)\/(\d+)\/(256|512)\/([^/]+)\/([^/]+)\.png$/),o){let[,t,a,r,e,c,s]=o,i=await O(),m=[...i?.radar?.past||[],...i?.radar?.nowcast||[]].sort((y,v)=>v.time-y.time)[0]?.time;if(!m)return u(404,{error:"no frames"});let d=U({index:i,ts:String(m),size:e,z:t,x:a,y:r,color:c,options:s});if(!d)return u(404,{error:"frame not found"});let _=await g(d,{}),$=Buffer.from(await _.arrayBuffer());return E(_.status,$,_.headers.get("content-type")||"image/png",h())}if(o=n.match(/^\/api\/rainviewer\/(\d+)\/(\d+)\/(\d+)\.png$/),o){let[,t,a,r]=o,e=await O(),s=[...e?.radar?.past||[],...e?.radar?.nowcast||[]].sort((d,_)=>_.time-d.time)[0]?.time;if(!s)return u(404,{error:"no frames"});let i=U({index:e,ts:String(s),size:"256",z:t,x:a,y:r,color:"0",options:"1_0"});if(!i)return u(404,{error:"frame not found"});let l=await g(i,{}),m=Buffer.from(await l.arrayBuffer());return E(l.status,m,l.headers.get("content-type")||"image/png",h())}if(n==="/api/gibs/redirect"){let t=new URLSearchParams(p.rawQueryString||""),a=t.get("layer"),r=t.get("epsg"),e=t.get("time")||void 0,c=t.get("tms"),s=t.get("z"),i=t.get("y"),l=t.get("x"),m=t.get("ext")||"png";if(!a||!r||!c||!s||!i||!l)return u(400,{error:"missing params"});let d=C({epsg:r,layer:a,time:e,tms:c,z:s,y:i,x:l,ext:m});return d.startsWith("https://gibs.earthdata.nasa.gov/")?{statusCode:302,headers:{Location:d,...h()},body:""}:u(400,{error:"invalid redirect"})}if(o=n.match(/^\/api\/gibs\/tile\/(\d+)\/([^/]+)\/([^/]+)\/([^/]+)\/(\d+)\/(\d+)\/(\d+)\.([a-zA-Z0-9]+)$/),o){let[,t,a,r,e,c,s,i,l]=o,m=C({epsg:t,layer:a,time:r,tms:e,z:c,y:s,x:i,ext:l}),d=await g(m,{}),_=Buffer.from(await d.arrayBuffer());return E(d.status,_,d.headers.get("content-type")||"image/png",h())}if(o=n.match(/^\/api\/gibs\/tile\/(\d+)\/([^/]+)\/([^/]+)\/(\d+)\/(\d+)\/(\d+)\.([a-zA-Z0-9]+)$/),o){let[,t,a,r,e,c,s,i]=o,l=C({epsg:t,layer:a,tms:r,z:e,y:c,x:s,ext:i}),m=await g(l,{}),d=Buffer.from(await m.arrayBuffer());return E(m.status,d,m.headers.get("content-type")||"image/png",h())}if(o=n.match(/^\/api\/gibs\/domains\/(\d+)\/([^/]+)\/([^/]+)\/([^/]+)\.xml$/),o){let[,t,a,r,e]=o,c=K({epsg:t,layer:a,tms:r,range:e}),s=await g(c,{}),i=await s.text();return R(s.status,i,h({"Content-Type":s.headers.get("content-type")||"application/xml"}))}if(n==="/api/forecast"){let t=new URLSearchParams(p.rawQueryString||""),a=t.get("lat"),r=t.get("lon"),e=t.get("units")||"metric",c=t.get("source")||"openmeteo";if(!a||!r)return u(400,{error:"lat and lon parameters required"});let s=parseFloat(a),i=parseFloat(r);if(isNaN(s)||isNaN(i))return u(400,{error:"invalid lat/lon values"});try{let _=`https://api.open-meteo.com/v1/forecast?latitude=${s}&longitude=${i}&current=temperature_2m,relative_humidity_2m,apparent_temperature,pressure_msl,wind_speed_10m,wind_direction_10m,weather_code&hourly=temperature_2m,weather_code,precipitation_probability&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max&temperature_unit=${e==="imperial"?"fahrenheit":"celsius"}&wind_speed_unit=${e==="imperial"?"mph":"kmh"}&precipitation_unit=${e==="imperial"?"inch":"mm"}&forecast_days=7`,$=await g(_);if(!$.ok)throw new Error(`Open-Meteo API error: ${$.status}`);let y=await $.json(),v={current:{temp:y.current?.temperature_2m,feels_like:y.current?.apparent_temperature,humidity:y.current?.relative_humidity_2m,pressure:y.current?.pressure_msl,wind_speed:y.current?.wind_speed_10m,wind_deg:y.current?.wind_direction_10m,weather_code:y.current?.weather_code,dt:Math.floor(Date.now()/1e3)},hourly:y.hourly?.time?.slice(0,24)?.map((M,S)=>({dt:Math.floor(new Date(M).getTime()/1e3),temp:y.hourly?.temperature_2m?.[S],weather_code:y.hourly?.weather_code?.[S],pop:y.hourly?.precipitation_probability?.[S]})),daily:y.daily?.time?.slice(0,7)?.map((M,S)=>({dt:Math.floor(new Date(M).getTime()/1e3),temp_min:y.daily?.temperature_2m_min?.[S],temp_max:y.daily?.temperature_2m_max?.[S],weather_code:y.daily?.weather_code?.[S],pop:y.daily?.precipitation_probability_max?.[S]}))};return u(200,v,h())}catch(l){return console.error("Forecast error:",l),u(503,{error:"forecast service unavailable",detail:String(l)})}}if(o=n.match(/^\/api\/glm-toe\/(\d+)\/(\d+)\/(\d+)\.png$/),o){let t=process.env.GLM_TOE_PY_URL;if(!t)return u(503,{error:"GLM_TOE_PY_URL not configured"});let[,a,r,e]=o,c=`${t.replace(/\/$/,"")}/${a}/${r}/${e}.png${f}`;try{let s=await g(c,{},2,8e3),i=Buffer.from(await s.arrayBuffer());return E(s.status,i,s.headers.get("content-type")||"image/png",h())}catch(s){return u(503,{error:"GLM service unavailable",detail:String(s)})}}if(o=n.match(/^\/api\/firms\/csv\/(.+)$/),o){let[,t]=o;if(!await A("FIRMS_MAP_KEY","FIRMS_MAP_KEY_SECRET"))return u(503,{error:"FIRMS_MAP_KEY not configured"});try{let r=`https://firms.modaps.eosdis.nasa.gov/api/area/csv/${t}`,e=await g(r),c=await e.text();return R(e.status,c,h({"Content-Type":"text/csv"}))}catch(r){return u(503,{error:"FIRMS service unavailable",detail:String(r)})}}if(o=n.match(/^\/api\/firms\/(wms|wfs)\/([^/]+)$/),o){let[,t,a]=o,r=await A("FIRMS_MAP_KEY","FIRMS_MAP_KEY_SECRET");if(!r)return u(503,{error:"FIRMS_MAP_KEY not configured"});try{let e=new URLSearchParams(p.rawQueryString||"");e.set("MAP_KEY",r);let c=`https://firms.modaps.eosdis.nasa.gov/${t}/${a}?${e.toString()}`,s=await g(c);if(t==="wms"){let i=Buffer.from(await s.arrayBuffer());return E(s.status,i,s.headers.get("content-type")||"image/png",P())}else{let i=await s.text();return R(s.status,i,h({"Content-Type":s.headers.get("content-type")||"application/xml"}))}}catch(e){return u(503,{error:"FIRMS service unavailable",detail:String(e)})}}if(n==="/api/airnow/current"){let t=new URLSearchParams(p.rawQueryString||""),a=t.get("lat"),r=t.get("lon");if(!a||!r)return u(400,{error:"lat and lon parameters required"});let e=await A("AIRNOW_API_KEY","AIRNOW_API_KEY_SECRET");if(!e)return u(503,{error:"AIRNOW_API_KEY not configured"});try{let s=`https://www.airnowapi.org/aq/observation/latLong/current?${new URLSearchParams({format:"application/json",latitude:a,longitude:r,API_KEY:e}).toString()}`,i=await g(s),l=await i.json();return u(i.status,l,h())}catch(c){return console.error("AirNow error:",c),u(503,{error:"AirNow service unavailable",detail:String(c)})}}if(n.startsWith("/api/openaq/")){let t=await A("OPENAQ_API_KEY","OPENAQ_API_KEY_SECRET");if(!t)return u(503,{error:"OPENAQ_API_KEY not configured"});try{let r=`https://api.openaq.org/v3${n.replace("/api/openaq","")}${f}`,e=await g(r,{headers:{"X-API-Key":t}}),c=await e.json();return u(e.status,c,h())}catch(a){return console.error("OpenAQ error:",a),u(503,{error:"OpenAQ service unavailable",detail:String(a)})}}if(n.startsWith("/api/purpleair/")){let t=await A("PURPLEAIR_API_KEY","PURPLEAIR_API_KEY_SECRET");if(!t)return u(503,{error:"PURPLEAIR_API_KEY not configured"});try{let r=`https://api.purpleair.com/v1${n.replace("/api/purpleair","")}${f}`,e=await g(r,{headers:{"X-API-Key":t}}),c=await e.json();return u(e.status,c,h())}catch(a){return console.error("PurpleAir error:",a),u(503,{error:"PurpleAir service unavailable",detail:String(a)})}}if(o=n.match(/^\/api\/meteomatics\/(.+)$/),o){let[,t]=o,a=await A("METEOMATICS_USER","METEOMATICS_USER_SECRET"),r=await A("METEOMATICS_PASSWORD","METEOMATICS_PASSWORD_SECRET");if(!a||!r)return u(503,{error:"METEOMATICS credentials not configured"});try{let e=Buffer.from(`${a}:${r}`).toString("base64"),c=`https://api.meteomatics.com/${t}${f}`,s=await g(c,{headers:{Authorization:`Basic ${e}`}}),i=await s.json();return u(s.status,i,h())}catch(e){return console.error("Meteomatics error:",e),u(503,{error:"Meteomatics service unavailable",detail:String(e)})}}if(n.startsWith("/api/google/")){let t=await A("GOOGLE_CLOUD_KEY","GOOGLE_CLOUD_KEY_SECRET");if(!t)return u(503,{error:"GOOGLE_CLOUD_KEY not configured"});try{let r=`https://airquality.googleapis.com/v1${n.replace("/api/google","")}?key=${encodeURIComponent(t)}`,e=await g(r,{method:p.requestContext?.http?.method||"GET",headers:{"Content-Type":"application/json"},body:p.body||void 0}),c=await e.json();return u(e.status,c,h())}catch(a){return console.error("Google Cloud error:",a),u(503,{error:"Google Cloud service unavailable",detail:String(a)})}}return n.startsWith("/api/")?u(404,{error:"not found",path:n}):u(400,{error:"bad request"})}catch(o){return console.error(o),u(500,{error:"proxy error"})}};export{ut as handler};
+// packages/proxy-constants/index.js
+var DEFAULT_NWS_USER_AGENT = "(AtmosInsight, contact@atmosinsight.com)";
+var GIBS_BASE = "https://gibs.earthdata.nasa.gov/wmts";
+var OWM_BASE = "https://tile.openweathermap.org/map";
+var OWM_ALLOW = /* @__PURE__ */ new Set([
+  "clouds_new",
+  "precipitation_new",
+  "pressure_new",
+  "wind_new",
+  "temp_new",
+  "rain",
+  "snow"
+]);
+function buildGibsTileUrl({ epsg, layer, time, tms, z, y, x, ext }) {
+  const timePart = time ? `${time}/` : "";
+  return `${GIBS_BASE}/epsg${epsg}/best/${layer}/default/${timePart}${tms}/${z}/${y}/${x}.${ext}`;
+}
+function buildGibsDomainsUrl({ epsg, layer, tms, range }) {
+  return `${GIBS_BASE}/epsg${epsg}/best/1.0.0/${layer}/default/${tms}/all/${range}.xml`;
+}
+
+// packages/shared-utils/dist/index.js
+import { readFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+var __filename = fileURLToPath(import.meta.url);
+var __dirname = dirname(__filename);
+var config = null;
+var absConfigPath = "/AtmosInsight/config/ports.json";
+var relativeConfigPath = join(__dirname, "..", "..", "config", "ports.json");
+try {
+  config = JSON.parse(readFileSync(absConfigPath, "utf8"));
+} catch (e) {
+  try {
+    config = JSON.parse(readFileSync(relativeConfigPath, "utf8"));
+  } catch (e2) {
+    config = { proxy: 3e3, catalog: 3001, web: 3002, database: 5432 };
+  }
+}
+var PORTS = {
+  PROXY: config.proxy,
+  CATALOG: config.catalog,
+  WEB: config.web,
+  DATABASE: config.database
+};
+async function fetchWithRetry(url, options = {}, retries = 3, timeoutMs = 1e4, backoffMs = 500) {
+  let attempt = 0;
+  let delay = backoffMs;
+  while (true) {
+    try {
+      const timeoutSignal = AbortSignal.timeout(timeoutMs);
+      const signal = options.signal ? AbortSignal.any([options.signal, timeoutSignal]) : timeoutSignal;
+      const response = await fetch(url, { ...options, signal });
+      if (response.status === 429 && attempt < retries) {
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        delay *= 2;
+        attempt++;
+        continue;
+      }
+      return response;
+    } catch (error) {
+      if (attempt >= retries) {
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      delay *= 2;
+      attempt++;
+    }
+  }
+}
+
+// tiling-services/proxy-api/index.ts
+async function getApiKey(envVarName, secretEnvVar) {
+  const secretName = secretEnvVar ? process.env[secretEnvVar] : null;
+  if (secretName) {
+    console.log(`Would fetch secret: ${secretName}`);
+  }
+  return process.env[envVarName] || "";
+}
+var JSON_HEADERS = { "Content-Type": "application/json" };
+var CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+  "Access-Control-Max-Age": "86400"
+};
+function json(status, obj, extra = {}) {
+  return {
+    statusCode: status,
+    headers: { ...JSON_HEADERS, ...CORS_HEADERS, ...extra },
+    body: JSON.stringify(obj)
+  };
+}
+function text(status, body, headers = {}) {
+  return {
+    statusCode: status,
+    headers: { ...CORS_HEADERS, ...headers },
+    body
+  };
+}
+function bin(status, bodyBuf, contentType, headers = {}) {
+  return {
+    statusCode: status,
+    isBase64Encoded: true,
+    headers: { "Content-Type": contentType, ...CORS_HEADERS, ...headers },
+    body: Buffer.from(bodyBuf).toString("base64")
+  };
+}
+function buildOwmTileUrl({ layer, z, x, y, apiKey }) {
+  return `${OWM_BASE}/${layer}/${z}/${x}/${y}.png?appid=${encodeURIComponent(apiKey)}`;
+}
+var rvCache = null;
+var rvAt = 0;
+var RV_TTL = 6e4;
+async function getRainviewerIndex() {
+  const now = Date.now();
+  if (rvCache && now - rvAt < RV_TTL) return rvCache;
+  const res = await fetchWithRetry(
+    "https://api.rainviewer.com/public/weather-maps.json"
+  );
+  if (!res.ok) throw new Error(`rainviewer index ${res.status}`);
+  rvCache = await res.json();
+  rvAt = now;
+  return rvCache;
+}
+function buildRainviewerTileUrl({
+  index,
+  ts,
+  size,
+  z,
+  x,
+  y,
+  color,
+  options
+}) {
+  const sizeVal = size === "512" ? "512" : "256";
+  const tsNum = Number(ts);
+  if (!Number.isFinite(tsNum)) return null;
+  const frames = [
+    ...index?.radar?.past || [],
+    ...index?.radar?.nowcast || []
+  ];
+  if (!frames.length) return null;
+  let match = frames.find((f) => f.time === tsNum);
+  if (!match) {
+    const pastOrEqual = frames.filter((f) => f.time <= tsNum).sort((a, b) => b.time - a.time);
+    match = pastOrEqual[0] || frames.sort((a, b) => b.time - a.time)[0];
+  }
+  if (!match) return null;
+  return `${index.host}${match.path}/${sizeVal}/${z}/${x}/${y}/${color}/${options}.png`;
+}
+function withShortCache(h = {}) {
+  return { "Cache-Control": "public, max-age=60", ...h };
+}
+function withMediumCache(h = {}) {
+  return { "Cache-Control": "public, max-age=300", ...h };
+}
+var handler = async (event) => {
+  const path = event.rawPath || "/";
+  const qs = event.rawQueryString ? `?${event.rawQueryString}` : "";
+  const method = event.requestContext?.http?.method || "GET";
+  try {
+    if (method === "OPTIONS") {
+      return {
+        statusCode: 200,
+        headers: CORS_HEADERS,
+        body: ""
+      };
+    }
+    if (path.startsWith("/api/catalog/")) {
+      const base = (process.env.CATALOG_API_BASE || "").replace(/\/$/, "");
+      if (!base) return json(503, { error: "CATALOG_API_BASE not configured" });
+      const target = `${base}${path.replace("/api", "")}${qs}`;
+      const upstream = await fetchWithRetry(target, {});
+      const body = await upstream.text();
+      return text(
+        upstream.status,
+        body,
+        withShortCache({
+          "Content-Type": upstream.headers.get("content-type") || "application/json"
+        })
+      );
+    }
+    if (path === "/api/healthz") {
+      return text(200, "ok", { "Content-Type": "text/plain" });
+    }
+    if (path.startsWith("/api/nws/alerts")) {
+      const userAgent = process.env.NWS_USER_AGENT || DEFAULT_NWS_USER_AGENT;
+      const url = "https://api.weather.gov" + path.replace("/api/nws", "") + qs;
+      const upstream = await fetchWithRetry(url, {
+        headers: { "User-Agent": userAgent, Accept: "application/geo+json" }
+      });
+      const textBody = await upstream.text();
+      return {
+        statusCode: upstream.status,
+        headers: withShortCache({
+          "Content-Type": upstream.headers.get("content-type") || "application/geo+json"
+        }),
+        body: textBody
+      };
+    }
+    let m = path.match(/^\/api\/owm\/([^/]+)\/(\d+)\/(\d+)\/(\d+)\.png$/);
+    if (m) {
+      const [, layer, z, x, y] = m;
+      if (!OWM_ALLOW.has(layer))
+        return json(400, { error: "unknown or blocked layer" });
+      const apiKey = await getApiKey("OPENWEATHER_API_KEY", "OPENWEATHER_API_KEY_SECRET");
+      if (!apiKey)
+        return json(503, { error: "OPENWEATHER_API_KEY not configured" });
+      const url = buildOwmTileUrl({ layer, z, x, y, apiKey });
+      const upstream = await fetchWithRetry(url, {});
+      const buf = Buffer.from(await upstream.arrayBuffer());
+      return bin(
+        upstream.status,
+        buf,
+        upstream.headers.get("content-type") || "image/png",
+        withShortCache()
+      );
+    }
+    m = path.match(/^\/api\/osm\/cyclosm\/(\d+)\/(\d+)\/(\d+)\.png$/);
+    if (m) {
+      const [, z, x, y] = m;
+      const servers = ["a", "b", "c"];
+      let lastError = null;
+      for (const s of servers) {
+        try {
+          const url = `https://${s}.tile.openstreetmap.fr/cyclosm/${z}/${x}/${y}.png`;
+          const upstream = await fetchWithRetry(url, {
+            headers: {
+              "User-Agent": process.env.NWS_USER_AGENT || DEFAULT_NWS_USER_AGENT,
+              Accept: "image/png,image/*,*/*"
+            }
+          }, 2, 1e4);
+          if (upstream.ok) {
+            const buf = Buffer.from(await upstream.arrayBuffer());
+            return bin(
+              200,
+              buf,
+              upstream.headers.get("content-type") || "image/png",
+              withMediumCache()
+            );
+          }
+        } catch (e) {
+          lastError = e;
+          continue;
+        }
+      }
+      return json(503, { error: "OpenStreetMap tile servers unavailable", detail: String(lastError ?? "") });
+    }
+    m = path.match(/^\/api\/basemap\/carto\/([^/]+)\/(\d+)\/(\d+)\/(\d+)\.png$/);
+    if (m) {
+      const [, style, z, x, y] = m;
+      const validStyles = ["light_all", "dark_all", "voyager", "positron"];
+      const mapStyle = validStyles.includes(style) ? style : "light_all";
+      const servers = ["a", "b", "c", "d"];
+      const server = servers[parseInt(x) % servers.length];
+      try {
+        const url = `https://${server}.basemaps.cartocdn.com/${mapStyle}/${z}/${x}/${y}.png`;
+        const upstream = await fetchWithRetry(url, {
+          headers: {
+            "User-Agent": process.env.NWS_USER_AGENT || DEFAULT_NWS_USER_AGENT,
+            Accept: "image/png,image/*,*/*"
+          }
+        });
+        if (upstream.ok) {
+          const buf = Buffer.from(await upstream.arrayBuffer());
+          return bin(
+            upstream.status,
+            buf,
+            upstream.headers.get("content-type") || "image/png",
+            withMediumCache()
+          );
+        }
+        return json(upstream.status, { error: "Carto basemap unavailable" });
+      } catch (e) {
+        return json(503, { error: "Carto service unavailable", detail: String(e) });
+      }
+    }
+    m = path.match(/^\/api\/basemap\/osm\/(\d+)\/(\d+)\/(\d+)\.png$/);
+    if (m) {
+      const [, z, x, y] = m;
+      const servers = ["a", "b", "c"];
+      let lastError = null;
+      for (const s of servers) {
+        try {
+          const url = `https://${s}.tile.openstreetmap.org/${z}/${x}/${y}.png`;
+          const upstream = await fetchWithRetry(url, {
+            headers: {
+              "User-Agent": `AtmosInsight/1.0 (${process.env.NWS_USER_AGENT || DEFAULT_NWS_USER_AGENT})`,
+              Accept: "image/png,image/*,*/*",
+              "Referer": "https://weather.westfam.media"
+            }
+          });
+          if (upstream.ok) {
+            const buf = Buffer.from(await upstream.arrayBuffer());
+            return bin(
+              200,
+              buf,
+              upstream.headers.get("content-type") || "image/png",
+              withMediumCache()
+            );
+          }
+        } catch (e) {
+          lastError = e;
+          continue;
+        }
+      }
+      return json(503, { error: "OSM standard tile servers unavailable", detail: String(lastError ?? "") });
+    }
+    m = path.match(/^\/api\/tracestrack\/([^/]+)\/(\d+)\/(\d+)\/(\d+)\.webp$/);
+    if (m) {
+      const [, style, z, x, y] = m;
+      const apiKey = await getApiKey("TRACESTRACK_API_KEY", "TRACESTRACK_API_KEY_SECRET");
+      if (!apiKey) return json(503, { error: "TRACESTRACK_API_KEY not configured" });
+      const params = new URLSearchParams(event.rawQueryString || "");
+      const styleParam = params.get("style") || "outrun";
+      const extra = `&style=${encodeURIComponent(styleParam)}`;
+      const url = `https://tile.tracestrack.com/${style}/${z}/${x}/${y}.webp?key=${encodeURIComponent(apiKey)}${extra}`;
+      const upstream = await fetchWithRetry(url, {});
+      const buf = Buffer.from(await upstream.arrayBuffer());
+      return bin(
+        upstream.status,
+        buf,
+        upstream.headers.get("content-type") || "image/webp",
+        withMediumCache()
+      );
+    }
+    if (path === "/api/rainviewer/index.json") {
+      const idx = await getRainviewerIndex();
+      return json(200, idx, withShortCache());
+    }
+    m = path.match(
+      /^\/api\/rainviewer\/(\d+)\/(256|512)\/(\d+)\/(\d+)\/(\d+)\/([^/]+)\/([^/]+)\.png$/
+    );
+    if (m) {
+      const [, ts, size, z, x, y, color, options] = m;
+      const idx = await getRainviewerIndex();
+      const url = buildRainviewerTileUrl({
+        index: idx,
+        ts,
+        size,
+        z,
+        x,
+        y,
+        color,
+        options
+      });
+      if (!url) return json(404, { error: "frame not found" });
+      const upstream = await fetchWithRetry(url, {});
+      const buf = Buffer.from(await upstream.arrayBuffer());
+      return bin(
+        upstream.status,
+        buf,
+        upstream.headers.get("content-type") || "image/png",
+        withShortCache()
+      );
+    }
+    m = path.match(
+      /^\/api\/rainviewer\/(\d+)\/(\d+)\/(\d+)\/(256|512)\/([^/]+)\/([^/]+)\.png$/
+    );
+    if (m) {
+      const [, z, x, y, size, color, options] = m;
+      const idx = await getRainviewerIndex();
+      const frames = [
+        ...idx?.radar?.past || [],
+        ...idx?.radar?.nowcast || []
+      ].sort((a, b) => b.time - a.time);
+      const ts = frames[0]?.time;
+      if (!ts) return json(404, { error: "no frames" });
+      const url = buildRainviewerTileUrl({
+        index: idx,
+        ts: String(ts),
+        size,
+        z,
+        x,
+        y,
+        color,
+        options
+      });
+      if (!url) return json(404, { error: "frame not found" });
+      const upstream = await fetchWithRetry(url, {});
+      const buf = Buffer.from(await upstream.arrayBuffer());
+      return bin(
+        upstream.status,
+        buf,
+        upstream.headers.get("content-type") || "image/png",
+        withShortCache()
+      );
+    }
+    m = path.match(/^\/api\/rainviewer\/(\d+)\/(\d+)\/(\d+)\.png$/);
+    if (m) {
+      const [, z, x, y] = m;
+      const idx = await getRainviewerIndex();
+      const frames = [
+        ...idx?.radar?.past || [],
+        ...idx?.radar?.nowcast || []
+      ].sort((a, b) => b.time - a.time);
+      const ts = frames[0]?.time;
+      if (!ts) return json(404, { error: "no frames" });
+      const url = buildRainviewerTileUrl({
+        index: idx,
+        ts: String(ts),
+        size: "256",
+        z,
+        x,
+        y,
+        color: "0",
+        options: "1_0"
+      });
+      if (!url) return json(404, { error: "frame not found" });
+      const upstream = await fetchWithRetry(url, {});
+      const buf = Buffer.from(await upstream.arrayBuffer());
+      return bin(
+        upstream.status,
+        buf,
+        upstream.headers.get("content-type") || "image/png",
+        withShortCache()
+      );
+    }
+    if (path === "/api/gibs/redirect") {
+      const params = new URLSearchParams(event.rawQueryString || "");
+      const layer = params.get("layer");
+      const epsg = params.get("epsg");
+      const time = params.get("time") || void 0;
+      const tms = params.get("tms");
+      const z = params.get("z");
+      const y = params.get("y");
+      const x = params.get("x");
+      const ext = params.get("ext") || "png";
+      if (!layer || !epsg || !tms || !z || !y || !x)
+        return json(400, { error: "missing params" });
+      const url = buildGibsTileUrl({ epsg, layer, time, tms, z, y, x, ext });
+      if (!url.startsWith("https://gibs.earthdata.nasa.gov/"))
+        return json(400, { error: "invalid redirect" });
+      return {
+        statusCode: 302,
+        headers: { Location: url, ...withShortCache() },
+        body: ""
+      };
+    }
+    m = path.match(
+      /^\/api\/gibs\/tile\/(\d+)\/([^/]+)\/([^/]+)\/([^/]+)\/(\d+)\/(\d+)\/(\d+)\.([a-zA-Z0-9]+)$/
+    );
+    if (m) {
+      const [, epsg, layer, time, tms, z, y, x, ext] = m;
+      const url = buildGibsTileUrl({ epsg, layer, time, tms, z, y, x, ext });
+      const upstream = await fetchWithRetry(url, {});
+      const buf = Buffer.from(await upstream.arrayBuffer());
+      return bin(
+        upstream.status,
+        buf,
+        upstream.headers.get("content-type") || "image/png",
+        withShortCache()
+      );
+    }
+    m = path.match(
+      /^\/api\/gibs\/tile\/(\d+)\/([^/]+)\/([^/]+)\/(\d+)\/(\d+)\/(\d+)\.([a-zA-Z0-9]+)$/
+    );
+    if (m) {
+      const [, epsg, layer, tms, z, y, x, ext] = m;
+      const url = buildGibsTileUrl({ epsg, layer, tms, z, y, x, ext });
+      const upstream = await fetchWithRetry(url, {});
+      const buf = Buffer.from(await upstream.arrayBuffer());
+      return bin(
+        upstream.status,
+        buf,
+        upstream.headers.get("content-type") || "image/png",
+        withShortCache()
+      );
+    }
+    m = path.match(
+      /^\/api\/gibs\/domains\/(\d+)\/([^/]+)\/([^/]+)\/([^/]+)\.xml$/
+    );
+    if (m) {
+      const [, epsg, layer, tms, range] = m;
+      const url = buildGibsDomainsUrl({ epsg, layer, tms, range });
+      const upstream = await fetchWithRetry(url, {});
+      const body = await upstream.text();
+      return text(
+        upstream.status,
+        body,
+        withShortCache({
+          "Content-Type": upstream.headers.get("content-type") || "application/xml"
+        })
+      );
+    }
+    if (path === "/api/forecast") {
+      const params = new URLSearchParams(event.rawQueryString || "");
+      const lat = params.get("lat");
+      const lon = params.get("lon");
+      const units = params.get("units") || "metric";
+      const source = params.get("source") || "openmeteo";
+      if (!lat || !lon) {
+        return json(400, { error: "lat and lon parameters required" });
+      }
+      const latNum = parseFloat(lat);
+      const lonNum = parseFloat(lon);
+      if (isNaN(latNum) || isNaN(lonNum)) {
+        return json(400, { error: "invalid lat/lon values" });
+      }
+      try {
+        const tempUnit = units === "imperial" ? "fahrenheit" : "celsius";
+        const windUnit = units === "imperial" ? "mph" : "kmh";
+        const precipUnit = units === "imperial" ? "inch" : "mm";
+        const omUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latNum}&longitude=${lonNum}&current=temperature_2m,relative_humidity_2m,apparent_temperature,pressure_msl,wind_speed_10m,wind_direction_10m,weather_code&hourly=temperature_2m,weather_code,precipitation_probability&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max&temperature_unit=${tempUnit}&wind_speed_unit=${windUnit}&precipitation_unit=${precipUnit}&forecast_days=7`;
+        const upstream = await fetchWithRetry(omUrl);
+        if (!upstream.ok) {
+          throw new Error(`Open-Meteo API error: ${upstream.status}`);
+        }
+        const data = await upstream.json();
+        const normalized = {
+          current: {
+            temp: data.current?.temperature_2m,
+            feels_like: data.current?.apparent_temperature,
+            humidity: data.current?.relative_humidity_2m,
+            pressure: data.current?.pressure_msl,
+            wind_speed: data.current?.wind_speed_10m,
+            wind_deg: data.current?.wind_direction_10m,
+            weather_code: data.current?.weather_code,
+            dt: Math.floor(Date.now() / 1e3)
+          },
+          hourly: data.hourly?.time?.slice(0, 24)?.map((time, i) => ({
+            dt: Math.floor(new Date(time).getTime() / 1e3),
+            temp: data.hourly?.temperature_2m?.[i],
+            weather_code: data.hourly?.weather_code?.[i],
+            pop: data.hourly?.precipitation_probability?.[i]
+          })),
+          daily: data.daily?.time?.slice(0, 7)?.map((time, i) => ({
+            dt: Math.floor(new Date(time).getTime() / 1e3),
+            temp_min: data.daily?.temperature_2m_min?.[i],
+            temp_max: data.daily?.temperature_2m_max?.[i],
+            weather_code: data.daily?.weather_code?.[i],
+            pop: data.daily?.precipitation_probability_max?.[i]
+          }))
+        };
+        return json(200, normalized, withShortCache());
+      } catch (e) {
+        console.error("Forecast error:", e);
+        return json(503, { error: "forecast service unavailable", detail: String(e) });
+      }
+    }
+    m = path.match(/^\/api\/glm-toe\/(\d+)\/(\d+)\/(\d+)\.png$/);
+    if (m) {
+      const glmBaseUrl = process.env.GLM_TOE_PY_URL;
+      if (!glmBaseUrl) {
+        return json(503, { error: "GLM_TOE_PY_URL not configured" });
+      }
+      const [, z, x, y] = m;
+      const url = `${glmBaseUrl.replace(/\/$/, "")}/${z}/${x}/${y}.png${qs}`;
+      try {
+        const upstream = await fetchWithRetry(url, {}, 2, 8e3);
+        const buf = Buffer.from(await upstream.arrayBuffer());
+        return bin(
+          upstream.status,
+          buf,
+          upstream.headers.get("content-type") || "image/png",
+          withShortCache()
+        );
+      } catch (e) {
+        return json(503, { error: "GLM service unavailable", detail: String(e) });
+      }
+    }
+    m = path.match(/^\/api\/firms\/csv\/(.+)$/);
+    if (m) {
+      const [, firmsPath] = m;
+      const firmsMapKey = await getApiKey("FIRMS_MAP_KEY", "FIRMS_MAP_KEY_SECRET");
+      if (!firmsMapKey) {
+        return json(503, { error: "FIRMS_MAP_KEY not configured" });
+      }
+      try {
+        const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${firmsPath}`;
+        const upstream = await fetchWithRetry(url);
+        const csvData = await upstream.text();
+        return text(
+          upstream.status,
+          csvData,
+          withShortCache({
+            "Content-Type": "text/csv"
+          })
+        );
+      } catch (e) {
+        return json(503, { error: "FIRMS service unavailable", detail: String(e) });
+      }
+    }
+    m = path.match(/^\/api\/firms\/(wms|wfs)\/([^/]+)$/);
+    if (m) {
+      const [, mode, dataset] = m;
+      const firmsMapKey = await getApiKey("FIRMS_MAP_KEY", "FIRMS_MAP_KEY_SECRET");
+      if (!firmsMapKey) {
+        return json(503, { error: "FIRMS_MAP_KEY not configured" });
+      }
+      try {
+        const params = new URLSearchParams(event.rawQueryString || "");
+        params.set("MAP_KEY", firmsMapKey);
+        const url = `https://firms.modaps.eosdis.nasa.gov/${mode}/${dataset}?${params.toString()}`;
+        const upstream = await fetchWithRetry(url);
+        if (mode === "wms") {
+          const buf = Buffer.from(await upstream.arrayBuffer());
+          return bin(
+            upstream.status,
+            buf,
+            upstream.headers.get("content-type") || "image/png",
+            withMediumCache()
+          );
+        } else {
+          const responseText = await upstream.text();
+          return text(
+            upstream.status,
+            responseText,
+            withShortCache({
+              "Content-Type": upstream.headers.get("content-type") || "application/xml"
+            })
+          );
+        }
+      } catch (e) {
+        return json(503, { error: "FIRMS service unavailable", detail: String(e) });
+      }
+    }
+    if (path === "/api/airnow/current") {
+      const params = new URLSearchParams(event.rawQueryString || "");
+      const lat = params.get("lat");
+      const lon = params.get("lon");
+      if (!lat || !lon) {
+        return json(400, { error: "lat and lon parameters required" });
+      }
+      const airNowKey = await getApiKey("AIRNOW_API_KEY", "AIRNOW_API_KEY_SECRET");
+      if (!airNowKey) {
+        return json(503, { error: "AIRNOW_API_KEY not configured" });
+      }
+      try {
+        const apiParams = new URLSearchParams({
+          format: "application/json",
+          latitude: lat,
+          longitude: lon,
+          API_KEY: airNowKey
+        });
+        const url = `https://www.airnowapi.org/aq/observation/latLong/current?${apiParams.toString()}`;
+        const upstream = await fetchWithRetry(url);
+        const data = await upstream.json();
+        return json(upstream.status, data, withShortCache());
+      } catch (e) {
+        console.error("AirNow error:", e);
+        return json(503, { error: "AirNow service unavailable", detail: String(e) });
+      }
+    }
+    if (path.startsWith("/api/openaq/")) {
+      const openAqKey = await getApiKey("OPENAQ_API_KEY", "OPENAQ_API_KEY_SECRET");
+      if (!openAqKey) {
+        return json(503, { error: "OPENAQ_API_KEY not configured" });
+      }
+      try {
+        const apiPath = path.replace("/api/openaq", "");
+        const url = `https://api.openaq.org/v3${apiPath}${qs}`;
+        const upstream = await fetchWithRetry(url, {
+          headers: { "X-API-Key": openAqKey }
+        });
+        const data = await upstream.json();
+        return json(upstream.status, data, withShortCache());
+      } catch (e) {
+        console.error("OpenAQ error:", e);
+        return json(503, { error: "OpenAQ service unavailable", detail: String(e) });
+      }
+    }
+    if (path.startsWith("/api/purpleair/")) {
+      const purpleAirKey = await getApiKey("PURPLEAIR_API_KEY", "PURPLEAIR_API_KEY_SECRET");
+      if (!purpleAirKey) {
+        return json(503, { error: "PURPLEAIR_API_KEY not configured" });
+      }
+      try {
+        const apiPath = path.replace("/api/purpleair", "");
+        const url = `https://api.purpleair.com/v1${apiPath}${qs}`;
+        const upstream = await fetchWithRetry(url, {
+          headers: { "X-API-Key": purpleAirKey }
+        });
+        const data = await upstream.json();
+        return json(upstream.status, data, withShortCache());
+      } catch (e) {
+        console.error("PurpleAir error:", e);
+        return json(503, { error: "PurpleAir service unavailable", detail: String(e) });
+      }
+    }
+    m = path.match(/^\/api\/meteomatics\/(.+)$/);
+    if (m) {
+      const [, apiPath] = m;
+      const meteomaticsUser = await getApiKey("METEOMATICS_USER", "METEOMATICS_USER_SECRET");
+      const meteomaticsPassword = await getApiKey("METEOMATICS_PASSWORD", "METEOMATICS_PASSWORD_SECRET");
+      if (!meteomaticsUser || !meteomaticsPassword) {
+        return json(503, { error: "METEOMATICS credentials not configured" });
+      }
+      try {
+        const auth = Buffer.from(`${meteomaticsUser}:${meteomaticsPassword}`).toString("base64");
+        const url = `https://api.meteomatics.com/${apiPath}${qs}`;
+        const upstream = await fetchWithRetry(url, {
+          headers: { Authorization: `Basic ${auth}` }
+        });
+        const data = await upstream.json();
+        return json(upstream.status, data, withShortCache());
+      } catch (e) {
+        console.error("Meteomatics error:", e);
+        return json(503, { error: "Meteomatics service unavailable", detail: String(e) });
+      }
+    }
+    if (path.startsWith("/api/google/")) {
+      const googleCloudKey = await getApiKey("GOOGLE_CLOUD_KEY", "GOOGLE_CLOUD_KEY_SECRET");
+      if (!googleCloudKey) {
+        return json(503, { error: "GOOGLE_CLOUD_KEY not configured" });
+      }
+      try {
+        const apiPath = path.replace("/api/google", "");
+        const url = `https://airquality.googleapis.com/v1${apiPath}?key=${encodeURIComponent(googleCloudKey)}`;
+        const upstream = await fetchWithRetry(url, {
+          method: event.requestContext?.http?.method || "GET",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: event.body || void 0
+        });
+        const data = await upstream.json();
+        return json(upstream.status, data, withShortCache());
+      } catch (e) {
+        console.error("Google Cloud error:", e);
+        return json(503, { error: "Google Cloud service unavailable", detail: String(e) });
+      }
+    }
+    if (path.startsWith("/api/")) {
+      return json(404, { error: "not found", path });
+    }
+    return json(400, { error: "bad request" });
+  } catch (e) {
+    console.error(e);
+    return json(500, { error: "proxy error" });
+  }
+};
+export {
+  handler
+};

@@ -43,8 +43,9 @@ export function GlmLegend({ map, layerId = 'glm_toe_layer' }: GlmLegendProps) {
     if (!map) return;
 
     const srcId = 'glm_toe';
+    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '';
     const tiles = [
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/glm-toe/{z}/{x}/{y}.png?window=${windowVal}` +
+      `${apiBase}/api/glm-toe/{z}/{x}/{y}.png?window=${windowVal}` +
         (qcStrict ? '&qc=true' : '') +
         (tISO ? `&t=${encodeURIComponent(tISO)}` : ''),
     ];

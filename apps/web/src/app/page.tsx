@@ -69,12 +69,32 @@ export default function Home() {
 
     map.addControl(new maplibregl.AttributionControl({ compact: true }));
 
-    map.on('error', (e: maplibregl.ErrorEvent) => {
-      const err = e.error;
-      if (err && 'sourceId' in err && err.sourceId === 'cyclosm') {
+    // Robust basemap fallback: if CyclOSM emits any load errors,
+    // immediately switch to Tracestrack to avoid a blank canvas.
+    let baseSwitched = false;
+    const switchToTracestrack = () => {
+      if (baseSwitched) return;
+      try {
         map.setLayoutProperty('basemap-cyclosm', 'visibility', 'none');
         map.setLayoutProperty('basemap-tracestrack', 'visibility', 'visible');
+        baseSwitched = true;
+        // eslint-disable-next-line no-console
+        console.debug('Basemap fallback: CyclOSM → Tracestrack');
+      } catch {
+        /* noop */
       }
+    };
+
+    // General map error handler (covers a wide net of failures)
+    map.on('error', (_e: maplibregl.ErrorEvent) => {
+      // If CyclOSM is the active layer and errors are bubbling, fall back.
+      const vis = map.getLayoutProperty('basemap-cyclosm', 'visibility');
+      if (vis !== 'none') switchToTracestrack();
+    });
+
+    // Source-specific errors (when available); use `any` to avoid type friction
+    map.on('source.error' as any, (e: any) => {
+      if (e && e.sourceId === 'cyclosm') switchToTracestrack();
     });
 
     // Store map reference globally for debugging (development only)
