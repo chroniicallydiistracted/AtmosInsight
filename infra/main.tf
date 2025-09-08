@@ -40,6 +40,7 @@ module "layer_index" {
 }
 
 module "database" {
+  count          = var.database_enabled ? 1 : 0
   source         = "./modules/rds-postgis"
   identifier     = var.rds_identifier
   instance_class = var.rds_instance_class
@@ -48,7 +49,10 @@ module "database" {
 }
 
 module "cdn" {
-  source        = "./modules/cloudfront"
-  origin_domain = "${module.app_bucket.bucket_id}.s3.amazonaws.com"
-  api_origin_domain = replace(aws_apigatewayv2_api.proxy.api_endpoint, "https://", "")
+  count                = var.cdn_enabled ? 1 : 0
+  source               = "./modules/cloudfront"
+  origin_domain        = "${module.app_bucket.bucket_id}.s3.amazonaws.com"
+  api_origin_domain    = replace(aws_apigatewayv2_api.proxy.api_endpoint, "https://", "")
+  aliases              = var.domain_name != "" ? [var.domain_name] : []
+  acm_certificate_arn  = var.acm_certificate_arn != "" ? var.acm_certificate_arn : null
 }

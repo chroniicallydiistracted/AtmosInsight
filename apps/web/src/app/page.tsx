@@ -13,6 +13,7 @@ import { Timeline } from '@/components/Timeline';
 import { GlmLegend } from '@/components/GlmLegend';
 import { AstroPanel } from '@/components/AstroPanel';
 import { AlertsLegend } from '@/components/AlertsLegend';
+import { ForecastPopover } from '@/components/ForecastPopover';
 import { RainviewerLayer } from '@/components/RainviewerLayer';
 
 export default function Home() {
@@ -207,10 +208,25 @@ export default function Home() {
         });
     }
 
-    map.on('load', () => {
-      addAlertsLayer();
+    // Health check for GLM service
+    async function checkGlmHealth(): Promise<boolean> {
+      try {
+        const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+        const response = await fetch(`${apiBase}/api/glm-toe/0/0/0.png`, { method: 'HEAD' });
+        return response.status !== 503; // 503 means GLM TOE disabled
+      } catch {
+        return false;
+      }
+    }
 
-      // GLM TOE raster tiles (from proxy)
+    // Add GLM layer if service is available
+    async function addGlmLayer() {
+      const isGlmAvailable = await checkGlmHealth();
+      if (!isGlmAvailable) {
+        console.debug('GLM TOE service not available, skipping layer');
+        return;
+      }
+
       const glmSourceId = 'glm_toe';
       if (!map.getSource(glmSourceId)) {
         const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '';
@@ -231,7 +247,14 @@ export default function Home() {
             'raster-resampling': 'linear',
           },
         } as RasterLayerSpecification);
+
+        console.debug('GLM TOE layer added successfully');
       }
+    }
+
+    map.on('load', () => {
+      addAlertsLayer();
+      addGlmLayer(); // Only add if service is available
     });
 
     const interval = window.setInterval(addAlertsLayer, 5 * 60 * 1000);
@@ -245,6 +268,7 @@ export default function Home() {
   return (
     <div className="relative h-screen w-screen">
       <div ref={mapRef} className="absolute inset-0" />
+      <ForecastPopover />
       <Timeline layerId="goes-east" />
       <AstroPanel />
       <GlmLegend map={mapObj} />

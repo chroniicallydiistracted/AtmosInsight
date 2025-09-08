@@ -33,7 +33,10 @@
     "ci": "pnpm ci --frozen-lockfile --prefer-offline",
     "ci:clean": "rm -rf node_modules && rm -rf */node_modules && rm -rf */*/node_modules && pnpm install --frozen-lockfile",
     "ci:fresh": "rm -rf node_modules && rm -rf */node_modules && rm -rf */*/node_modules && rm -rf .pnpm && pnpm install --frozen-lockfile",
-    "ci:script": "./scripts/ci.sh"
+    "ci:script": "./scripts/ci.sh",
+    "build:proxy": "npx esbuild tiling-services/proxy-api/index.ts --bundle --platform=node --format=esm --outfile=tiling-services/proxy-api/index.mjs",
+    "deploy:proxy": "./scripts/deploy-proxy-api.sh",
+    "deploy:web": "./scripts/deploy-web.sh"
   },
   "dependencies": {
     "prettier": "^3.6.2"
@@ -41,6 +44,7 @@
   "devDependencies": {
     "@types/nock": "^11.1.0",
     "@types/node": "^20",
+    "esbuild": "^0.25.9",
     "nock": "^14.0.10",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"

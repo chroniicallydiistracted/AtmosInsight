@@ -19,11 +19,11 @@ output "dynamodb_table_name" {
 }
 
 output "rds_endpoint" {
-  value = module.database.endpoint
+  value = try(module.database[0].endpoint, null)
 }
 
 output "cloudfront_domain" {
-  value = module.cdn.domain_name
+  value = try(module.cdn[0].domain_name, null)
 }
 
 output "catalog_api_url" {

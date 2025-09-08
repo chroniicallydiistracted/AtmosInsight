@@ -1,10 +1,15 @@
 resource "aws_cloudfront_distribution" "this" {
   enabled             = true
   default_root_object = var.default_root_object
+  aliases             = var.aliases
 
   origin {
     domain_name = var.origin_domain
     origin_id   = "s3-origin"
+    
+    s3_origin_config {
+      origin_access_identity = ""
+    }
   }
 
   # Optional API origin (API Gateway or other HTTP origin)
@@ -38,7 +43,7 @@ resource "aws_cloudfront_distribution" "this" {
     for_each = var.api_origin_domain == null ? [] : [true]
     content {
       path_pattern           = "/api/*"
-      allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+      allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
       cached_methods         = ["GET", "HEAD", "OPTIONS"]
       target_origin_id       = "api-origin"
       viewer_protocol_policy = "redirect-to-https"
@@ -60,6 +65,10 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    # Use ACM certificate if provided, otherwise use CloudFront default
+    acm_certificate_arn            = var.acm_certificate_arn
+    ssl_support_method             = var.acm_certificate_arn != null ? "sni-only" : null
+    minimum_protocol_version       = var.acm_certificate_arn != null ? "TLSv1.2_2021" : null
+    cloudfront_default_certificate = var.acm_certificate_arn == null
   }
 }

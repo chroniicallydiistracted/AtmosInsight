@@ -14,3 +14,15 @@ variable "api_origin_domain" {
   type        = string
   default     = null
 }
+
+variable "aliases" {
+  description = "List of domain aliases for the CloudFront distribution"
+  type        = list(string)
+  default     = []
+}
+
+variable "acm_certificate_arn" {
+  description = "ARN of the ACM certificate to use (must be in us-east-1). If null, uses CloudFront default certificate"
+  type        = string
+  default     = null
+}

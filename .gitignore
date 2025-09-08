@@ -52,6 +52,11 @@ infra/terraform.tfstate
 infra/terraform.tfstate.backup
 infra/terraform.tfvars
 infra/proxy-only/.terraform
+infra/terraform.tfstate.1757312267.backup
+infra/terraform.tfstate.1757312269.backup
+infra/terraform.tfstate.1757312333.backup
+infra/proxy-only/terraform.tfstate
+infra/proxy-only/terraform.tfstate.backup
 
 # Workspace File
 AtmosInsight.code-workspace
@@ -72,3 +77,4 @@ packages/**/*.js.map
 !**/dist/**
 !packages/tokens/build.mjs
 !packages/tokens/build.mjs
+infra/proxy-only/terraform.tfvars

@@ -1,11 +1,11 @@
 data "archive_file" "proxy_api" {
   type        = "zip"
-  source_file = "${path.module}/../tiling-services/proxy-api/index.ts"
+  source_file = "${path.module}/../tiling-services/proxy-api/index.mjs"
   output_path = "${path.module}/../tiling-services/proxy-api/function.zip"
 }
 
 resource "aws_iam_role" "proxy_api" {
-  name = "proxy-api-role"
+  name = "weather-proxy-api-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
@@ -28,6 +28,22 @@ resource "aws_iam_role_policy" "proxy_api_logs" {
   })
 }
 
+resource "aws_iam_role_policy" "proxy_api_secrets" {
+  role = aws_iam_role.proxy_api.id
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Action = [
+        "secretsmanager:GetSecretValue"
+      ],
+      Resource = [
+        "arn:aws:secretsmanager:${var.region}:*:secret:atmosinsight/*"
+      ]
+    }]
+  })
+}
+
 resource "aws_lambda_function" "proxy_api" {
   function_name    = "weather-proxy-api"
   role             = aws_iam_role.proxy_api.arn
@@ -36,13 +52,23 @@ resource "aws_lambda_function" "proxy_api" {
   filename         = data.archive_file.proxy_api.output_path
   source_code_hash = data.archive_file.proxy_api.output_base64sha256
   timeout          = 20
+  lifecycle {
+    ignore_changes = [
+      environment, # Preserve env vars managed outside Terraform
+    ]
+  }
   environment {
     variables = {
-      NWS_USER_AGENT   = var.nws_user_agent
-      OPENWEATHER_API_KEY = var.openweather_api_key
-      RAINVIEWER_ENABLED = "true"
-      GIBS_ENABLED     = "true"
-      GLM_TOE_PY_URL   = var.glm_toe_py_url
+      NWS_USER_AGENT              = var.nws_user_agent
+      OPENWEATHER_API_KEY_SECRET  = "atmosinsight/openweather-api-key"
+      TRACESTRACK_API_KEY_SECRET  = "atmosinsight/tracestrack-api-key"
+      RAINVIEWER_ENABLED          = "true"
+      GIBS_ENABLED                = "true"
+      GLM_TOE_PY_URL              = var.glm_toe_py_url
+      CATALOG_API_BASE            = var.catalog_api_base
+      # Fallback to direct env vars if secrets are not available
+      OPENWEATHER_API_KEY         = var.openweather_api_key
+      TRACESTRACK_API_KEY         = var.tracestrack_api_key
     }
   }
 }
@@ -82,4 +108,3 @@ resource "aws_lambda_permission" "proxy_invoke" {
 output "proxy_api_endpoint" {
   value = aws_apigatewayv2_api.proxy.api_endpoint
 }
-

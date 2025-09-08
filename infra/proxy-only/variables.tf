@@ -15,9 +15,20 @@ variable "openweather_api_key" {
   default     = ""
 }
 
+variable "tracestrack_api_key" {
+  description = "Tracestrack basemap API key"
+  type        = string
+  default     = ""
+}
+
 variable "glm_toe_py_url" {
   description = "Optional Python GLM TOE tiles service base URL (leave empty to disable)"
   type        = string
   default     = ""
 }
 
+variable "catalog_api_base" {
+  description = "Optional Catalog API base URL (e.g., https://..execute-api../catalog). Leave empty to disable forwarder."
+  type        = string
+  default     = ""
+}

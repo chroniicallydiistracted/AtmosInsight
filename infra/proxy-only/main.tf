@@ -18,7 +18,7 @@ provider "aws" {
 
 data "archive_file" "proxy_api" {
   type        = "zip"
-  source_file = "${path.module}/../../tiling-services/proxy-api/index.ts"
+  source_file = "${path.module}/../../tiling-services/proxy-api/index.mjs"
   output_path = "${path.module}/function.zip"
 }
 
@@ -54,13 +54,20 @@ resource "aws_lambda_function" "proxy_api" {
   filename         = data.archive_file.proxy_api.output_path
   source_code_hash = data.archive_file.proxy_api.output_base64sha256
   timeout          = 20
+  lifecycle {
+    ignore_changes = [
+      environment, # Preserve env vars managed outside Terraform
+    ]
+  }
   environment {
     variables = {
       NWS_USER_AGENT     = var.nws_user_agent
       OPENWEATHER_API_KEY = var.openweather_api_key
+      TRACESTRACK_API_KEY = var.tracestrack_api_key
       RAINVIEWER_ENABLED = "true"
       GIBS_ENABLED       = "true"
       GLM_TOE_PY_URL     = var.glm_toe_py_url
+      CATALOG_API_BASE   = var.catalog_api_base
     }
   }
 }
@@ -97,3 +104,6 @@ resource "aws_lambda_permission" "proxy_invoke" {
   source_arn    = "${aws_apigatewayv2_api.proxy.execution_arn}/*/*"
 }
 
+output "proxy_api_endpoint" {
+  value = aws_apigatewayv2_api.proxy.api_endpoint
+}

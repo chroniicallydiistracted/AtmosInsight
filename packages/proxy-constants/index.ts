@@ -1,4 +1,4 @@
-export const NWS_API_BASE = 'https://api.weather.gov/alerts';
+export const NWS_API_BASE = 'https://api.weather.gov';
 export const DEFAULT_NWS_USER_AGENT =
   '(AtmosInsight, contact@atmosinsight.com)';
 export const GIBS_BASE = 'https://gibs.earthdata.nasa.gov/wmts';

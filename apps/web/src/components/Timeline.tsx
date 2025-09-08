@@ -19,6 +19,7 @@ export function Timeline({ layerId }: TimelineProps) {
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [lastError, setLastError] = useState<string | null>(null);
+  const [catalogAvailable, setCatalogAvailable] = useState(true);
   const timerRef = useRef<number | null>(null);
 
   const fps = useMemo(
@@ -46,10 +47,29 @@ export function Timeline({ layerId }: TimelineProps) {
         const res = await fetch(
           `${apiBase}/api/catalog/layers/${layerId}/times?limit=10`
         );
+        
+        if (!res.ok) {
+          if (res.status === 503) {
+            if (!cancelled) {
+              setCatalogAvailable(false);
+              setLastError('Catalog service not available');
+            }
+            return;
+          }
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        
         const json: string[] = await res.json();
-        if (!cancelled) setTimes(json);
+        if (!cancelled) {
+          setTimes(json);
+          setCatalogAvailable(true);
+          setLastError(null);
+        }
       } catch (error) {
-        if (!cancelled) setLastError(String(error));
+        if (!cancelled) {
+          setLastError(String(error));
+          setCatalogAvailable(false);
+        }
       }
     }
     load();
@@ -85,6 +105,9 @@ export function Timeline({ layerId }: TimelineProps) {
     }
   }, [index, times, layerId, cache]);
 
+  // Hide component if catalog is not available
+  if (!catalogAvailable) return null;
+  
   if (times.length === 0) return null;
 
   const playable = isPlayable(times, lastError);
