@@ -66,6 +66,14 @@ interface RainviewerTileParams {
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
+// CORS headers for browser requests
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+  'Access-Control-Max-Age': '86400'
+};
+
 function json(
   status: number,
   obj: any,
@@ -73,7 +81,7 @@ function json(
 ): LambdaResponse {
   return {
     statusCode: status,
-    headers: { ...JSON_HEADERS, ...extra },
+    headers: { ...JSON_HEADERS, ...CORS_HEADERS, ...extra },
     body: JSON.stringify(obj),
   };
 }
@@ -85,7 +93,7 @@ function text(
 ): LambdaResponse {
   return {
     statusCode: status,
-    headers,
+    headers: { ...CORS_HEADERS, ...headers },
     body,
   };
 }
@@ -99,7 +107,7 @@ function bin(
   return {
     statusCode: status,
     isBase64Encoded: true,
-    headers: { 'Content-Type': contentType, ...headers },
+    headers: { 'Content-Type': contentType, ...CORS_HEADERS, ...headers },
     body: Buffer.from(bodyBuf).toString('base64'),
   };
 }
@@ -179,6 +187,14 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
   const method = event.requestContext?.http?.method || 'GET';
 
   try {
+    // Handle CORS preflight requests
+    if (method === 'OPTIONS') {
+      return {
+        statusCode: 200,
+        headers: CORS_HEADERS,
+        body: '',
+      };
+    }
     // Catalog forwarder (keep a single API origin)
     if (path.startsWith('/api/catalog/')) {
       const base = (process.env.CATALOG_API_BASE || '').replace(/\/$/, '');
