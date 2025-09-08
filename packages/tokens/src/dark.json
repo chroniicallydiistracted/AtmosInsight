@@ -1,6 +1,6 @@
 {
   "color": {
     "background": { "value": "{color.neutral.900}" },
-    "text": { "value": "{color.text.base}" }
+    "text": { "value": "{color.neutral.50}" }
   }
 }

@@ -116,3 +116,74 @@ variable "log_retention_days" {
   type        = number
   default     = 30
 }
+
+# Additional API provider keys
+variable "firms_map_key" {
+  description = "NASA FIRMS MAP_KEY for fire data access"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "airnow_api_key" {
+  description = "EPA AirNow API key for air quality data"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "nasa_api_key" {
+  description = "NASA API key for various NASA services"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "openaq_api_key" {
+  description = "OpenAQ API key for global air quality data"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "purpleair_api_key" {
+  description = "PurpleAir API key for crowdsourced air quality data"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "cesium_ion_token" {
+  description = "Cesium Ion access token for 3D mapping"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "earthdata_token" {
+  description = "NASA Earthdata bearer token for authenticated services"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "google_cloud_key" {
+  description = "Google Cloud API key for Google services"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "meteomatics_user" {
+  description = "Meteomatics API username"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "meteomatics_password" {
+  description = "Meteomatics API password"
+  type        = string
+  sensitive   = true
+  default     = ""
+}

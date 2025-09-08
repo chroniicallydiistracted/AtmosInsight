@@ -69,6 +69,17 @@ resource "aws_lambda_function" "proxy_api" {
       # Fallback to direct env vars if secrets are not available
       OPENWEATHER_API_KEY         = var.openweather_api_key
       TRACESTRACK_API_KEY         = var.tracestrack_api_key
+      # Additional API provider keys
+      FIRMS_MAP_KEY               = var.firms_map_key
+      AIRNOW_API_KEY              = var.airnow_api_key
+      NASA_API_KEY                = var.nasa_api_key
+      OPENAQ_API_KEY              = var.openaq_api_key
+      PURPLEAIR_API_KEY           = var.purpleair_api_key
+      CESIUM_ION_TOKEN            = var.cesium_ion_token
+      EARTHDATA_TOKEN             = var.earthdata_token
+      GOOGLE_CLOUD_KEY            = var.google_cloud_key
+      METEOMATICS_USER            = var.meteomatics_user
+      METEOMATICS_PASSWORD        = var.meteomatics_password
     }
   }
 }

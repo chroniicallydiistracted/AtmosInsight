@@ -269,8 +269,7 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
               'User-Agent': process.env.NWS_USER_AGENT || DEFAULT_NWS_USER_AGENT,
               Accept: 'image/png,image/*,*/*',
             },
-            signal: AbortSignal.timeout(5000),
-          });
+          }, 2, 10000); // Retry 2 times with 10s timeout
           if (upstream.ok) {
             const buf = Buffer.from(await upstream.arrayBuffer());
             return bin(
@@ -286,6 +285,73 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
         }
       }
       return json(503, { error: 'OpenStreetMap tile servers unavailable', detail: String(lastError ?? '') });
+    }
+
+    // Carto basemap tiles (reliable alternative)
+    m = path.match(/^\/api\/basemap\/carto\/([^/]+)\/(\d+)\/(\d+)\/(\d+)\.png$/);
+    if (m) {
+      const [, style, z, x, y] = m;
+      // Carto provides free basemap tiles
+      const validStyles = ['light_all', 'dark_all', 'voyager', 'positron'];
+      const mapStyle = validStyles.includes(style) ? style : 'light_all';
+      const servers = ['a', 'b', 'c', 'd'];
+      const server = servers[parseInt(x) % servers.length];
+      
+      try {
+        const url = `https://${server}.basemaps.cartocdn.com/${mapStyle}/${z}/${x}/${y}.png`;
+        const upstream = await fetchWithRetry(url, {
+          headers: {
+            'User-Agent': process.env.NWS_USER_AGENT || DEFAULT_NWS_USER_AGENT,
+            Accept: 'image/png,image/*,*/*',
+          },
+        });
+        if (upstream.ok) {
+          const buf = Buffer.from(await upstream.arrayBuffer());
+          return bin(
+            upstream.status,
+            buf,
+            upstream.headers.get('content-type') || 'image/png',
+            withMediumCache()
+          );
+        }
+        return json(upstream.status, { error: 'Carto basemap unavailable' });
+      } catch (e) {
+        return json(503, { error: 'Carto service unavailable', detail: String(e) });
+      }
+    }
+
+    // OpenStreetMap standard tiles (with proper headers)
+    m = path.match(/^\/api\/basemap\/osm\/(\d+)\/(\d+)\/(\d+)\.png$/);
+    if (m) {
+      const [, z, x, y] = m;
+      const servers = ['a', 'b', 'c'];
+      let lastError: unknown = null;
+      
+      for (const s of servers) {
+        try {
+          const url = `https://${s}.tile.openstreetmap.org/${z}/${x}/${y}.png`;
+          const upstream = await fetchWithRetry(url, {
+            headers: {
+              'User-Agent': `AtmosInsight/1.0 (${process.env.NWS_USER_AGENT || DEFAULT_NWS_USER_AGENT})`,
+              Accept: 'image/png,image/*,*/*',
+              'Referer': 'https://weather.westfam.media',
+            },
+          });
+          if (upstream.ok) {
+            const buf = Buffer.from(await upstream.arrayBuffer());
+            return bin(
+              200,
+              buf,
+              upstream.headers.get('content-type') || 'image/png',
+              withMediumCache()
+            );
+          }
+        } catch (e) {
+          lastError = e;
+          continue;
+        }
+      }
+      return json(503, { error: 'OSM standard tile servers unavailable', detail: String(lastError ?? '') });
     }
 
     // Tracestrack tiles
@@ -570,6 +636,197 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
         );
       } catch (e) {
         return json(503, { error: 'GLM service unavailable', detail: String(e) });
+      }
+    }
+
+    // NASA FIRMS (Fire Information for Resource Management System)
+    // CSV data: /api/firms/csv/{path}
+    m = path.match(/^\/api\/firms\/csv\/(.+)$/);
+    if (m) {
+      const [, firmsPath] = m;
+      const firmsMapKey = await getApiKey('FIRMS_MAP_KEY', 'FIRMS_MAP_KEY_SECRET');
+      if (!firmsMapKey) {
+        return json(503, { error: 'FIRMS_MAP_KEY not configured' });
+      }
+      
+      try {
+        const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${firmsPath}`;
+        const upstream = await fetchWithRetry(url);
+        const csvData = await upstream.text();
+        return text(
+          upstream.status,
+          csvData,
+          withShortCache({
+            'Content-Type': 'text/csv',
+          })
+        );
+      } catch (e) {
+        return json(503, { error: 'FIRMS service unavailable', detail: String(e) });
+      }
+    }
+
+    // NASA FIRMS WMS/WFS tiles: /api/firms/{mode}/{dataset}
+    m = path.match(/^\/api\/firms\/(wms|wfs)\/([^/]+)$/);
+    if (m) {
+      const [, mode, dataset] = m;
+      const firmsMapKey = await getApiKey('FIRMS_MAP_KEY', 'FIRMS_MAP_KEY_SECRET');
+      if (!firmsMapKey) {
+        return json(503, { error: 'FIRMS_MAP_KEY not configured' });
+      }
+      
+      try {
+        const params = new URLSearchParams(event.rawQueryString || '');
+        params.set('MAP_KEY', firmsMapKey);
+        const url = `https://firms.modaps.eosdis.nasa.gov/${mode}/${dataset}?${params.toString()}`;
+        const upstream = await fetchWithRetry(url);
+        
+        if (mode === 'wms') {
+          // Return image data for WMS requests
+          const buf = Buffer.from(await upstream.arrayBuffer());
+          return bin(
+            upstream.status,
+            buf,
+            upstream.headers.get('content-type') || 'image/png',
+            withMediumCache()
+          );
+        } else {
+          // Return JSON/XML data for WFS requests
+          const responseText = await upstream.text();
+          return text(
+            upstream.status,
+            responseText,
+            withShortCache({
+              'Content-Type': upstream.headers.get('content-type') || 'application/xml',
+            })
+          );
+        }
+      } catch (e) {
+        return json(503, { error: 'FIRMS service unavailable', detail: String(e) });
+      }
+    }
+
+    // AirNow air quality by coordinates: /api/airnow/current?lat={lat}&lon={lon}
+    if (path === '/api/airnow/current') {
+      const params = new URLSearchParams(event.rawQueryString || '');
+      const lat = params.get('lat');
+      const lon = params.get('lon');
+      
+      if (!lat || !lon) {
+        return json(400, { error: 'lat and lon parameters required' });
+      }
+      
+      const airNowKey = await getApiKey('AIRNOW_API_KEY', 'AIRNOW_API_KEY_SECRET');
+      if (!airNowKey) {
+        return json(503, { error: 'AIRNOW_API_KEY not configured' });
+      }
+      
+      try {
+        const apiParams = new URLSearchParams({
+          format: 'application/json',
+          latitude: lat,
+          longitude: lon,
+          API_KEY: airNowKey,
+        });
+        const url = `https://www.airnowapi.org/aq/observation/latLong/current?${apiParams.toString()}`;
+        const upstream = await fetchWithRetry(url);
+        const data = await upstream.json();
+        return json(upstream.status, data, withShortCache());
+      } catch (e) {
+        console.error('AirNow error:', e);
+        return json(503, { error: 'AirNow service unavailable', detail: String(e) });
+      }
+    }
+
+    // OpenAQ air quality data: /api/openaq/measurements
+    if (path.startsWith('/api/openaq/')) {
+      const openAqKey = await getApiKey('OPENAQ_API_KEY', 'OPENAQ_API_KEY_SECRET');
+      if (!openAqKey) {
+        return json(503, { error: 'OPENAQ_API_KEY not configured' });
+      }
+      
+      try {
+        const apiPath = path.replace('/api/openaq', '');
+        const url = `https://api.openaq.org/v3${apiPath}${qs}`;
+        const upstream = await fetchWithRetry(url, {
+          headers: { 'X-API-Key': openAqKey }
+        });
+        const data = await upstream.json();
+        return json(upstream.status, data, withShortCache());
+      } catch (e) {
+        console.error('OpenAQ error:', e);
+        return json(503, { error: 'OpenAQ service unavailable', detail: String(e) });
+      }
+    }
+
+    // PurpleAir air quality sensors: /api/purpleair/sensors
+    if (path.startsWith('/api/purpleair/')) {
+      const purpleAirKey = await getApiKey('PURPLEAIR_API_KEY', 'PURPLEAIR_API_KEY_SECRET');
+      if (!purpleAirKey) {
+        return json(503, { error: 'PURPLEAIR_API_KEY not configured' });
+      }
+      
+      try {
+        const apiPath = path.replace('/api/purpleair', '');
+        const url = `https://api.purpleair.com/v1${apiPath}${qs}`;
+        const upstream = await fetchWithRetry(url, {
+          headers: { 'X-API-Key': purpleAirKey }
+        });
+        const data = await upstream.json();
+        return json(upstream.status, data, withShortCache());
+      } catch (e) {
+        console.error('PurpleAir error:', e);
+        return json(503, { error: 'PurpleAir service unavailable', detail: String(e) });
+      }
+    }
+
+    // Meteomatics weather data: /api/meteomatics/{datetime}/{parameters}/{lat},{lon}/{format}
+    m = path.match(/^\/api\/meteomatics\/(.+)$/);
+    if (m) {
+      const [, apiPath] = m;
+      const meteomaticsUser = await getApiKey('METEOMATICS_USER', 'METEOMATICS_USER_SECRET');
+      const meteomaticsPassword = await getApiKey('METEOMATICS_PASSWORD', 'METEOMATICS_PASSWORD_SECRET');
+      
+      if (!meteomaticsUser || !meteomaticsPassword) {
+        return json(503, { error: 'METEOMATICS credentials not configured' });
+      }
+      
+      try {
+        const auth = Buffer.from(`${meteomaticsUser}:${meteomaticsPassword}`).toString('base64');
+        const url = `https://api.meteomatics.com/${apiPath}${qs}`;
+        const upstream = await fetchWithRetry(url, {
+          headers: { Authorization: `Basic ${auth}` }
+        });
+        const data = await upstream.json();
+        return json(upstream.status, data, withShortCache());
+      } catch (e) {
+        console.error('Meteomatics error:', e);
+        return json(503, { error: 'Meteomatics service unavailable', detail: String(e) });
+      }
+    }
+
+    // Google Cloud air quality: /api/google/air-quality
+    if (path.startsWith('/api/google/')) {
+      const googleCloudKey = await getApiKey('GOOGLE_CLOUD_KEY', 'GOOGLE_CLOUD_KEY_SECRET');
+      if (!googleCloudKey) {
+        return json(503, { error: 'GOOGLE_CLOUD_KEY not configured' });
+      }
+      
+      try {
+        const apiPath = path.replace('/api/google', '');
+        // Example endpoint for Air Quality API
+        const url = `https://airquality.googleapis.com/v1${apiPath}?key=${encodeURIComponent(googleCloudKey)}`;
+        const upstream = await fetchWithRetry(url, {
+          method: event.requestContext?.http?.method || 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: event.body || undefined,
+        });
+        const data = await upstream.json();
+        return json(upstream.status, data, withShortCache());
+      } catch (e) {
+        console.error('Google Cloud error:', e);
+        return json(503, { error: 'Google Cloud service unavailable', detail: String(e) });
       }
     }
 

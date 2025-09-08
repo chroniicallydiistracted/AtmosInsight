@@ -21,18 +21,41 @@ const SEMANTIC = readJson('semantic');
 const LIGHT = readJson('light');
 const DARK = readJson('dark');
 
-// Wrap plain objects into SD token shape { key: { value } }
+// Return tokens as-is since they're already in SD token shape { key: { value } }
 function toTokens(obj) {
-  return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, { value: v }]));
+  return obj;
+}
+
+function deepMerge(target, ...sources) {
+  if (!sources.length) return target;
+  const source = sources.shift();
+  
+  if (isObject(target) && isObject(source)) {
+    for (const key in source) {
+      if (isObject(source[key])) {
+        if (!target[key]) Object.assign(target, { [key]: {} });
+        deepMerge(target[key], source[key]);
+      } else {
+        Object.assign(target, { [key]: source[key] });
+      }
+    }
+  }
+  
+  return deepMerge(target, ...sources);
+}
+
+function isObject(item) {
+  return item && typeof item === 'object' && !Array.isArray(item);
 }
 
 function themeTokens(themeVars) {
-  // order: primitives → semantic → theme
-  return {
-    ...toTokens(PRIMITIVES),
-    ...toTokens(SEMANTIC),
-    ...toTokens(themeVars),
-  };
+  // order: primitives → semantic → theme  
+  return deepMerge(
+    {},
+    toTokens(PRIMITIVES),
+    toTokens(SEMANTIC), 
+    toTokens(themeVars)
+  );
 }
 
 // v4: register formats via registerFormat; handler is `format` (not `formatter`)

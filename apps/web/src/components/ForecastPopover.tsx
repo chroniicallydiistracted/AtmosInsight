@@ -33,7 +33,7 @@ export function ForecastPopover() {
 
   // Get user's location
   useEffect(() => {
-    if (isOpen && !location) {
+    if (isOpen && !location && typeof navigator !== 'undefined') {
       if ('geolocation' in navigator) {
         navigator.geolocation.getCurrentPosition(
           (position) => {

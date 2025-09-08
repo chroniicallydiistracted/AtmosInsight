@@ -6,15 +6,20 @@ export function AstroPanel() {
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(
     null
   );
-  const [now, setNow] = useState<Date>(new Date());
+  const [now, setNow] = useState<Date | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+    setNow(new Date());
     const id = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(id);
   }, []);
 
   useEffect(() => {
-    if ('geolocation' in navigator) {
+    if (!mounted) return;
+    
+    if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         pos =>
           setCoords({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
@@ -24,15 +29,36 @@ export function AstroPanel() {
     } else {
       setCoords({ lat: 0, lon: 0 });
     }
-  }, []);
+  }, [mounted]);
 
   const astro = useMemo(() => {
+    if (!now) return null;
     const lat = coords?.lat ?? 0;
     const lon = coords?.lon ?? 0;
     return computeAstro({ date: now, lat, lon });
   }, [coords, now]);
 
   const deg = (rad: number) => (rad * 180) / Math.PI;
+
+  if (!mounted || !astro) {
+    return (
+      <div className="panel absolute top-4 left-4 p-3 text-sm">
+        <div className="flex items-center gap-2 mb-2">
+          <strong>Astronomy</strong>
+          <a
+            href="/learn/astro"
+            aria-label="Learn about Sun/Moon"
+            className="text-blue-300 hover:text-blue-200 text-xs"
+          >
+            Learn
+          </a>
+        </div>
+        <div className="space-y-1 text-xs">
+          <div>Loading astronomical data...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="panel absolute top-4 left-4 p-3 text-sm">

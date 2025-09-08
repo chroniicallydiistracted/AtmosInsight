@@ -22,6 +22,11 @@ export function GlmLegend({ map, layerId = 'glm_toe_layer' }: GlmLegendProps) {
   const [qcStrict, setQcStrict] = useState(false);
   const [tISO, setTISO] = useState('');
   const [collapsed, setCollapsed] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!map) return;
@@ -228,36 +233,42 @@ export function GlmLegend({ map, layerId = 'glm_toe_layer' }: GlmLegendProps) {
                 End=Now
               </button>
               <button
-                onClick={() =>
-                  setTISO(
-                    new Date(Date.now() - 60_000).toISOString().slice(0, 19) +
-                      'Z'
-                  )
-                }
+                onClick={() => {
+                  if (mounted) {
+                    setTISO(
+                      new Date(Date.now() - 60_000).toISOString().slice(0, 19) +
+                        'Z'
+                    );
+                  }
+                }}
                 className="text-xs bg-gray-700 hover:bg-gray-600 rounded px-2 py-1"
               >
                 Now-1m
               </button>
               <button
-                onClick={() =>
-                  setTISO(
-                    new Date(Date.now() - 5 * 60_000)
-                      .toISOString()
-                      .slice(0, 19) + 'Z'
-                  )
-                }
+                onClick={() => {
+                  if (mounted) {
+                    setTISO(
+                      new Date(Date.now() - 5 * 60_000)
+                        .toISOString()
+                        .slice(0, 19) + 'Z'
+                    );
+                  }
+                }}
                 className="text-xs bg-gray-700 hover:bg-gray-600 rounded px-2 py-1"
               >
                 Now-5m
               </button>
               <button
-                onClick={() =>
-                  setTISO(
-                    new Date(Date.now() - 10 * 60_000)
-                      .toISOString()
-                      .slice(0, 19) + 'Z'
-                  )
-                }
+                onClick={() => {
+                  if (mounted) {
+                    setTISO(
+                      new Date(Date.now() - 10 * 60_000)
+                        .toISOString()
+                        .slice(0, 19) + 'Z'
+                    );
+                  }
+                }}
                 className="text-xs bg-gray-700 hover:bg-gray-600 rounded px-2 py-1"
               >
                 Now-10m
