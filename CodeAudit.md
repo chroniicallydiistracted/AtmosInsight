@@ -46,7 +46,7 @@ This report summarizes code issues identified in the AtmosInsight repository. Fi
 - **Provider JSON typing gaps** – `openmeteo.ts`, `tomorrowio.ts`, and `visualcrossing.ts` all return `Promise<any>` from `fetchJson`, undermining type safety【F:packages/providers/openmeteo.ts†L15-L17】【F:packages/providers/tomorrowio.ts†L15-L23】【F:packages/providers/visualcrossing.ts†L17-L19】
 - **Uncaught fetch errors** – NWS alerts fetch chain lacks a `catch`, risking unhandled promise rejections【F:apps/web/src/app/page.tsx†L106-L114】
 - **Console debug in production path** – Proxy API logs attempted secret fetches, which may leak metadata【F:tiling-services/proxy-api/index.ts†L19-L23】
-  - **Extraneous Zone.Identifier files** – Windows metadata files clutter the scripts directory and should be removed【58d987†L1-L14】
+- **Extraneous Zone.Identifier files** – Windows metadata files clutter the scripts directory and should be removed【58d987†L1-L14】
 - **Port management scripts rely on external binaries** – `port_killer.py` shells out to `netstat`, `ss`, `fuser`, `lsof`, and `ps`, requiring these commands to exist on the host system and potentially limiting portability【F:scripts/port_killer.py†L27-L37】
 - **Leftover patch artifact** – `StagedFixes.patch` at the repository root holds obsolete provider diffs and should be deleted【F:StagedFixes.patch†L1-L19】
 - **Obsolete CI workflow** – `.github/workflows/ci.yml` still runs npm-based jobs for removed `proxy-server` and `dashboard-app` directories, leaving the pipeline misaligned with the pnpm workspace【F:.github/workflows/ci.yml†L9-L61】
@@ -68,6 +68,7 @@ This report summarizes code issues identified in the AtmosInsight repository. Fi
 - **Single shared TypeScript version** – Root and packages align on `typescript@^5.9.2`, but ensure all workspaces lock to this version to avoid build drift【F:package.json†L42-L46】【F:apps/web/package.json†L43-L45】
 - **Providers manifest not validated** – Absence of schema or validation tooling means malformed `providers.json` goes undetected; integrate JSON schema checks【F:providers.json†L1-L40】
 - **Placeholder Python requirements** – Root `requirements.txt` claims no external dependencies, which may hide actual needs for scripts or services【F:requirements.txt†L1-L3】
+
 
 ## Recommendations (Ordered by Severity)
 1. **Fix lint/test failures** – Replace `any` types in `page.tsx`, include missing hook dependencies, and resolve `@atmos/shared-utils` import for fetch-client tests.
