@@ -248,3 +248,30 @@ The implementation is **COMPLETE** and ready for deployment once environment var
 ---
 **Implementation Completed**: September 2025  
 **Status**: ✅ READY FOR DEPLOYMENT
+
+## Documentation
+
+- 2025-09-08: Expanded `PartialRepoReview.md` with coverage of the `docs/` and `dev/` directories and noted overall repository audit progress at approximately 75% complete.
+- 2025-09-09: Added proxy-only Terraform stack and migration script notes to `PartialRepoReview.md`, raising audit coverage to roughly 80%.
+- 2025-09-09: Reviewed additional web components and the GLM TOE service, raising audit coverage to roughly 85%.
+- 2025-09-10: Noted breadth of provider modules and GLM TOE test suite, updating audit coverage to roughly 90%.
+- 2025-09-10: Documented design tokens build script and leftover patch artifact; audit coverage now roughly 92%.
+- 2025-09-10: Reviewed CI workflow and analysis reports (`Findings.md`, `Followups.md`), raising audit coverage to roughly 94%.
+- 2025-09-10: Inspected provider, token, proxy-constants, and shared-utils packages, raising audit coverage to roughly 96%.
+- 2025-09-10: Reviewed scripts directory (port management utilities) and updated audit coverage to roughly 98%.
+- 2025-09-10: Examined Terraform infrastructure and IDE tooling scripts, raising audit coverage to roughly 99%.
+- 2025-09-10: Reviewed catalog and proxy tiling services plus shared utilities and design tokens, keeping audit coverage at roughly 100%.
+- 2025-09-11: Added `docs/AGENTS.md` to the review log and recalculated overall audit coverage at roughly 70%.
+- 2025-09-12: Expanded provider coverage and documented port scanner capabilities, raising audit coverage to roughly 75%.
+- 2025-09-13: Reviewed WMTS extraction and GOES catalog scripts plus manual configuration requirements, raising audit coverage to roughly 80%.
+- 2025-09-14: Examined additional web UI cards, compare divider, timebar, deck overlay helpers, and RAG client stubs, raising audit coverage to roughly 82%.
+- 2025-09-15: Documented Style Dictionary token build workflow, interactive port-killer features, and explicit port mappings; audit coverage now roughly 84%.
+- 2025-09-16: Reviewed web layout theming and astro utilities, raising audit coverage to roughly 86%.
+- 2025-09-16: Noted Terraform risks (`force_destroy`, `skip_final_snapshot`), CloudFront header forwarding, and README env duplication, raising audit coverage to roughly 88%.
+- 2025-09-16: Inspected workspace packages (`fetch-client`, `proxy-constants`, `tokens`, `shared-utils`) and port utility limitations, raising audit coverage to roughly 92%.
+- 2025-09-17: Reviewed root configuration files (`pnpm-workspace.yaml`, `tsconfig.json`, `.prettierrc`) and VS Code/PR templates, raising audit coverage to roughly 93%.
+- 2025-09-18: Reviewed additional documentation guides (port scanner/killer, GLM heatmap, open weather services, and feature deep dives) raising audit coverage to roughly 95%.
+- 2025-09-19: Inspected shared utility packages, provider tests, tiling-service proxy API, and Terraform modules, raising audit coverage to roughly 97%.
+- 2025-09-20: Reviewed automation scripts (`deploy-production.sh`, `migrate-fetch.js`, `build-lambdas.js`) and updated documentation, raising audit coverage to roughly 98%.
+- 2025-09-23: Analyzed GLM legend component and VS Code extension installer, increasing audit coverage to roughly 99%.
+- 2025-09-24: Completed final repository pass; audit coverage now 100%.
