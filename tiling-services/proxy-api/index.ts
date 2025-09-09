@@ -66,12 +66,22 @@ interface RainviewerTileParams {
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
-// CORS headers for browser requests
+// CORS headers for browser requests - configurable based on environment
+const getAllowedOrigins = (): string => {
+  // In production, use specific origins from environment variable
+  if (process.env.NODE_ENV === 'production') {
+    return process.env.ALLOWED_ORIGINS || 'https://atmosinsight.app,https://atmosinsight.westfam.media';
+  }
+  // In development, allow common local development origins
+  return process.env.ALLOWED_ORIGINS || 'http://localhost:3002,http://localhost:3000,http://localhost:5173';
+};
+
 const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-  'Access-Control-Max-Age': '86400'
+  'Access-Control-Allow-Origin': getAllowedOrigins().split(',')[0], // Use first origin as default
+  'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Requested-With',
+  'Access-Control-Max-Age': '86400',
+  'Access-Control-Expose-Headers': 'x-cost-note, x-provider-id, cache-control'
 };
 
 function json(

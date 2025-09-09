@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AtmosInsight Provider Manifest Schema",
+  "description": "Schema for validating provider configurations in AtmosInsight",
+  "type": "object",
+  "required": ["providers", "meta"],
+  "properties": {
+    "providers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/provider"
+      }
+    },
+    "meta": {
+      "type": "object",
+      "required": ["version", "updated"],
+      "properties": {
+        "version": {"type": "string"},
+        "updated": {"type": "string", "format": "date-time"},
+        "schema": {"type": "string", "format": "uri"},
+        "notes": {"type": "string"}
+      }
+    }
+  },
+  "definitions": {
+    "provider": {
+      "type": "object",
+      "required": ["id", "name", "category", "access", "auth", "license", "attribution"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Unique provider identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable provider name"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "satellite", "radar", "weather", "lightning", "hydrology", 
+            "ocean", "air-quality", "space-weather", "basemap", "elevation", "fire"
+          ]
+        },
+        "access": {
+          "type": "string",
+          "enum": ["s3", "non_s3"]
+        },
+        "s3": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "required": ["bucket", "region", "requesterPays"],
+              "properties": {
+                "bucket": {"type": "string"},
+                "region": {"type": "string"},
+                "requesterPays": {"type": ["boolean", "null"]},
+                "prefixExamples": {
+                  "type": ["array", "null"],
+                  "items": {"type": "string"}
+                },
+                "snsTopic": {"type": ["string", "null"]}
+              }
+            }
+          ]
+        },
+        "wmts": {
+          "type": ["object", "null"],
+          "properties": {
+            "baseUrl": {"type": "string", "format": "uri"},
+            "layers": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        },
+        "rest": {
+          "type": ["object", "null"],
+          "properties": {
+            "baseUrl": {"type": "string", "format": "uri"},
+            "apiKeyRequired": {"type": "boolean"},
+            "userAgentRequired": {"type": "boolean"},
+            "endpoints": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        },
+        "tiles": {
+          "type": ["object", "null"],
+          "properties": {
+            "baseUrl": {"type": "string", "format": "uri"},
+            "apiKeyRequired": {"type": "boolean"},
+            "tileFormat": {"type": "string"},
+            "layers": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "attribution": {"type": "string"},
+            "indexEndpoint": {"type": "string"}
+          }
+        },
+        "auth": {
+          "type": "string",
+          "enum": ["none", "api_key", "earthdata", "user_agent", "unknown"]
+        },
+        "license": {"type": "string"},
+        "attribution": {"type": "string"},
+        "notes": {"type": "string"},
+        "costNote": {
+          "type": "string",
+          "enum": [
+            "same-region", "cross-region", "requester-pays", 
+            "external-service", "unknown-region"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "todo", "deprecated"]
+        }
+      }
+    }
+  }
+}

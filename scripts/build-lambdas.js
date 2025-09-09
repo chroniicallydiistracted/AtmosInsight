@@ -18,7 +18,8 @@ async function buildLambda(inputFile, outputFile) {
       external: ['@aws-sdk/*'], // Keep AWS SDK external
       alias: {
         '@atmos/proxy-constants': path.join(__dirname, '../packages/proxy-constants/index.js'),
-        '@atmos/fetch-client': path.join(__dirname, '../packages/shared-utils/dist/index.js')
+        '@atmos/fetch-client': path.join(__dirname, '../packages/fetch-client/index.js'),
+        '@atmos/shared-utils': path.join(__dirname, '../packages/shared-utils/index.js')
       },
       minify: true,
       sourcemap: false,

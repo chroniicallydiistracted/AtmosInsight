@@ -35,13 +35,22 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Add CORS middleware
+# Add CORS middleware - configurable based on environment
+def get_allowed_origins():
+    if os.environ.get('NODE_ENV') == 'production':
+        origins = os.environ.get('ALLOWED_ORIGINS', 'https://atmosinsight.app,https://atmosinsight.westfam.media')
+        return origins.split(',')
+    else:
+        # Development origins
+        origins = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:3002,http://localhost:3000,http://localhost:5173')
+        return origins.split(',')
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=get_allowed_origins(),
+    allow_credentials=False,  # Don't allow credentials for tile service
+    allow_methods=["GET", "HEAD", "OPTIONS"],
+    allow_headers=["Content-Type", "X-Requested-With"],
 )
 
 # Configuration from environment variables

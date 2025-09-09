@@ -19,33 +19,43 @@ AtmosInsight is a unified educational portal for atmospheric and planetary scien
 ### Monorepo Structure
 This is a pnpm workspace monorepo organized into:
 
-- **apps/web/** - React/Next.js dashboard with MapLibre GL mapping
-- **proxy-server/** - Express-based Node.js proxy centralizing external API calls
+- **apps/web/** - Next.js 14 web dashboard with MapLibre GL mapping and deck.gl overlays
+- **proxy-server/** - Express-based Node.js proxy for local development (TypeScript with live reload)
 - **packages/** - Shared libraries:
   - `tokens` - Design tokens built with Style Dictionary v4
-  - `providers` - Weather data provider modules 
+  - `providers` - Weather data provider modules with S3-first categorization and machine-readable manifest
   - `proxy-constants` - Shared constants for proxy services
-  - `shared-utils` - Common utilities
-  - `fetch-client` - HTTP client utilities
-- **infra/** - Terraform configuration for serverless AWS deployment (API Gateway + Lambda + CloudFront)
-- **tiling-services/** - Tile rendering services (including GLM lightning processing)
-- **data-pipelines/** - ETL jobs for data processing
-- **scripts/** - Development and operations utilities
+  - `shared-utils` - Common utilities including secrets management and port configuration
+  - `fetch-client` - HTTP client utilities with retry logic
+- **infra/** - Terraform configuration for serverless AWS deployment (API Gateway + Lambda + CloudFront + RDS)
+- **tiling-services/** - 3 services:
+  - `catalog-api` - Layer metadata service
+  - `proxy-api` - Production Lambda proxy with restrictive CORS
+  - `glm_toe` - GLM lightning Total Optical Energy FastAPI service
+- **scripts/** - Development and operations utilities including CI/CD tools
 
 ### Backend Proxy Architecture
-The proxy-server exposes `/api/*` endpoints that:
-- Centralize calls to external data providers (NWS, OpenWeather, NASA GIBS, AirNow, etc.)
-- Add required API keys and user-agent headers
-- Implement caching and error handling
-- Forward standardized responses to frontend
+**Dual Proxy Setup:**
+- **Development:** Express-based `proxy-server/` with live reload, helmet security, and comprehensive error handling
+- **Production:** Lambda-based `tiling-services/proxy-api/` with restrictive CORS and cost tracking
+
+Both proxy implementations:
+- Centralize calls to external data providers following the S3-first policy
+- Add required API keys from AWS Secrets Manager (with environment variable fallback)
+- Implement caching and error handling with fetchWithRetry
+- Forward standardized responses with cost-awareness headers
+- Support the provider manifest system for dynamic routing
 
 **Key Proxy Endpoints:**
+- `/api/s3/:provider/*` - S3 object access with signed URLs and region-aware routing
+- `/api/catalog/:provider/times` - Layer timeline data from SNS-driven index or S3 listing
 - `/api/nws/alerts/*` - National Weather Service alerts (GeoJSON)
 - `/api/air/airnow`, `/api/air/openaq` - Air quality data
-- `/api/osm/cyclosm/{z}/{x}/{y}.png` - OpenStreetMap CyclOSM tiles
-- `/api/gibs/tile/*` - NASA GIBS satellite tiles
+- `/api/gibs/tile/*` - NASA GIBS satellite tiles (non-S3)
 - `/api/glm-toe/{z}/{x}/{y}.png` - GLM lightning Total Optical Energy tiles
 - `/api/rainviewer/*` - RainViewer radar frames and indices
+- `/api/point/metno` - MET Norway location forecasts
+- `/api/space/*` - NOAA Space Weather data
 
 ### Frontend Dashboard Components
 The apps/web dashboard implements:
@@ -149,42 +159,41 @@ Tokens are built to CSS variables and TypeScript exports. Run `pnpm tokens` afte
 
 ## Environment Variables
 
-The application uses numerous environment variables for weather provider APIs, AWS services, and feature toggles. Key categories:
+The application uses environment variables for provider APIs, AWS services, and feature toggles. Key categories:
 
-- **Weather APIs**: NWS_USER_AGENT, OPENWEATHER_API_KEY, WEATHERKIT_*, METEOMATICS_*
-- **AWS**: AWS_ACCESS_KEY_ID, LAMBDA_FUNCTION_NAME, DIST_ID, APP_BUCKET
-- **Feature Toggles**: RAINVIEWER_ENABLED, GIBS_ENABLED, GLM_TOE_ENABLED
-- **Frontend**: NEXT_PUBLIC_API_BASE_URL, NEXT_PUBLIC_DEV_PORT
+- **Provider APIs**: `NWS_USER_AGENT`, `OPENWEATHER_API_KEY`, `AIRNOW_API_KEY`, `TRACESTRACK_API_KEY`, `FIRMS_MAP_KEY`
+- **AWS Services**: `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `LAMBDA_FUNCTION_NAME`
+- **Feature Toggles**: `RAINVIEWER_ENABLED`, `GIBS_ENABLED`, `GLM_TOE_ENABLED`, `FIRMS_ENABLED` 
+- **Service URLs**: `GLM_TOE_PY_URL`, `CATALOG_API_BASE`, `NEXT_PUBLIC_API_BASE_URL`
+- **Security**: `ALLOWED_ORIGINS`, `NODE_ENV`
+- **S3 Configuration**: `REQUESTER_PAYS_DEFAULT`, `AWS_S3_FORCE_PATH_STYLE`, `PROVIDER_CONFIG_PATH`
 
-See `README_MAIN.md` for complete environment variable documentation.
+Secrets can be managed via AWS Secrets Manager (production) or environment variables (development).
+See `packages/providers/providers.json` for the machine-readable provider manifest.
 
 ## Weather Data Providers
 
-The system integrates numerous atmospheric and planetary science data sources:
+The system implements an **S3-first policy** with machine-readable provider manifest at `packages/providers/providers.json`:
 
-**Weather & Radar:**
-- National Weather Service (NWS) - alerts, forecasts, observations
-- OpenWeatherMap - global weather tiles and data
-- RainViewer - real-time radar precipitation with animation
-- WeatherKit (Apple) - premium weather data
-- Meteomatics - meteorological model data
+**S3 Providers (Direct AWS Access):**
+- **NOAA Data** (us-east-1): GOES-19/18 ABI & GLM, HRRR, MRMS, NEXRAD Level II, GFS, NAM, NBM, NDFD, NWM, RTOFS, GESTOFS
+- **Cross-Region S3**: Landsat (us-west-2), Copernicus DEM (eu-central-1) - with cost annotations
+- **Earthdata Cloud**: FIRMS, PO.DAAC, NSIDC, LAADS - requiring authentication
+- **Open Datasets**: Sentinel-2 COG, HiRISE DTMs, LOLA - various regions
 
-**Satellite & Lightning:**
-- NASA GIBS - satellite imagery and earth observation data
-- GLM (Geostationary Lightning Mapper) - lightning Total Optical Energy on 2×2km grid
-- NOAA GOES-East/West - satellite data via AWS Open Data
+**Non-S3 Providers (External APIs):**
+- **NASA GIBS** - WMTS/XYZ tiles (not available on S3)
+- **Air Quality**: AirNow (API key), OpenAQ (free)
+- **Weather Services**: MET Norway (User-Agent required), NOAA SWPC
+- **Commercial**: RainViewer radar, TracesTrack topographic tiles, OpenWeatherMap
+- **Community**: CyclOSM (development only)
 
-**Air Quality:**
-- AirNow (U.S. EPA) - official air quality indices
-- OpenAQ - global air quality measurements
-- PurpleAir - crowdsourced air quality sensors
+**Provider Categorization:**
+- Each provider includes `access: "s3" | "non_s3"`, `costNote`, `auth` method, and license information
+- S3 providers specify bucket, region, and requester-pays status
+- Cost-awareness headers (`x-cost-note`) distinguish same-region, cross-region, and external services
 
-**Additional Data Sources:**
-- FIRMS - NASA fire detection and monitoring
-- Tracestrack/CyclOSM - basemap tile services
-- Astronomical data - sun/moon calculations via suncalc
-
-Provider modules are organized in `packages/providers/` with TypeScript support and consistent API interfaces.
+Provider utilities in `packages/providers/index.ts` enable filtering by category, access type, and cost model.
 
 ## Development Notes
 

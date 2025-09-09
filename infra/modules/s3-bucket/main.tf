@@ -1,6 +1,8 @@
 resource "aws_s3_bucket" "this" {
   bucket        = var.name
-  force_destroy = var.force_destroy
+  force_destroy = var.force_destroy # WARNING: Only use true in development/testing
+  
+  tags = var.tags
 }
 
 resource "aws_s3_bucket_versioning" "this" {

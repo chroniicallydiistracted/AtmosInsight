@@ -92,8 +92,8 @@ export default function Home() {
       if (vis !== 'none') switchToTracestrack();
     });
 
-    // Source-specific errors (when available); use `any` to avoid type friction
-    map.on('source.error' as any, (e: any) => {
+    // Source-specific errors (when available)
+    map.on('source.error' as any, (e: { sourceId?: string }) => {
       if (e && e.sourceId === 'cyclosm') switchToTracestrack();
     });
 

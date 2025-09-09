@@ -168,6 +168,9 @@ export async function killProcessOnPort(port: number): Promise<boolean> {
   });
 }
 
+// Export secrets utilities
+export * from './src/secrets.js';
+
 // Health check utility
 export function createHealthCheckEndpoint(serviceName: string) {
   return async (req: any, res: any) => {
