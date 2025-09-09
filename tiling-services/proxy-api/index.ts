@@ -25,6 +25,87 @@ async function getApiKey(envVarName: string, secretEnvVar?: string): Promise<str
   return process.env[envVarName] || '';
 }
 
+// Load providers manifest
+async function getProvidersManifest(): Promise<any[]> {
+  try {
+    // Use embedded providers directly
+    return getEmbeddedProviders();
+  } catch (error) {
+    console.error('Failed to load providers manifest:', error);
+    return getEmbeddedProviders();
+  }
+}
+
+// Embedded fallback providers (key S3 providers only)
+function getEmbeddedProviders(): any[] {
+  return [
+    {
+      id: "goes19-abi",
+      name: "GOES-19 ABI",
+      category: "satellite",
+      access: "s3",
+      s3: {
+        bucket: "noaa-goes19",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: ["ABI-L2-CMIPC/2025/09/08/"]
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/NESDIS",
+      costNote: "same-region"
+    },
+    {
+      id: "goes18-abi",
+      name: "GOES-18 ABI",
+      category: "satellite", 
+      access: "s3",
+      s3: {
+        bucket: "noaa-goes18",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: ["ABI-L2-CMIPC/2025/09/08/"]
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/NESDIS",
+      costNote: "same-region"
+    },
+    {
+      id: "hrrr",
+      name: "HRRR Model",
+      category: "weather",
+      access: "s3",
+      s3: {
+        bucket: "noaa-hrrr-bdp-pds",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: ["hrrr.20250908/conus/"]
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/NCEP",
+      costNote: "same-region"
+    },
+    {
+      id: "mrms",
+      name: "MRMS Multi-Radar",
+      category: "radar",
+      access: "s3",
+      s3: {
+        bucket: "noaa-mrms-pds",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: ["CONUS/PrecipRate_00.00/20250908/"]
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/NESDIS",
+      costNote: "same-region"
+    }
+  ];
+}
+
 interface LambdaEvent {
   rawPath?: string;
   rawQueryString?: string;
@@ -222,6 +303,138 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
       );
     }
 
+    // S3 Providers endpoint
+    if (path === '/api/providers') {
+      try {
+        const providers = await getProvidersManifest();
+        return json(200, { providers }, withShortCache());
+      } catch (error) {
+        return json(503, { error: 'Failed to load providers manifest', detail: String(error) });
+      }
+    }
+
+    // S3 Provider list endpoint: /api/s3/:provider/list (check this BEFORE general object access)
+    let listMatch = path.match(/^\/api\/s3\/([^/]+)\/list$/);
+    if (listMatch) {
+      const [, providerId] = listMatch;
+      const prefix = new URLSearchParams(qs.slice(1)).get('prefix') || '';
+      const maxKeys = parseInt(new URLSearchParams(qs.slice(1)).get('max-keys') || '1000', 10);
+      
+      try {
+        const providers = await getProvidersManifest();
+        const provider = providers.find((p: any) => p.id === providerId && p.access === 's3');
+        
+        if (!provider) {
+          return json(404, { error: `S3 provider '${providerId}' not found` });
+        }
+
+        const { bucket, region, requesterPays } = provider.s3;
+        
+        // Build S3 list URL
+        const s3Url = region === 'us-east-1' 
+          ? `https://${bucket}.s3.amazonaws.com/`
+          : `https://${bucket}.s3.${region}.amazonaws.com/`;
+
+        const listParams = new URLSearchParams({
+          'list-type': '2',
+          prefix,
+          'max-keys': maxKeys.toString()
+        });
+
+        const continuationToken = new URLSearchParams(qs.slice(1)).get('continuation-token');
+        if (continuationToken) {
+          listParams.set('continuation-token', continuationToken);
+        }
+
+        // Prepare headers
+        const headers: Record<string, string> = {};
+        if (requesterPays) {
+          headers['x-amz-request-payer'] = 'requester';
+        }
+
+        // Fetch list from S3
+        const upstream = await fetchWithRetry(`${s3Url}?${listParams.toString()}`, { headers });
+        const xmlBody = await upstream.text();
+        
+        return text(
+          upstream.status,
+          xmlBody,
+          withShortCache({
+            'Content-Type': 'application/xml',
+            'x-cost-note': provider.costNote,
+            'x-provider-id': providerId,
+          })
+        );
+      } catch (error) {
+        return json(503, { 
+          error: `S3 list failed for ${providerId}`, 
+          detail: String(error),
+          prefix 
+        });
+      }
+    }
+
+    // S3 Provider object access: /api/s3/:provider/* (check AFTER list endpoint)
+    let s3Match = path.match(/^\/api\/s3\/([^/]+)\/(.+)$/);
+    if (s3Match) {
+      const [, providerId, objectKey] = s3Match;
+      try {
+        const providers = await getProvidersManifest();
+        const provider = providers.find((p: any) => p.id === providerId && p.access === 's3');
+        
+        if (!provider) {
+          return json(404, { error: `S3 provider '${providerId}' not found` });
+        }
+
+        const { bucket, region, requesterPays } = provider.s3;
+        
+        // Build S3 URL
+        const s3Url = region === 'us-east-1' 
+          ? `https://${bucket}.s3.amazonaws.com/${objectKey}`
+          : `https://${bucket}.s3.${region}.amazonaws.com/${objectKey}`;
+
+        // Prepare headers
+        const headers: Record<string, string> = {};
+        if (requesterPays) {
+          headers['x-amz-request-payer'] = 'requester';
+        }
+
+        // Fetch from S3
+        const upstream = await fetchWithRetry(s3Url, { headers });
+        const contentType = upstream.headers.get('content-type') || 'application/octet-stream';
+        
+        if (contentType.startsWith('image/') || contentType.startsWith('application/')) {
+          const buf = Buffer.from(await upstream.arrayBuffer());
+          return bin(
+            upstream.status,
+            buf,
+            contentType,
+            withMediumCache({
+              'x-cost-note': provider.costNote,
+              'x-provider-id': providerId,
+            })
+          );
+        } else {
+          const body = await upstream.text();
+          return text(
+            upstream.status,
+            body,
+            withMediumCache({
+              'Content-Type': contentType,
+              'x-cost-note': provider.costNote,
+              'x-provider-id': providerId,
+            })
+          );
+        }
+      } catch (error) {
+        return json(503, { 
+          error: `S3 fetch failed for ${providerId}`, 
+          detail: String(error),
+          objectKey 
+        });
+      }
+    }
+
     // Health
     if (path === '/api/healthz') {
       return text(200, 'ok', { 'Content-Type': 'text/plain' });
@@ -277,6 +490,7 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
           const upstream = await fetchWithRetry(url, {
             headers: {
               'User-Agent': process.env.NWS_USER_AGENT || DEFAULT_NWS_USER_AGENT,
+              'Referer': 'https://weather.westfam.media',
               Accept: 'image/png,image/*,*/*',
             },
           }, 2, 10000); // Retry 2 times with 10s timeout
@@ -361,6 +575,29 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
           continue;
         }
       }
+      // Server-side fallback to Carto if OSM is unavailable
+      try {
+        const cartoServers = ['a', 'b', 'c', 'd'];
+        const cs = cartoServers[parseInt(x) % cartoServers.length];
+        const cartoUrl = `https://${cs}.basemaps.cartocdn.com/light_all/${z}/${x}/${y}.png`;
+        const upstream = await fetchWithRetry(cartoUrl, {
+          headers: {
+            'User-Agent': process.env.NWS_USER_AGENT || DEFAULT_NWS_USER_AGENT,
+            Accept: 'image/png,image/*,*/*',
+          },
+        });
+        if (upstream.ok) {
+          const buf = Buffer.from(await upstream.arrayBuffer());
+          return bin(
+            200,
+            buf,
+            upstream.headers.get('content-type') || 'image/png',
+            withMediumCache({ 'x-basemap-fallback': 'carto' })
+          );
+        }
+      } catch (e2) {
+        lastError = `${String(lastError ?? '')} | carto:${String(e2)}`;
+      }
       return json(503, { error: 'OSM standard tile servers unavailable', detail: String(lastError ?? '') });
     }
 
@@ -370,10 +607,9 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
       const [, style, z, x, y] = m;
       const apiKey = await getApiKey('TRACESTRACK_API_KEY', 'TRACESTRACK_API_KEY_SECRET');
       if (!apiKey) return json(503, { error: 'TRACESTRACK_API_KEY not configured' });
-      const params = new URLSearchParams(event.rawQueryString || '');
-      const styleParam = params.get('style') || 'outrun';
-      const extra = `&style=${encodeURIComponent(styleParam)}`;
-      const url = `https://tile.tracestrack.com/${style}/${z}/${x}/${y}.webp?key=${encodeURIComponent(apiKey)}${extra}`;
+      
+      // Don't add extra style parameters - just use the URL path style directly
+      const url = `https://tile.tracestrack.com/${style}/${z}/${x}/${y}.webp?key=${encodeURIComponent(apiKey)}`;
       const upstream = await fetchWithRetry(url, {});
       const buf = Buffer.from(await upstream.arrayBuffer());
       return bin(

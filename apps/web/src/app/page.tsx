@@ -25,12 +25,21 @@ export default function Home() {
     const style: StyleSpecification = {
       version: 8,
       sources: {
-        cyclosm: {
+        // Use working OSM standard tiles as primary
+        osm: {
           type: 'raster',
-          tiles: [`${apiBase}/api/osm/cyclosm/{z}/{x}/{y}.png`],
+          tiles: [`${apiBase}/api/basemap/osm/{z}/{x}/{y}.png`],
           tileSize: 256,
-          attribution: '© OpenStreetMap contributors, © CyclOSM',
+          attribution: '© OpenStreetMap contributors',
         },
+        // Use Carto as reliable fallback
+        carto: {
+          type: 'raster',
+          tiles: [`${apiBase}/api/basemap/carto/light_all/{z}/{x}/{y}.png`],
+          tileSize: 256,
+          attribution: '© CARTO, © OpenStreetMap contributors',
+        },
+        // Keep Tracestrack as option but fix the endpoint issue
         'tracestrack-topo': {
           type: 'raster',
           tiles: [`${apiBase}/api/tracestrack/topo_en/{z}/{x}/{y}.webp`],
@@ -40,9 +49,18 @@ export default function Home() {
       },
       layers: [
         {
-          id: 'basemap-cyclosm',
+          id: 'basemap-osm',
           type: 'raster',
-          source: 'cyclosm',
+          source: 'osm',
+          // Show OSM by default - it's working reliably
+          minzoom: 0,
+          maxzoom: 18,
+        },
+        {
+          id: 'basemap-carto',
+          type: 'raster',
+          source: 'carto',
+          layout: { visibility: 'none' },
           minzoom: 0,
           maxzoom: 18,
         },
@@ -69,17 +87,29 @@ export default function Home() {
 
     map.addControl(new maplibregl.AttributionControl({ compact: true }));
 
-    // Robust basemap fallback: if CyclOSM emits any load errors,
-    // immediately switch to Tracestrack to avoid a blank canvas.
+    // Keep map sized to container: observe container and window resizes
+    const handleWindowResize = () => {
+      try {
+        map.resize();
+      } catch {
+        /* noop */
+      }
+    };
+    window.addEventListener('resize', handleWindowResize);
+    const ro = new ResizeObserver(() => handleWindowResize());
+    if (mapRef.current) ro.observe(mapRef.current);
+
+    // Robust basemap fallback: if OSM emits any load errors,
+    // immediately switch to Carto to avoid a blank canvas.
     let baseSwitched = false;
-    const switchToTracestrack = () => {
+    const switchToCarto = () => {
       if (baseSwitched) return;
       try {
-        map.setLayoutProperty('basemap-cyclosm', 'visibility', 'none');
-        map.setLayoutProperty('basemap-tracestrack', 'visibility', 'visible');
+        map.setLayoutProperty('basemap-osm', 'visibility', 'none');
+        map.setLayoutProperty('basemap-carto', 'visibility', 'visible');
         baseSwitched = true;
         // eslint-disable-next-line no-console
-        console.debug('Basemap fallback: CyclOSM → Tracestrack');
+        console.debug('Basemap fallback: OSM → Carto');
       } catch {
         /* noop */
       }
@@ -87,14 +117,14 @@ export default function Home() {
 
     // General map error handler (covers a wide net of failures)
     map.on('error', (_e: maplibregl.ErrorEvent) => {
-      // If CyclOSM is the active layer and errors are bubbling, fall back.
-      const vis = map.getLayoutProperty('basemap-cyclosm', 'visibility');
-      if (vis !== 'none') switchToTracestrack();
+      // If OSM is the active layer and errors are bubbling, fall back.
+      const vis = map.getLayoutProperty('basemap-osm', 'visibility');
+      if (vis !== 'none') switchToCarto();
     });
 
     // Source-specific errors (when available)
     map.on('source.error' as any, (e: { sourceId?: string }) => {
-      if (e && e.sourceId === 'cyclosm') switchToTracestrack();
+      if (e && e.sourceId === 'osm') switchToCarto();
     });
 
     // Store map reference globally for debugging (development only)
@@ -281,12 +311,18 @@ export default function Home() {
 
     return () => {
       clearInterval(interval);
+      try {
+        window.removeEventListener('resize', handleWindowResize);
+        ro.disconnect();
+      } catch {
+        /* noop */
+      }
       map.remove();
     };
   }, []);
 
   return (
-    <div className="relative h-screen w-screen">
+  <div className="relative w-screen h-screen min-h-[100svh]">
       <div ref={mapRef} className="absolute inset-0" />
       <ForecastPopover />
       <Timeline layerId="goes-east" />

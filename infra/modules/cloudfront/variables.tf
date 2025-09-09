@@ -26,3 +26,9 @@ variable "acm_certificate_arn" {
   type        = string
   default     = null
 }
+
+variable "custom_domain" {
+  description = "Custom domain name for the distribution (used for API origin headers)"
+  type        = string
+  default     = ""
+}

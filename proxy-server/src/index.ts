@@ -11,7 +11,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { costTracking } from './middleware/costTracking.js';
 
 const app = express();
-const port = PORTS.proxy || 3000;
+const port = PORTS.PROXY || 3000;
 
 // Security middleware
 app.use(helmet({
@@ -80,7 +80,7 @@ const server = app.listen(port, () => {
   console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
   
   if (process.env.NODE_ENV !== 'production') {
-    console.log(`🎯 Frontend URL: http://localhost:${PORTS.web || 3002}`);
+    console.log(`🎯 Frontend URL: http://localhost:${PORTS.WEB || 3002}`);
   }
 });
 

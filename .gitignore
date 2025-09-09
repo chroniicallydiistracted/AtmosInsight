@@ -35,7 +35,7 @@ apps/web/.env
 **/tiling-services/glm_toe/venv/lib/python3.12/site-packages/yaml/
 **/tiling-services/glm_toe/venv/lib/python3.12/site-packages/yaml/parser.py
 **/tiling-services/glm_toe/venv/lib/python3.12/site-packages/yaml/scanner.py
-weather.westfam.media-20250908T014217.json
+weather.westfam.media-20250908T183924.json
 
 # Python bytecode/cache
 __pycache__/

@@ -10,8 +10,15 @@ export function createS3Router(): Router {
   // S3 object proxy: /api/s3/:provider/*
   router.get('/:provider/*', async (req, res, next) => {
     try {
-      const { provider: providerId } = req.params;
-      const objectPath = req.params[0]; // Everything after the provider ID
+      const { provider: providerId } = req.params as any;
+      const objectPath = (req.params as any)[0]; // Everything after the provider ID
+
+      // Require an object path after the provider id
+      if (!objectPath || objectPath.trim() === '') {
+        const error: AppError = new Error('Missing S3 object path');
+        error.status = 400;
+        return next(error);
+      }
       
       const provider = getProvider(providerId);
       if (!provider) {

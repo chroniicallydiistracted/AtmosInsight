@@ -1,0 +1,346 @@
+Attached HTML and CSS Context
+
+<div class="relative h-screen w-screen"><div class="absolute inset-0 maplibregl-map"><div class="maplibregl-canvas-container maplibregl-interactive maplibregl-touch-drag-pan maplibregl-touch-zoom-rotate"><canvas class="maplibregl-canvas" tabindex="0" aria-label="Map" role="region" width="2212" height="375" style="width: 1770px; height: 300px;"></canvas></div><div class="maplibregl-control-container"><div class="maplibregl-ctrl-top-left "></div><div class="maplibregl-ctrl-top-right "></div><div class="maplibregl-ctrl-bottom-left "></div><div class="maplibregl-ctrl-bottom-right "><details class="maplibregl-ctrl maplibregl-ctrl-attrib maplibregl-compact maplibregl-compact-show" open=""><summary class="maplibregl-ctrl-attrib-button" title="Toggle attribution" aria-label="Toggle attribution"></summary><div class="maplibregl-ctrl-attrib-inner">© CARTO, © OpenStreetMap contributors</div></details></div></div></div><button class="panel absolute top-4 left-4 p-2 text-sm hover:bg-white/10 transition-colors" aria-label="Open weather forecast">🌤️ Forecast</button><div class="panel absolute top-4 left-4 p-3 text-sm"><div class="flex items-center gap-2 mb-2"><strong>Astronomy</strong><a href="/learn/astro" aria-label="Learn about Sun/Moon" class="text-blue-300 hover:text-blue-200 text-xs">Learn</a></div><div class="space-y-1 text-xs"><div>Sun: az -96.4°, el -32.2°</div><div>Moon: az 94.6°, el 47.7°, dist 369144 km, phase 55%</div></div></div><div class="panel absolute bottom-4 right-4 p-3 text-sm transition-all duration-200 w-72"><div class="flex justify-between items-center mb-2"><strong title="Total Optical Energy (fJ)">GLM TOE</strong><span title="Color ramp thresholds and units" class="opacity-80">ⓘ</span><label class="flex items-center gap-2"><input type="checkbox" class="w-3 h-3" checked=""><span class="text-xs">Visible</span></label></div><div class="space-y-2"><div class="flex justify-between items-center text-xs"><span>Intensity (fJ)</span><button class="text-blue-300 hover:text-blue-200">Collapse</button></div><div class="space-y-1"><div class="flex items-center gap-2"><div class="w-4 h-4 rounded-sm" style="background-color:rgb(65,182,196)"></div><span class="text-xs">&lt; 50 fJ</span></div><div class="flex items-center gap-2"><div class="w-4 h-4 rounded-sm" style="background-color:rgb(44,127,184)"></div><span class="text-xs">&lt; 200 fJ</span></div><div class="flex items-center gap-2"><div class="w-4 h-4 rounded-sm" style="background-color:rgb(37,52,148)"></div><span class="text-xs">&lt; 500 fJ</span></div><div class="flex items-center gap-2"><div class="w-4 h-4 rounded-sm" style="background-color:rgb(255,255,0)"></div><span class="text-xs">&lt; 1000 fJ</span></div><div class="flex items-center gap-2"><div class="w-4 h-4 rounded-sm" style="background-color:rgb(255,140,0)"></div><span class="text-xs">&lt; 2000 fJ</span></div><div class="flex items-center gap-2"><div class="w-4 h-4 rounded-sm" style="background-color:rgb(220,20,60)"></div><span class="text-xs">≥ 2000 fJ</span></div></div><div class="text-xs opacity-70 mt-2"><p>Total Optical Energy from GOES-R GLM</p><p>2×2 km grid resolution</p><p>Units: femtojoules (fJ)</p></div><div class="space-y-2 mt-2"><div class="flex justify-between items-center"><label class="text-xs">Window:</label><select class="text-xs bg-gray-700 rounded px-2 py-1"><option value="1m">1m</option><option value="5m" selected="">5m</option><option value="10m">10m</option></select></div><label class="flex items-center gap-2 text-xs"><input type="checkbox" class="w-3 h-3"><span>Apply strict QC filtering</span></label><div class="space-y-1"><label class="text-xs">Time (t):</label><div class="flex gap-1"><input type="text" placeholder="2025-08-28T12:34:00Z" class="text-xs bg-gray-700 rounded px-2 py-1 flex-1" value=""><button class="text-xs bg-gray-700 hover:bg-gray-600 rounded px-2 py-1">Now</button><button class="text-xs bg-gray-700 hover:bg-gray-600 rounded px-2 py-1">Clear</button></div></div><div class="flex flex-wrap gap-1"><button class="text-xs bg-gray-700 hover:bg-gray-600 rounded px-2 py-1">End=Now</button><button class="text-xs bg-gray-700 hover:bg-gray-600 rounded px-2 py-1">Now-1m</button><button class="text-xs bg-gray-700 hover:bg-gray-600 rounded px-2 py-1">Now-5m</button><button class="text-xs bg-gray-700 hover:bg-gray-600 rounded px-2 py-1">Now-10m</button></div></div></div></div><div class="panel absolute top-4 right-4 p-3 text-sm"><div class="flex justify-between items-center gap-2 mb-2"><strong>NWS Alerts</strong><a href="/learn/alerts.md" target="_blank" rel="noreferrer" class="text-blue-300 hover:text-blue-200 text-xs">Learn</a></div><div class="space-y-1"><div class="flex items-center gap-2"><span class="w-3 h-3 bg-red-800 rounded-sm"></span><span class="text-xs">Extreme</span></div><div class="flex items-center gap-2"><span class="w-3 h-3 bg-red-600 rounded-sm"></span><span class="text-xs">Severe</span></div><div class="flex items-center gap-2"><span class="w-3 h-3 bg-orange-500 rounded-sm"></span><span class="text-xs">Moderate</span></div><div class="flex items-center gap-2"><span class="w-3 h-3 bg-yellow-300 rounded-sm"></span><span class="text-xs">Minor</span></div></div></div></div>
+
+
+/* Matched Rule from user-agent */
+div {
+  display: block;
+}
+
+/* Matched Rule from user-agent */
+address, blockquote, center, div, figure, figcaption, footer, form, header, hr, legend, listing, main, p, plaintext, pre, summary, xmp, article, aside, h1, h2, h3, h4, h5, h6, hgroup, nav, section, search, table, caption, colgroup, col, thead, tbody, tfoot, tr, td, th, dir, dd, dl, dt, menu, ol, ul, li, bdi, output, [dir="ltr" i], [dir="rtl" i], [dir="auto" i] {
+  unicode-bidi: isolate;
+}
+
+/* Matched Rule from regular */
+*, :after, :before {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgba(59,130,246,.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgba(59,130,246,.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+}
+
+/* Matched Rule from regular */
+*, :after, :before {
+  box-sizing: border-box;
+  border: 0 solid #e5e7eb;
+  box-sizing: border-box;
+  border-top-width: 0px;
+  border-right-width: 0px;
+  border-bottom-width: 0px;
+  border-left-width: 0px;
+  border-top-style: solid;
+  border-right-style: solid;
+  border-bottom-style: solid;
+  border-left-style: solid;
+  border-top-color: rgb(229, 231, 235);
+  border-right-color: rgb(229, 231, 235);
+  border-bottom-color: rgb(229, 231, 235);
+  border-left-color: rgb(229, 231, 235);
+  border-image-source: initial;
+  border-image-slice: initial;
+  border-image-width: initial;
+  border-image-outset: initial;
+  border-image-repeat: initial;
+}
+
+/* Matched Rule from regular */
+.relative {
+  position: relative;
+  position: relative;
+}
+
+/* Matched Rule from regular */
+.h-screen {
+  height: 100vh;
+  height: 100vh;
+}
+
+/* Matched Rule from regular */
+.w-screen {
+  width: 100vw;
+  width: 100vw;
+}
+
+/* Inherited from ancestor level 1 (user-agent) */
+body {
+  display: block;
+  margin-top: 8px;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  margin-left: 8px;
+}
+
+/* Inherited from ancestor level 1 (regular) */
+*, :after, :before {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgba(59,130,246,.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgba(59,130,246,.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+}
+
+/* Inherited from ancestor level 1 (regular) */
+*, :after, :before {
+  box-sizing: border-box;
+  border: 0 solid #e5e7eb;
+  box-sizing: border-box;
+  border-top-width: 0px;
+  border-right-width: 0px;
+  border-bottom-width: 0px;
+  border-left-width: 0px;
+  border-top-style: solid;
+  border-right-style: solid;
+  border-bottom-style: solid;
+  border-left-style: solid;
+  border-top-color: rgb(229, 231, 235);
+  border-right-color: rgb(229, 231, 235);
+  border-bottom-color: rgb(229, 231, 235);
+  border-left-color: rgb(229, 231, 235);
+  border-image-source: initial;
+  border-image-slice: initial;
+  border-image-width: initial;
+  border-image-outset: initial;
+  border-image-repeat: initial;
+}
+
+/* Inherited from ancestor level 1 (regular) */
+body {
+  margin: 0;
+  line-height: inherit;
+  margin-top: 0px;
+  margin-right: 0px;
+  margin-bottom: 0px;
+  margin-left: 0px;
+  line-height: inherit;
+}
+
+/* Inherited from ancestor level 2 (user-agent) */
+html {
+  display: block;
+}
+
+/* Inherited from ancestor level 2 (user-agent) */
+:root {
+  view-transition-name: root;
+}
+
+/* Inherited from ancestor level 2 (regular) */
+*, :after, :before {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgba(59,130,246,.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgba(59,130,246,.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+}
+
+/* Inherited from ancestor level 2 (regular) */
+*, :after, :before {
+  box-sizing: border-box;
+  border: 0 solid #e5e7eb;
+  box-sizing: border-box;
+  border-top-width: 0px;
+  border-right-width: 0px;
+  border-bottom-width: 0px;
+  border-left-width: 0px;
+  border-top-style: solid;
+  border-right-style: solid;
+  border-bottom-style: solid;
+  border-left-style: solid;
+  border-top-color: rgb(229, 231, 235);
+  border-right-color: rgb(229, 231, 235);
+  border-bottom-color: rgb(229, 231, 235);
+  border-left-color: rgb(229, 231, 235);
+  border-image-source: initial;
+  border-image-slice: initial;
+  border-image-width: initial;
+  border-image-outset: initial;
+  border-image-repeat: initial;
+}
+
+/* Inherited from ancestor level 2 (regular) */
+:host, html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+  font-family: ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1.5;
+  text-size-adjust: 100%;
+  tab-size: 4;
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Inherited from ancestor level 2 (regular) */
+:root {
+  --color-text: #111827;
+  --color-background: #f9fafb;
+  --color-neutral-50: #f9fafb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-400: #9ca3af;
+  --color-neutral-500: #6b7280;
+  --color-neutral-600: #4b5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1f2937;
+  --color-neutral-900: #111827;
+  --color-accent-teal: #1bc7b5;
+  --color-accent-coral: #ff7a66;
+  --color-text: #f9fafb;
+  --color-alert-extreme: #7f0000;
+  --color-alert-severe: #d7301f;
+  --color-alert-moderate: #fc8d59;
+  --color-alert-minor: #fdcc8a;
+  --color-alert-unknown: #bdbdbd;
+  --color-alert-outline: #444;
+  --color-alert-point: #08519c;
+  --color-background: #111827;
+  --radius-8: 8px;
+  --radius-10: 10px;
+  --radius-12: 12px;
+  --radius-14: 14px;
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 8px rgba(0,0,0,.1);
+  --motion-fast: 150ms;
+  --motion-slow: 300ms;
+  --color-neutral-50: #f9fafb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-400: #9ca3af;
+  --color-neutral-500: #6b7280;
+  --color-neutral-600: #4b5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1f2937;
+  --color-neutral-900: #111827;
+  --color-accent-teal: #1bc7b5;
+  --color-accent-coral: #ff7a66;
+  --color-text: #f9fafb;
+  --color-alert-extreme: #7f0000;
+  --color-alert-severe: #d7301f;
+  --color-alert-moderate: #fc8d59;
+  --color-alert-minor: #fdcc8a;
+  --color-alert-unknown: #bdbdbd;
+  --color-alert-outline: #444;
+  --color-alert-point: #08519c;
+  --color-background: #111827;
+  --radius-8: 8px;
+  --radius-10: 10px;
+  --radius-12: 12px;
+  --radius-14: 14px;
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 8px rgba(0,0,0,.1);
+  --motion-fast: 150ms;
+  --motion-slow: 300ms;
+}
+
+/* Inherited from ancestor level 2 (regular) */
+:root {
+  font-family: Manrope Variable,system-ui,sans-serif;
+  font-family: "Manrope Variable", system-ui, sans-serif;
+}

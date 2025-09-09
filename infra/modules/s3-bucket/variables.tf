@@ -14,3 +14,9 @@ variable "versioning_enabled" {
   type        = bool
   default     = true
 }
+
+variable "tags" {
+  description = "Tags to apply to the S3 bucket"
+  type        = map(string)
+  default     = {}
+}

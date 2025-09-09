@@ -52,13 +52,12 @@ resource "aws_lambda_function" "proxy_api" {
   filename         = data.archive_file.proxy_api.output_path
   source_code_hash = data.archive_file.proxy_api.output_base64sha256
   timeout          = 20
-  lifecycle {
-    ignore_changes = [
-      environment, # Preserve env vars managed outside Terraform
-    ]
-  }
+  memory_size      = 512  # Increased from default 128MB to handle large S3 files
+  # Manage environment via Terraform
   environment {
     variables = {
+      NODE_ENV                   = "production"
+      ALLOWED_ORIGINS            = "https://weather.westfam.media,https://d1nv9ihd4pas5i.cloudfront.net"
       NWS_USER_AGENT              = var.nws_user_agent
       OPENWEATHER_API_KEY_SECRET  = "atmosinsight/openweather-api-key"
       TRACESTRACK_API_KEY_SECRET  = "atmosinsight/tracestrack-api-key"

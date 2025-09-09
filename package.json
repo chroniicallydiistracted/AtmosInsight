@@ -34,9 +34,10 @@
     "ci:clean": "rm -rf node_modules && rm -rf */node_modules && rm -rf */*/node_modules && pnpm install --frozen-lockfile",
     "ci:fresh": "rm -rf node_modules && rm -rf */node_modules && rm -rf */*/node_modules && rm -rf .pnpm && pnpm install --frozen-lockfile",
     "ci:script": "./scripts/ci.sh",
-    "build:proxy": "npx esbuild tiling-services/proxy-api/index.ts --bundle --platform=node --format=esm --outfile=tiling-services/proxy-api/index.mjs",
+    "build:proxy": "npx esbuild tiling-services/proxy-api/index.ts --bundle --platform=node --format=esm --outfile=tiling-services/proxy-api/index.mjs --packages=bundle --external:fs --external:path",
     "deploy:proxy": "./scripts/deploy-proxy-api.sh",
-    "deploy:web": "./scripts/deploy-web.sh"
+  "deploy:web": "./scripts/deploy-web.sh",
+  "e2e:tile": "node scripts/e2e/check_tile_fetch.mjs"
   },
   "dependencies": {
     "prettier": "^3.6.2"
@@ -47,6 +48,7 @@
     "esbuild": "^0.25.9",
     "nock": "^14.0.10",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+  "vitest": "^3.2.4",
+  "puppeteer": "^22.15.0"
   }
 }

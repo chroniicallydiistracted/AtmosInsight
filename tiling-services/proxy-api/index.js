@@ -1,3 +1,29 @@
+"use strict";
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// tiling-services/proxy-api/index.ts
+var index_exports = {};
+__export(index_exports, {
+  handler: () => handler
+});
+module.exports = __toCommonJS(index_exports);
+
 // packages/proxy-constants/index.js
 var DEFAULT_NWS_USER_AGENT = "(AtmosInsight, contact@atmosinsight.com)";
 var GIBS_BASE = "https://gibs.earthdata.nasa.gov/wmts";
@@ -20,19 +46,20 @@ function buildGibsDomainsUrl({ epsg, layer, tms, range }) {
 }
 
 // packages/shared-utils/dist/index.js
-import { readFileSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
-var __filename = fileURLToPath(import.meta.url);
-var __dirname = dirname(__filename);
+var import_fs = require("fs");
+var import_path = require("path");
+var import_url = require("url");
+var import_meta = {};
+var __filename = (0, import_url.fileURLToPath)(import_meta.url);
+var __dirname = (0, import_path.dirname)(__filename);
 var config = null;
 var absConfigPath = "/AtmosInsight/config/ports.json";
-var relativeConfigPath = join(__dirname, "..", "..", "config", "ports.json");
+var relativeConfigPath = (0, import_path.join)(__dirname, "..", "..", "config", "ports.json");
 try {
-  config = JSON.parse(readFileSync(absConfigPath, "utf8"));
+  config = JSON.parse((0, import_fs.readFileSync)(absConfigPath, "utf8"));
 } catch (e) {
   try {
-    config = JSON.parse(readFileSync(relativeConfigPath, "utf8"));
+    config = JSON.parse((0, import_fs.readFileSync)(relativeConfigPath, "utf8"));
   } catch (e2) {
     config = { proxy: 3e3, catalog: 3001, web: 3002, database: 5432 };
   }
@@ -273,51 +300,6 @@ var handler = async (event) => {
         return json(503, { error: "Failed to load providers manifest", detail: String(error) });
       }
     }
-    let listMatch = path.match(/^\/api\/s3\/([^/]+)\/list$/);
-    if (listMatch) {
-      const [, providerId] = listMatch;
-      const prefix = new URLSearchParams(qs.slice(1)).get("prefix") || "";
-      const maxKeys = parseInt(new URLSearchParams(qs.slice(1)).get("max-keys") || "1000", 10);
-      try {
-        const providers = await getProvidersManifest();
-        const provider = providers.find((p) => p.id === providerId && p.access === "s3");
-        if (!provider) {
-          return json(404, { error: `S3 provider '${providerId}' not found` });
-        }
-        const { bucket, region, requesterPays } = provider.s3;
-        const s3Url = region === "us-east-1" ? `https://${bucket}.s3.amazonaws.com/` : `https://${bucket}.s3.${region}.amazonaws.com/`;
-        const listParams = new URLSearchParams({
-          "list-type": "2",
-          prefix,
-          "max-keys": maxKeys.toString()
-        });
-        const continuationToken = new URLSearchParams(qs.slice(1)).get("continuation-token");
-        if (continuationToken) {
-          listParams.set("continuation-token", continuationToken);
-        }
-        const headers = {};
-        if (requesterPays) {
-          headers["x-amz-request-payer"] = "requester";
-        }
-        const upstream = await fetchWithRetry(`${s3Url}?${listParams.toString()}`, { headers });
-        const xmlBody = await upstream.text();
-        return text(
-          upstream.status,
-          xmlBody,
-          withShortCache({
-            "Content-Type": "application/xml",
-            "x-cost-note": provider.costNote,
-            "x-provider-id": providerId
-          })
-        );
-      } catch (error) {
-        return json(503, {
-          error: `S3 list failed for ${providerId}`,
-          detail: String(error),
-          prefix
-        });
-      }
-    }
     let s3Match = path.match(/^\/api\/s3\/([^/]+)\/(.+)$/);
     if (s3Match) {
       const [, providerId, objectKey] = s3Match;
@@ -363,6 +345,51 @@ var handler = async (event) => {
           error: `S3 fetch failed for ${providerId}`,
           detail: String(error),
           objectKey
+        });
+      }
+    }
+    let listMatch = path.match(/^\/api\/s3\/([^/]+)\/list$/);
+    if (listMatch) {
+      const [, providerId] = listMatch;
+      const prefix = new URLSearchParams(qs.slice(1)).get("prefix") || "";
+      const maxKeys = parseInt(new URLSearchParams(qs.slice(1)).get("max-keys") || "1000", 10);
+      try {
+        const providers = await getProvidersManifest();
+        const provider = providers.find((p) => p.id === providerId && p.access === "s3");
+        if (!provider) {
+          return json(404, { error: `S3 provider '${providerId}' not found` });
+        }
+        const { bucket, region, requesterPays } = provider.s3;
+        const s3Url = region === "us-east-1" ? `https://${bucket}.s3.amazonaws.com/` : `https://${bucket}.s3.${region}.amazonaws.com/`;
+        const listParams = new URLSearchParams({
+          "list-type": "2",
+          prefix,
+          "max-keys": maxKeys.toString()
+        });
+        const continuationToken = new URLSearchParams(qs.slice(1)).get("continuation-token");
+        if (continuationToken) {
+          listParams.set("continuation-token", continuationToken);
+        }
+        const headers = {};
+        if (requesterPays) {
+          headers["x-amz-request-payer"] = "requester";
+        }
+        const upstream = await fetchWithRetry(`${s3Url}?${listParams.toString()}`, { headers });
+        const xmlBody = await upstream.text();
+        return text(
+          upstream.status,
+          xmlBody,
+          withShortCache({
+            "Content-Type": "application/xml",
+            "x-cost-note": provider.costNote,
+            "x-provider-id": providerId
+          })
+        );
+      } catch (error) {
+        return json(503, {
+          error: `S3 list failed for ${providerId}`,
+          detail: String(error),
+          prefix
         });
       }
     }
@@ -490,28 +517,6 @@ var handler = async (event) => {
           lastError = e;
           continue;
         }
-      }
-      try {
-        const cartoServers = ["a", "b", "c", "d"];
-        const cs = cartoServers[parseInt(x) % cartoServers.length];
-        const cartoUrl = `https://${cs}.basemaps.cartocdn.com/light_all/${z}/${x}/${y}.png`;
-        const upstream = await fetchWithRetry(cartoUrl, {
-          headers: {
-            "User-Agent": process.env.NWS_USER_AGENT || DEFAULT_NWS_USER_AGENT,
-            Accept: "image/png,image/*,*/*"
-          }
-        });
-        if (upstream.ok) {
-          const buf = Buffer.from(await upstream.arrayBuffer());
-          return bin(
-            200,
-            buf,
-            upstream.headers.get("content-type") || "image/png",
-            withMediumCache({ "x-basemap-fallback": "carto" })
-          );
-        }
-      } catch (e2) {
-        lastError = `${String(lastError ?? "")} | carto:${String(e2)}`;
       }
       return json(503, { error: "OSM standard tile servers unavailable", detail: String(lastError ?? "") });
     }
@@ -936,6 +941,7 @@ var handler = async (event) => {
     return json(500, { error: "proxy error" });
   }
 };
-export {
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
   handler
-};
+});

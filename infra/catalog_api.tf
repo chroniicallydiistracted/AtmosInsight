@@ -1,6 +1,6 @@
 data "archive_file" "catalog_api" {
   type        = "zip"
-  source_file = "${path.module}/../tiling-services/catalog-api/index.ts"
+  source_dir  = "${path.module}/../tiling-services/catalog-api"
   output_path = "${path.module}/../tiling-services/catalog-api/function.zip"
 }
 
@@ -36,7 +36,7 @@ resource "aws_lambda_function" "catalog_api" {
   function_name    = "catalog-api"
   role             = aws_iam_role.catalog_api.arn
   handler          = "index.handler"
-  runtime          = "nodejs18.x"
+  runtime          = "nodejs20.x"
   filename         = data.archive_file.catalog_api.output_path
   source_code_hash = data.archive_file.catalog_api.output_base64sha256
   environment {

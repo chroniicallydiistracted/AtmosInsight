@@ -270,7 +270,8 @@ resource "aws_cloudwatch_log_metric_filter" "proxy_api_fatal_errors" {
   
   name           = "atmosinsight-proxy-api-fatal-errors"
   log_group_name = aws_cloudwatch_log_group.proxy_api[0].name
-  pattern        = "[timestamp, requestId, \"ERROR\", ...]"
+  # Match log events containing the term ERROR
+  pattern        = "ERROR"
 
   metric_transformation {
     name      = "ProxyApiFatalErrors"

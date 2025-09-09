@@ -9,7 +9,7 @@ export function createApiRouter(): Router {
   // NASA GIBS proxy
   router.get('/gibs/*', async (req, res, next) => {
     try {
-      const gibsPath = req.params[0];
+      const gibsPath = (req.params as any)[0];
       const queryString = req.url.split('?')[1];
       
       const gibsProvider = getProvider('nasa-gibs');
@@ -56,7 +56,7 @@ export function createApiRouter(): Router {
         return next(error);
       }
 
-      const airnowPath = req.params[0];
+      const airnowPath = (req.params as any)[0];
       const queryString = req.url.split('?')[1];
       
       const airnowProvider = getProvider('airnow');
@@ -86,7 +86,7 @@ export function createApiRouter(): Router {
   // OpenAQ proxy
   router.get('/air/openaq/*', async (req, res, next) => {
     try {
-      const openaqPath = req.params[0];
+      const openaqPath = (req.params as any)[0];
       const queryString = req.url.split('?')[1];
       
       const openaqProvider = getProvider('openaq');
@@ -161,7 +161,7 @@ export function createApiRouter(): Router {
   // Space Weather proxy (NOAA SWPC)
   router.get('/space/*', async (req, res, next) => {
     try {
-      const spacePath = req.params[0];
+      const spacePath = (req.params as any)[0];
       const queryString = req.url.split('?')[1];
       
       const swpcProvider = getProvider('noaa-swpc');
@@ -199,7 +199,7 @@ export function createApiRouter(): Router {
   // RainViewer proxy
   router.get('/radar/rainviewer/*', async (req, res, next) => {
     try {
-      const rainviewerPath = req.params[0];
+      const rainviewerPath = (req.params as any)[0];
       const queryString = req.url.split('?')[1];
       
       const rainviewerProvider = getProvider('rainviewer');
@@ -247,7 +247,7 @@ export function createApiRouter(): Router {
         return next(error);
       }
 
-      const tilePath = req.params[0];
+      const tilePath = (req.params as any)[0];
       
       const tracesProvider = getProvider('tracestrack-topo');
       if (!tracesProvider || !tracesProvider.tiles) {
@@ -289,7 +289,7 @@ export function createApiRouter(): Router {
         return next(error);
       }
 
-      const owmPath = req.params[0];
+      const owmPath = (req.params as any)[0];
       
       const owmProvider = getProvider('openweather-tiles');
       if (!owmProvider || !owmProvider.tiles) {

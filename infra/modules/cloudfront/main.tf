@@ -1,15 +1,32 @@
+data "aws_cloudfront_cache_policy" "managed_caching_disabled" {
+  name = "Managed-CachingDisabled"
+}
+
+data "aws_cloudfront_origin_request_policy" "managed_all_viewer_except_host" {
+  name = "Managed-AllViewerExceptHostHeader"
+}
+
+data "aws_cloudfront_cache_policy" "managed_caching_optimized" {
+  name = "Managed-CachingOptimized"
+}
+
+resource "aws_cloudfront_origin_access_control" "this" {
+  name                              = "atmosinsight-staging-site-weather-oac"
+  description                       = "OAC for S3 origin"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
 resource "aws_cloudfront_distribution" "this" {
   enabled             = true
   default_root_object = var.default_root_object
   aliases             = var.aliases
 
   origin {
-    domain_name = var.origin_domain
-    origin_id   = "s3-origin"
-    
-    s3_origin_config {
-      origin_access_identity = ""
-    }
+    domain_name              = var.origin_domain
+    origin_id                = "s3-origin"
+    origin_access_control_id = aws_cloudfront_origin_access_control.this.id
   }
 
   # Optional API origin (API Gateway or other HTTP origin)
@@ -18,7 +35,7 @@ resource "aws_cloudfront_distribution" "this" {
     content {
       domain_name = origin.value
       origin_id   = "api-origin"
-      custom_origin_config {
+  custom_origin_config {
         http_port              = 80
         https_port             = 443
         origin_protocol_policy = "https-only"
@@ -39,6 +56,21 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   # Route /api/* to the API origin if provided
+  # 1) Cached tiles: /api/basemap/*
+  dynamic "ordered_cache_behavior" {
+    for_each = var.api_origin_domain == null ? [] : [true]
+    content {
+      path_pattern           = "/api/basemap/*"
+      allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+      cached_methods         = ["GET", "HEAD", "OPTIONS"]
+      target_origin_id       = "api-origin"
+      viewer_protocol_policy = "redirect-to-https"
+      cache_policy_id          = data.aws_cloudfront_cache_policy.managed_caching_optimized.id
+      origin_request_policy_id = data.aws_cloudfront_origin_request_policy.managed_all_viewer_except_host.id
+    }
+  }
+
+  # 2) General API (no cache)
   dynamic "ordered_cache_behavior" {
     for_each = var.api_origin_domain == null ? [] : [true]
     content {
@@ -47,14 +79,9 @@ resource "aws_cloudfront_distribution" "this" {
       cached_methods         = ["GET", "HEAD", "OPTIONS"]
       target_origin_id       = "api-origin"
       viewer_protocol_policy = "redirect-to-https"
-      min_ttl                = 0
-      default_ttl            = 60
-      max_ttl                = 60
-      forwarded_values {
-        query_string = true
-        headers      = ["*"]
-        cookies { forward = "none" }
-      }
+      # Use AWS managed policies for APIs: no cache and forward all viewer headers except Host
+      cache_policy_id          = data.aws_cloudfront_cache_policy.managed_caching_disabled.id
+      origin_request_policy_id = data.aws_cloudfront_origin_request_policy.managed_all_viewer_except_host.id
     }
   }
 

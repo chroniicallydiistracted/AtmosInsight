@@ -5,10 +5,12 @@ export * as openweather from './openweather.js';
 export * as smhi from './smhi.js';
 
 // Provider manifest and utilities
-import providersManifest from './providers.json';
+import providersManifestRaw from './providers.json';
 import providersSchema from './providers.schema.json';
 
-export { providersManifest, providersSchema };
+// Cast imported JSON to the stricter TypeScript types
+export const providersManifest = providersManifestRaw as unknown as ProviderManifest;
+export { providersSchema };
 
 export interface Provider {
   id: string;
@@ -58,7 +60,7 @@ export interface ProviderManifest {
   };
 }
 
-export const providers: Provider[] = providersManifest.providers;
+export const providers: Provider[] = providersManifest.providers as unknown as Provider[];
 
 export function getProvider(id: string): Provider | undefined {
   return providers.find(p => p.id === id);

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "==> Deploying weather-proxy-api (bundle, Terraform, smoke tests)"
+echo "==> Deploying weather-proxy-api (bundle, Terraform main infra, smoke tests)"
 
 # Colors
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
@@ -40,87 +40,63 @@ note "Bundling proxy Lambda with esbuild"
 npx esbuild tiling-services/proxy-api/index.ts \
   --bundle --platform=node --format=esm \
   --outfile=tiling-services/proxy-api/index.mjs \
-  --packages=bundle
+  --packages=bundle --external:fs --external:path
 ok "Built tiling-services/proxy-api/index.mjs ($(du -h tiling-services/proxy-api/index.mjs | cut -f1))"
 
-# 2) Prepare Terraform tfvars for proxy-only
-TFVARS_DIR="infra/proxy-only"
-mkdir -p "$TFVARS_DIR"
-cat > "$TFVARS_DIR/terraform.tfvars" <<EOF
-region = "${AWS_DEFAULT_REGION:-${AWS_REGION:-us-east-1}}"
-nws_user_agent = "${NWS_USER_AGENT:-}"
-openweather_api_key = "${OPENWEATHER_API_KEY:-}"
-tracestrack_api_key = "${TRACESTRACK_API_KEY:-}"
-glm_toe_py_url = "${GLM_TOE_PY_URL:-}"
-catalog_api_base = "${CATALOG_API_BASE:-}"
-EOF
-ok "Wrote $TFVARS_DIR/terraform.tfvars"
-
+# 2) Use main infrastructure directory (not proxy-only)
+TFVARS_DIR="infra"
 pushd "$TFVARS_DIR" >/dev/null
 
-# 3) terraform init
-note "Initializing Terraform (proxy-only)"
+# 3) terraform init (main infrastructure)
+note "Initializing Terraform (main infrastructure)"
 terraform init -input=false
 
-# 4) Import existing resources if present to avoid conflicts
-ROLE_NAME="weather-proxy-api-role"
-FUNC_NAME="weather-proxy-api"
+# 4) Only update the Lambda function (skip imports to avoid conflicts)
+note "Planning Lambda function update only"
+terraform plan -target=aws_lambda_function.proxy_api -out=tfplan -input=false
 
-if aws iam get-role --role-name "$ROLE_NAME" >/dev/null 2>&1; then
-  note "Importing IAM role $ROLE_NAME into state"
-  terraform import -input=false aws_iam_role.proxy_api "$ROLE_NAME" >/dev/null 2>&1 || true
-fi
-
-if aws lambda get-function --function-name "$FUNC_NAME" >/dev/null 2>&1; then
-  note "Importing Lambda $FUNC_NAME into state"
-  terraform import -input=false aws_lambda_function.proxy_api "$FUNC_NAME" >/dev/null 2>&1 || true
-fi
-
-# Prefer API ID already in Terraform state to avoid mismatches
-STATE_API_ID=$(terraform state show aws_apigatewayv2_api.proxy 2>/dev/null | awk -F' = ' '/^\s*id\s*=/{print $2}' | tr -d '"') || true
-API_ID=${STATE_API_ID:-$(aws apigatewayv2 get-apis --query "Items[?Name=='weather-proxy-api'].ApiId | [0]" --output text 2>/dev/null || echo "")}
-if [[ "$API_ID" != "" && "$API_ID" != "None" ]]; then
-  note "Importing API Gateway ID $API_ID"
-  terraform import -input=false aws_apigatewayv2_api.proxy "$API_ID" >/dev/null 2>&1 || true
-  # Import default stage if present
-  if aws apigatewayv2 get-stage --api-id "$API_ID" --stage-name '$default' >/dev/null 2>&1; then
-    terraform import -input=false aws_apigatewayv2_stage.proxy "$API_ID/\$default" >/dev/null 2>&1 || true
-  fi
-  # Import route ANY /api/{proxy+} if present
-  ROUTE_ID=$(aws apigatewayv2 get-routes --api-id "$API_ID" --query "Items[?RouteKey=='ANY /api/{proxy+}'].RouteId | [0]" --output text 2>/dev/null || echo "")
-  if [[ "$ROUTE_ID" != "" && "$ROUTE_ID" != "None" ]]; then
-    terraform import -input=false aws_apigatewayv2_route.proxy_any "$API_ID/$ROUTE_ID" >/dev/null 2>&1 || true
-  fi
-fi
-
-# Import existing Lambda permission if present to avoid SID conflicts
-POLICY_STR=$(aws lambda get-policy --function-name "$FUNC_NAME" --query 'Policy' --output text 2>/dev/null || echo "")
-if echo "$POLICY_STR" | grep -q '"Sid":"AllowAPIGatewayInvoke"'; then
-  note "Importing existing Lambda permission AllowAPIGatewayInvoke"
-  terraform import -input=false aws_lambda_permission.proxy_invoke "$FUNC_NAME/AllowAPIGatewayInvoke" >/dev/null 2>&1 || true
-fi
-
-# 5) Plan/apply
-note "Planning changes"
-terraform plan -out=tfplan -input=false
-note "Applying changes"
+note "Applying Lambda function update"
 terraform apply -auto-approve tfplan
 
-# 6) Output API endpoint and run smoke tests
+# 5) Get the correct API endpoint from main infrastructure 
 API_URL=$(terraform output -raw proxy_api_endpoint)
 ok "API Gateway endpoint: $API_URL"
 
+# Get CloudFront URL if available
+if terraform state list | grep -q "module.cdn"; then
+  CLOUDFRONT_URL="https://$(terraform output -raw cloudfront_domain 2>/dev/null || echo "CloudFront domain not available")"
+  ok "CloudFront URL: $CLOUDFRONT_URL"
+else
+  note "CloudFront not deployed in this infrastructure"
+fi
+
 echo
-note "Running smoke tests against $API_URL"
+note "Running smoke tests against production endpoints"
 set +e
-curl -fsSI "$API_URL/api/healthz" | sed -n '1,10p' || true
-curl -fsSI "$API_URL/api/nws/alerts/active?area=AZ" | sed -n '1,10p' || true
-curl -fsSI "$API_URL/api/rainviewer/index.json" | sed -n '1,10p' || true
-curl -fsSI "$API_URL/api/osm/cyclosm/0/0/0.png" | sed -n '1,10p' || true
-curl -fsSI "$API_URL/api/tracestrack/topo_en/1/1/1.webp" | sed -n '1,10p' || true
-curl -fsSI "$API_URL/api/forecast?lat=33.45&lon=-112.07" | sed -n '1,10p' || true
+
+# Test CloudFront endpoints (production)
+if [[ -n "${CLOUDFRONT_URL:-}" ]] && [[ "$CLOUDFRONT_URL" != "https://CloudFront domain not available" ]]; then
+  note "Testing CloudFront endpoints..."
+  curl -fsSI "$CLOUDFRONT_URL/api/healthz" | sed -n '1,5p' || true
+  curl -fsSI "$CLOUDFRONT_URL/api/providers" | sed -n '1,5p' || true
+  curl -fsSI "$CLOUDFRONT_URL/api/rainviewer/index.json" | sed -n '1,5p' || true
+  curl -fsSI "$CLOUDFRONT_URL/api/owm/precipitation_new/6/32/22.png" | sed -n '1,5p' || true
+  curl -fsSI "$CLOUDFRONT_URL/api/tracestrack/topo_en/7/50/55.webp" | sed -n '1,5p' || true
+fi
+
+# Test direct API Gateway endpoints (fallback)
+note "Testing direct API Gateway endpoints..."
+curl -fsSI "$API_URL/api/healthz" | sed -n '1,5p' || true
+curl -fsSI "$API_URL/api/providers" | sed -n '1,5p' || true
+curl -fsSI "$API_URL/api/rainviewer/index.json" | sed -n '1,5p' || true
+
 set -e
 
-ok "Deploy proxy complete. Point CloudFront /api/* to $API_URL for production."
+if [[ -n "${CLOUDFRONT_URL:-}" ]] && [[ "$CLOUDFRONT_URL" != "https://CloudFront domain not available" ]]; then
+  ok "Deploy complete. Production site: $CLOUDFRONT_URL"
+else
+  ok "Deploy complete. Direct API access: $API_URL"
+  note "Deploy CloudFront with: cd infra && terraform plan -var 'cdn_enabled=true' && terraform apply"
+fi
 
 popd >/dev/null
