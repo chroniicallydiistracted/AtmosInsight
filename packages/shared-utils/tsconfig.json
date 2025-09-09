@@ -12,6 +12,6 @@
     "declaration": true,
     "sourceMap": true
   },
-  "include": ["index.ts"],
+  "include": ["index.ts", "browser.ts", "src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

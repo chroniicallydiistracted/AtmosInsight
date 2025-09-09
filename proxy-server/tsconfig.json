@@ -6,9 +6,8 @@
     "module": "ESNext",
     "target": "ES2022",
     "moduleResolution": "Node",
-    "paths": {
-      "@atmos/*": ["./packages/*/dist", "./packages/*"]
-    },
+    "noEmit": false,
+    "paths": {},
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true
   },

@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AtmosInsight - Weather Intelligence Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --glass-bg: rgba(15, 23, 42, 0.8);
+            --glass-border: rgba(148, 163, 184, 0.1);
+            --accent-primary: #0ea5e9;
+            --accent-secondary: #8b5cf6;
+            --accent-success: #10b981;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #0f172a;
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        /* Glass morphism panels */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* Animated gradient border */
+        .gradient-border {
+            position: relative;
+            background: linear-gradient(var(--glass-bg), var(--glass-bg)) padding-box,
+                        linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)) border-box;
+            border: 2px solid transparent;
+        }
+
+        /* Smooth transitions */
+        .smooth-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(148, 163, 184, 0.1);
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.5);
+        }
+
+        /* Pulse animation for live indicators */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* Slide animations */
+        @keyframes slideInLeft {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideInBottom {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .slide-in-left {
+            animation: slideInLeft 0.3s ease-out;
+        }
+
+        .slide-in-right {
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .slide-in-bottom {
+            animation: slideInBottom 0.3s ease-out;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 2px solid var(--glass-border);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Toggle switch */
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--accent-primary);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(20px);
+        }
+
+        /* Map controls override */
+        .maplibregl-ctrl-group {
+            background: var(--glass-bg) !important;
+            backdrop-filter: blur(20px) !important;
+            border: 1px solid var(--glass-border) !important;
+        }
+
+        .maplibregl-ctrl-group button {
+            background: transparent !important;
+            color: var(--text-primary) !important;
+        }
+
+        .maplibregl-ctrl-group button:hover {
+            background: rgba(148, 163, 184, 0.1) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Application Container -->
+    <div id="app" class="relative w-screen h-screen">
+        <!-- Map Container -->
+        <div id="map" class="absolute inset-0 z-0"></div>
+
+        <!-- Top Navigation Bar -->
+        <nav class="absolute top-0 left-0 right-0 z-30 glass slide-in-bottom">
+            <div class="flex items-center justify-between px-4 py-3">
+                <!-- Logo and Brand -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg gradient-border flex items-center justify-center">
+                        <svg class="w-6 h-6 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-semibold">AtmosInsight</h1>
+                        <p class="text-xs text-gray-400">Weather Intelligence Platform</p>
+                    </div>
+                </div>
+
+                <!-- Center Controls -->
+                <div class="hidden md:flex items-center space-x-2">
+                    <button class="px-4 py-2 rounded-lg glass hover:bg-white/10 smooth-transition text-sm">
+                        <span class="flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>Live</span>
+                            <span class="w-2 h-2 bg-green-500 rounded-full pulse"></span>
+                        </span>
+                    </button>
+                    <button class="px-4 py-2 rounded-lg glass hover:bg-white/10 smooth-transition text-sm">
+                        Forecast
+                    </button>
+                    <button class="px-4 py-2 rounded-lg glass hover:bg-white/10 smooth-transition text-sm">
+                        Historical
+                    </button>
+                </div>
+
+                <!-- Right Controls -->
+                <div class="flex items-center space-x-3">
+                    <!-- Search -->
+                    <button class="p-2 rounded-lg glass hover:bg-white/10 smooth-transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+                    <!-- Settings -->
+                    <button class="p-2 rounded-lg glass hover:bg-white/10 smooth-transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </button>
+                    <!-- Menu -->
+                    <button class="p-2 rounded-lg glass hover:bg-white/10 smooth-transition md:hidden">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Left Sidebar - Layers Panel -->
+        <aside class="absolute left-4 top-20 bottom-24 w-80 z-20 slide-in-left hidden md:block">
+            <div class="glass rounded-xl h-full flex flex-col">
+                <!-- Header -->
+                <div class="p-4 border-b border-white/10">
+                    <h2 class="text-sm font-semibold mb-3">Data Layers</h2>
+                    <input type="text" placeholder="Search layers..." 
+                           class="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm focus:outline-none focus:border-sky-400 smooth-transition">
+                </div>
+
+                <!-- Layers List -->
+                <div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
+                    <!-- Weather Alerts -->
+                    <div class="layer-card">
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 smooth-transition cursor-pointer">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium">Weather Alerts</p>
+                                    <p class="text-xs text-gray-400">NWS Active Warnings</p>
+                                </div>
+                                <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lightning -->
+                    <div class="layer-card">
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 smooth-transition cursor-pointer">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium">Lightning (GLM)</p>
+                                    <p class="text-xs text-gray-400">Total Optical Energy</p>
+                                </div>
+                                <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                        </div>
+                        <!-- GLM Settings -->
+                        <div class="mt-2 p-3 rounded-lg bg-white/5 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-400">Time Window</span>
+                                <select class="px-2 py-1 rounded bg-white/10 text-xs focus:outline-none">
+                                    <option>1 min</option>
+                                    <option selected>5 min</option>
+                                    <option>10 min</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-400">Opacity</span>
+                                <input type="range" min="0" max="100" value="85" class="w-24">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Radar -->
+                    <div class="layer-card">
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 smooth-transition cursor-pointer">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium">Precipitation Radar</p>
+                                    <p class="text-xs text-gray-400">RainViewer Composite</p>
+                                </div>
+                                <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Satellite -->
+                    <div class="layer-card">
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-white/5 hover:bg-white/10 smooth-transition cursor-pointer">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium">GOES Satellite</p>
+                                    <p class="text-xs text-gray-400">Visible/IR Imagery</p>
+                                </div>
+                                <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="p-4 border-t border-white/10">
+                    <button class="w-full px-4 py-2 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-400 text-sm font-medium smooth-transition">
+                        + Add Custom Layer
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right Sidebar - Info Panel -->
+        <aside class="absolute right-4 top-20 w-80 z-20 slide-in-right hidden lg:block">
+            <!-- Current Conditions Card -->
+            <div class="glass rounded-xl p-4 mb-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-semibold">Current Conditions</h3>
+                    <span class="text-xs text-gray-400">Phoenix, AZ</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="text-center p-3 rounded-lg bg-white/5">
+                        <p class="text-2xl font-bold text-sky-400">72°</p>
+                        <p class="text-xs text-gray-400">Temperature</p>
+                    </div>
+                    <div class="text-center p-3 rounded-lg bg-white/5">
+                        <p class="text-2xl font-bold text-blue-400">65%</p>
+                        <p class="text-xs text-gray-400">Humidity</p>
+                    </div>
+                    <div class="text-center p-3 rounded-lg bg-white/5">
+                        <p class="text-lg font-bold text-green-400">12mph</p>
+                        <p class="text-xs text-gray-400">Wind Speed</p>
+                    </div>
+                    <div class="text-center p-3 rounded-lg bg-white/5">
+                        <p class="text-lg font-bold text-purple-400">Good</p>
+                        <p class="text-xs text-gray-400">Air Quality</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Astronomy Card -->
+            <div class="glass rounded-xl p-4 mb-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-semibold">Astronomy</h3>
+                    <button class="text-xs text-sky-400 hover:text-sky-300">Details</button>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between p-2 rounded-lg bg-white/5">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-yellow-400">☀️</span>
+                            <span class="text-xs">Sun</span>
+                        </div>
+                        <span class="text-xs text-gray-400">Az: 245°, El: 35°</span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 rounded-lg bg-white/5">
+                        <div class="flex items-center space-x-2">
+                            <span>🌙</span>
+                            <span class="text-xs">Moon</span>
+                        </div>
+                        <span class="text-xs text-gray-400">Phase: 67%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Alerts -->
+            <div class="glass rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-semibold">Active Alerts</h3>
+                    <span class="px-2 py-1 rounded-full bg-red-500/20 text-red-400 text-xs">2 Active</span>
+                </div>
+                <div class="space-y-2">
+                    <div class="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                        <div class="flex items-start space-x-2">
+                            <svg class="w-4 h-4 text-red-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-xs font-medium text-red-400">Heat Advisory</p>
+                                <p class="text-xs text-gray-400 mt-1">Until 8:00 PM MST</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                        <div class="flex items-start space-x-2">
+                            <svg class="w-4 h-4 text-yellow-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-xs font-medium text-yellow-400">Air Quality Alert</p>
+                                <p class="text-xs text-gray-400 mt-1">Moderate - Sensitive Groups</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Bottom Timeline Control -->
+        <div class="absolute bottom-4 left-4 right-4 z-20 slide-in-bottom">
+            <div class="glass rounded-xl p-4 max-w-4xl mx-auto">
+                <div class="flex items-center space-x-4">
+                    <!-- Play Controls -->
+                    <div class="flex items-center space-x-2">
+                        <button class="p-2 rounded-lg hover:bg-white/10 smooth-transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                        <button class="p-2 rounded-lg hover:bg-white/10 smooth-transition">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+                            </svg>
+                        </button>
+                        <button class="p-2 rounded-lg hover:bg-white/10 smooth-transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Timeline Slider -->
+                    <div class="flex-1 flex items-center space-x-3">
+                        <span class="text-xs text-gray-400 whitespace-nowrap">-2h</span>
+                        <div class="flex-1 relative">
+                            <input type="range" min="0" max="100" value="70" 
+                                   class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer">
+                            <div class="absolute top-0 left-0 h-2 bg-gradient-to-r from-sky-500 to-purple-500 rounded-lg pointer-events-none" 
+                                 style="width: 70%"></div>
+                        </div>
+                        <span class="text-xs text-gray-400 whitespace-nowrap">Now</span>
+                    </div>
+
+                    <!-- Speed Control -->
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs text-gray-400">Speed:</span>
+                        <select class="px-2 py-1 rounded-lg bg-white/10 text-xs focus:outline-none">
+                            <option>0.5x</option>
+                            <option selected>1x</option>
+                            <option>2x</option>
+                            <option>4x</option>
+                        </select>
+                    </div>
+
+                    <!-- Time Display -->
+                    <div class="text-right">
+                        <p class="text-sm font-medium">14:32 MST</p>
+                        <p class="text-xs text-gray-400">Dec 28, 2024</p>
+                    </div>
+                </div>
+
+                <!-- Timeline Markers -->
+                <div class="mt-3 relative h-8">
+                    <div class="absolute inset-0 flex items-center justify-between px-12">
+                        <div class="text-xs text-gray-500">|</div>
+                        <div class="text-xs text-gray-500">|</div>
+                        <div class="text-xs text-gray-500">|</div>
+                        <div class="text-xs text-gray-500">|</div>
+                        <div class="text-xs text-gray-500">|</div>
+                        <div class="text-xs text-gray-500">|</div>
+                        <div class="text-xs text-gray-500">|</div>
+                        <div class="text-xs text-gray-500">|</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Bottom Navigation -->
+        <nav class="absolute bottom-0 left-0 right-0 z-30 glass md:hidden">
+            <div class="flex items-center justify-around py-2">
+                <button class="p-3 rounded-lg hover:bg-white/10 smooth-transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                    </svg>
+                </button>
+                <button class="p-3 rounded-lg hover:bg-white/10 smooth-transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </button>
+                <button class="p-3 rounded-lg hover:bg-white/10 smooth-transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </button>
+                <button class="p-3 rounded-lg hover:bg-white/10 smooth-transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Floating Quick Actions -->
+        <div class="absolute bottom-32 right-4 z-20 space-y-2 md:bottom-24">
+            <!-- Location Button -->
+            <button class="w-12 h-12 rounded-full glass flex items-center justify-center hover:scale-110 smooth-transition group">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <span class="absolute right-14 px-2 py-1 rounded bg-gray-900 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 smooth-transition">
+                    My Location
+                </span>
+            </button>
+
+            <!-- Zoom Controls -->
+            <div class="glass rounded-full p-1">
+                <button class="w-10 h-10 rounded-full hover:bg-white/10 smooth-transition flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6"></path>
+                    </svg>
+                </button>
+                <button class="w-10 h-10 rounded-full hover:bg-white/10 smooth-transition flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading" class="absolute inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+            <div class="glass rounded-xl p-8 flex flex-col items-center space-y-4">
+                <div class="spinner"></div>
+                <p class="text-sm">Loading weather data...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize MapLibre GL map
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: {
+                version: 8,
+                sources: {
+                    'carto-dark': {
+                        type: 'raster',
+                        tiles: ['https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'],
+                        tileSize: 256,
+                        attribution: '© CARTO'
+                    }
+                },
+                layers: [{
+                    id: 'carto-dark-layer',
+                    type: 'raster',
+                    source: 'carto-dark',
+                    minzoom: 0,
+                    maxzoom: 20
+                }]
+            },
+            center: [-112.074037, 33.448376], // Phoenix, AZ
+            zoom: 8,
+            attributionControl: false
+        });
+
+        // Add navigation controls with custom styling
+        map.addControl(new maplibregl.NavigationControl({
+            showCompass: true,
+            showZoom: false
+        }), 'top-right');
+
+        // Add attribution
+        map.addControl(new maplibregl.AttributionControl({
+            compact: true
+        }), 'bottom-right');
+
+        // Remove loading overlay after map loads
+        map.on('load', () => {
+            document.getElementById('loading').classList.add('hidden');
+        });
+
+        // Add interactive features
+        map.on('click', (e) => {
+            // Handle map clicks for weather data queries
+            console.log('Clicked at:', e.lngLat);
+        });
+
+        // Mobile responsiveness
+        function handleResize() {
+            map.resize();
+        }
+        window.addEventListener('resize', handleResize);
+
+        // Demo animation for timeline
+        const timelineSlider = document.querySelector('input[type="range"]');
+        let animationFrame;
+        
+        function animateTimeline() {
+            let value = parseInt(timelineSlider.value);
+            value = (value + 1) % 101;
+            timelineSlider.value = value;
+            
+            // Update the progress bar
+            const progressBar = timelineSlider.nextElementSibling;
+            if (progressBar) {
+                progressBar.style.width = value + '%';
+            }
+            
+            animationFrame = requestAnimationFrame(animateTimeline);
+        }
+
+        // Start/stop animation on play button click
+        document.querySelector('button svg path[fill-rule]')?.parentElement?.parentElement?.addEventListener('click', () => {
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            } else {
+                animateTimeline();
+            }
+        });
+    </script>
+</body>
+</html>

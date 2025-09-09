@@ -12,6 +12,7 @@
     "build:static": "next build"
   },
   "dependencies": {
+    "@atmos/shared-utils": "workspace:*",
     "@atmos/tokens": "workspace:*",
     "@deck.gl/core": "^9.1.14",
     "@deck.gl/layers": "^9.1.14",

@@ -98,7 +98,9 @@ async function buildTheme(themeName, vars) {
 
 async function buildAll() {
   ensureDist();
+  // Build both 'base' (legacy) and 'light' aliases from the LIGHT tokens
   await buildTheme('base', LIGHT);
+  await buildTheme('light', LIGHT);
   await buildTheme('dark', DARK);
   console.log('[tokens] built to dist/');
 }
@@ -113,4 +115,3 @@ async function watch() {
 
 if (process.argv.includes('--watch')) watch();
 else buildAll().catch((e) => { console.error(e); process.exit(1); });
-

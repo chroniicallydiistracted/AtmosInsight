@@ -5,6 +5,9 @@ import '@atmos/tokens/dist/tokens-light.css';
 
 // Then your global styles
 import './globals.css';
+import { Inter } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'] });
 
 // Plain JS metadata object (no TS types)
 export const metadata = {
@@ -20,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="theme-dark">
       {/* switch to theme-light to change theme */}
-      <body>{children}</body>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }
