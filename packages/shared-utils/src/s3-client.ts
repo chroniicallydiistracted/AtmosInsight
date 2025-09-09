@@ -298,11 +298,11 @@ export class AtmosS3Client {
 export async function createS3Client(): Promise<AtmosS3Client> {
   try {
     // In a real app, this would load from your providers.json
-    const response = await fetch('/api/catalog/providers');
+  const response = await fetch('/api/providers');
     const data = await response.json();
     
     // Filter to only S3 providers
-    const s3Providers = data.providers.filter((p: any) => p.access === 's3');
+  const s3Providers = (data.providers || data).filter((p: any) => p.access === 's3');
     
     return new AtmosS3Client(s3Providers);
   } catch (error) {

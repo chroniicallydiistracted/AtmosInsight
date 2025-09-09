@@ -68,8 +68,6 @@
 ### 6. Cache TTL Policy Confirmation
 **Current Recommendations** (confirm or override):
 - NWS Alerts: 60 seconds
-- RainViewer Index: 60 seconds  
-- RainViewer Tiles: 60-120 seconds
 - OpenWeatherMap Tiles: 300-900 seconds
 - CyclOSM/Tracestrack Tiles: 300 seconds
 - GIBS Tiles (timestamped): 86400 seconds (1 day)
@@ -81,14 +79,13 @@
 
 ### 7. Feature Scope for MVP
 **Confirm which features to enable**:
-- ✅ **Basemaps**: CyclOSM + Tracestrack
-- ✅ **Weather Alerts**: NWS alerts overlay  
-- ✅ **Radar**: RainViewer precipitation
-- ✅ **Satellite**: NASA GIBS tiles
-- ✅ **Weather Tiles**: OpenWeatherMap layers
-- ❓ **Lightning**: GLM tiles (requires service URL)
-- ❓ **Forecast**: Location-based weather popover
-- ❓ **Timeline**: Time-series data navigation
+- ✅ Basemaps: CyclOSM + Tracestrack
+- ✅ Weather Alerts: NWS alerts overlay  
+- ✅ Satellite: NASA GIBS tiles
+- ✅ Weather Tiles: OpenWeatherMap layers
+- ❓ Lightning: GLM tiles (requires service URL)
+- ❓ Forecast: Location-based weather popover
+- ❓ Timeline: Time-series data navigation
 
 ### 8. Monitoring & Observability
 **Preferences**:

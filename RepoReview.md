@@ -18,7 +18,6 @@ This document summarizes a repository-wide review of the AtmosInsight codebase. 
 
 ### Additional Components and State
 - `AstroPanel.tsx` polls the browser clock and geolocation to compute Sun and Moon azimuth/elevation via a `computeAstro` helper.
-- `RainviewerLayer.tsx` animates radar frames with FPS clamping, tile prefetching, and an optional in-memory image cache.
 - `Timeline.tsx` queries the catalog API for layer timestamps, hiding itself when the service returns 503 errors.
 - `GlmLegend.tsx` toggles a GOES lightning layer and lets users adjust window, QC filtering, and timestamp parameters while wrapping map updates in silent `try/catch` blocks.
 - `viewStore.ts` (Zustand) tracks active layers, time, and comparison state with helpers for toggling layer opacity and workspace.
@@ -81,7 +80,7 @@ This document summarizes a repository-wide review of the AtmosInsight codebase. 
 
 ## Tiling Services (`tiling-services`)
 - `catalog-api` exposes `/catalog/layers` and `/catalog/layers/{id}/times` by reading local `layers.json` and `times.json` files via a minimal HTTP handler.
-- `proxy-api` is a Node.js Lambda-style handler forwarding `/api/*` requests to providers like NWS, OpenWeatherMap, RainViewer, Carto basemaps, NASA GIBS, and several air-quality services. The handler also proxies CyclOSM and standard OSM tiles, Carto basemaps, Tracestrack, FIRMS fire layers, and multiple air-quality APIs (AirNow, OpenAQ, PurpleAir, Meteomatics, Google Cloud). It adds CORS headers, short/medium cache control, and TODOs for Secrets Manager-backed API keys.
+ - `proxy-api` is a Node.js Lambda-style handler forwarding `/api/*` requests to providers like NWS, OpenWeatherMap, Carto basemaps, NASA GIBS, and several air-quality services. The handler also proxies CyclOSM and standard OSM tiles, Carto basemaps, Tracestrack, FIRMS fire layers, and multiple air-quality APIs (AirNow, OpenAQ, PurpleAir, Meteomatics, Google Cloud). It adds CORS headers, short/medium cache control, and TODOs for Secrets Manager-backed API keys.
 - `glm_toe` is a Python FastAPI service that ingests GLM Level-2 lightning data, caches rendered TOE tiles, and optionally polls NOAA S3 buckets for new granules.
 - `tiling-services/README.md` is a placeholder with no setup or usage instructions.
 

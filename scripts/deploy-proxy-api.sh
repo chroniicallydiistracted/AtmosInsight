@@ -3,6 +3,13 @@ set -euo pipefail
 
 echo "==> Deploying weather-proxy-api (bundle, Terraform main infra, smoke tests)"
 
+# Usage: ./scripts/deploy-proxy-api.sh [--lambda-only]
+# Default is FULL APPLY to ensure all intended changes are deployed.
+MODE="full"
+if [[ "${1:-}" == "--lambda-only" ]]; then
+  MODE="lambda-only"
+fi
+
 # Colors
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
 note(){ echo -e "${YELLOW}➡ $*${NC}"; }
@@ -51,12 +58,19 @@ pushd "$TFVARS_DIR" >/dev/null
 note "Initializing Terraform (main infrastructure)"
 terraform init -input=false
 
-# 4) Only update the Lambda function (skip imports to avoid conflicts)
-note "Planning Lambda function update only"
-terraform plan -target=aws_lambda_function.proxy_api -out=tfplan -input=false
-
-note "Applying Lambda function update"
-terraform apply -auto-approve tfplan
+if [[ "$MODE" == "lambda-only" ]]; then
+  # 4) Only update the Lambda function (fast hot patch)
+  note "Planning Lambda function update only (-target)"
+  terraform plan -target=aws_lambda_function.proxy_api -out=tfplan -input=false
+  note "Applying Lambda function update"
+  terraform apply -auto-approve tfplan
+else
+  # 4) Full plan/apply to ensure all intended changes are deployed
+  note "Planning full infrastructure changes"
+  terraform plan -out=tfplan -input=false
+  note "Applying full infrastructure changes"
+  terraform apply -auto-approve tfplan
+fi
 
 # 5) Get the correct API endpoint from main infrastructure 
 API_URL=$(terraform output -raw proxy_api_endpoint)
@@ -77,18 +91,16 @@ set +e
 # Test CloudFront endpoints (production)
 if [[ -n "${CLOUDFRONT_URL:-}" ]] && [[ "$CLOUDFRONT_URL" != "https://CloudFront domain not available" ]]; then
   note "Testing CloudFront endpoints..."
-  curl -fsSI "$CLOUDFRONT_URL/api/healthz" | sed -n '1,5p' || true
-  curl -fsSI "$CLOUDFRONT_URL/api/providers" | sed -n '1,5p' || true
-  curl -fsSI "$CLOUDFRONT_URL/api/rainviewer/index.json" | sed -n '1,5p' || true
-  curl -fsSI "$CLOUDFRONT_URL/api/owm/precipitation_new/6/32/22.png" | sed -n '1,5p' || true
-  curl -fsSI "$CLOUDFRONT_URL/api/tracestrack/topo_en/7/50/55.webp" | sed -n '1,5p' || true
+  curl -fsSI "$CLOUDFRONT_URL/api/health" | sed -n '1,10p' || true
+  curl -fsSI "$CLOUDFRONT_URL/api/providers" | sed -n '1,10p' || true
+  curl -fsSI "$CLOUDFRONT_URL/api/owm/precipitation_new/6/32/22.png" | sed -n '1,10p' || true
+  curl -fsSI "$CLOUDFRONT_URL/api/tracestrack/topo_en/7/50/55.webp" | sed -n '1,10p' || true
 fi
 
 # Test direct API Gateway endpoints (fallback)
 note "Testing direct API Gateway endpoints..."
-curl -fsSI "$API_URL/api/healthz" | sed -n '1,5p' || true
-curl -fsSI "$API_URL/api/providers" | sed -n '1,5p' || true
-curl -fsSI "$API_URL/api/rainviewer/index.json" | sed -n '1,5p' || true
+curl -fsSI "$API_URL/api/health" | sed -n '1,10p' || true
+curl -fsSI "$API_URL/api/providers" | sed -n '1,10p' || true
 
 set -e
 

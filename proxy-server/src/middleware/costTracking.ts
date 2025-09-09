@@ -52,7 +52,6 @@ function addCostHeaders(req: Request, res: Response): void {
       path.startsWith('/api/air/') ||
       path.startsWith('/api/point/') ||
       path.startsWith('/api/space/') ||
-      path.startsWith('/api/radar/rainviewer') ||
       path.startsWith('/api/basemap/') ||
       path.startsWith('/api/owm/')) {
     res.setHeader('x-cost-note', 'external-service');

@@ -19,10 +19,10 @@ The focus is: what exists, what’s missing, how the system wires together, and 
 
 - Frontend (apps/web):
   - Basemaps: CyclOSM and Tracestrack raster sources (apps/web/src/app/page.tsx).
-  - Overlays: NWS Alerts, RainViewer radar animation, optional GLM TOE overlay.
+  - Overlays: NWS Alerts, optional GLM TOE overlay.
   - Timeline UI component fetches `/api/catalog/layers/:id/times` and prefetches frame tiles (apps/web/src/components/Timeline.tsx).
 - Proxy Lambda (tiling-services/proxy-api/index.ts):
-  - Implemented: `/api/healthz`, `/api/nws/alerts/*`, `/api/rainviewer/*`, `/api/owm/:layer/...`, `/api/gibs/*`, `/api/glm-toe/:z/:x/:y.png` (503 if not configured).
+  - Implemented: `/api/healthz`, `/api/nws/alerts/*`, `/api/owm/:layer/...`, `/api/gibs/*`, `/api/glm-toe/:z/:x/:y.png` (503 if not configured).
   - Not yet implemented but used by frontend: `/api/osm/cyclosm/:z/:x/:y.png`, `/api/tracestrack/:style/:z/:x/:y.webp`.
 - Catalog API (tiling-services/catalog-api):
   - Implements `/catalog/layers` and `/catalog/layers/:id/times` with simple JSON sources; Terraform deploys as separate Lambda + API.
@@ -31,7 +31,7 @@ The focus is: what exists, what’s missing, how the system wires together, and 
 ### Initial Test Scope (agreed)
 
 - Basemap: CyclOSM + Tracestrack, optimized and fully functional.
-- Radar reflectivity: RainViewer (index + tiles).
+// Radar reflectivity via RainViewer removed.
 - Alerts: NWS alerts overlay (GeoJSON).
 - Satellite: NASA GIBS tiles.
 - Lightning: GLM tiles via Python microservice (preferred) or temporarily disabled in UI until service is up.
@@ -68,7 +68,7 @@ Set these on the proxy Lambda (Terraform `environment.variables`):
 - `NWS_USER_AGENT` – required by NWS (include contact email). Note: ensure it has balanced parentheses.
 - `OPENWEATHER_API_KEY` – for `/api/owm/...` tiles.
 - `TRACESTRACK_API_KEY` – for Tracestrack tiles.
-- `RAINVIEWER_ENABLED=true`, `GIBS_ENABLED=true` – keep enabled for MVP.
+- `GIBS_ENABLED=true` – keep enabled for MVP.
 - `GLM_TOE_PY_URL` – optional; set if Python GLM tiles service is running; otherwise keep the GLM layer disabled in UI.
 - `CATALOG_API_BASE` – URL of the catalog HTTP API (e.g., `https://...execute-api.../catalog`).
 
@@ -85,8 +85,7 @@ Secrets handling:
 ### Caching strategy (TTL recommendations)
 
 - Alerts (NWS): 60s. “Don’t cache” in practice means “don’t cache long”; 60s balances freshness and load.
-- RainViewer index: 60s. Frames update frequently.
-- RainViewer tiles: 60–120s. A given timestamp’s tiles are stable briefly.
+// RainViewer cache guidance removed.
 - OWM tiles: 300–900s. Weather layers change but support modest caching.
 - CyclOSM tiles: 300s. Respect upstream cache headers if present; otherwise 5 minutes.
 - Tracestrack tiles: 300s.
@@ -125,7 +124,7 @@ CloudFront should respect origin Cache‑Control headers. Keep Cloudflare DNS‑
 7) Smoke tests (after propagation)
    - `curl -I https://<domain>/api/healthz` → 200
    - `curl -I "https://<domain>/api/nws/alerts/active?area=AZ"` → 200, `application/geo+json`
-   - `curl -I https://<domain>/api/rainviewer/index.json` → 200
+  - Removed: legacy RainViewer smoke test.
    - `curl -I https://<domain>/api/osm/cyclosm/0/0/0.png` → 200 (after adding route)
    - `curl -I https://<domain>/api/tracestrack/topo_en/1/1/1.webp` → 200 (with key)
 
@@ -165,7 +164,7 @@ Provide these to accelerate implementation (no secrets pasted into chat; store i
 - API endpoints
   - Final API Gateway base URL(s) to forward `/api/catalog/*` (or confirm preference to add a second CloudFront origin instead).
 - Feature scope for MVP
-  - Confirm we will enable: Basemap (CyclOSM + Tracestrack), NWS alerts, RainViewer, OWM tiles, GIBS, and GLM.
+  - Confirm we will enable: Basemap (CyclOSM + Tracestrack), NWS alerts, OWM tiles, GIBS, and GLM.
   - Confirm TTL policy matches the recommendations above (or provide overrides).
 - Observability
   - Where to ship logs/metrics (CloudWatch is default). Any alarms you want for 4xx/5xx or latency.
@@ -186,7 +185,7 @@ Once you confirm these details, the agent can:
 ## 9) Quick File Pointers
 
 - Frontend map + layers: `apps/web/src/app/page.tsx`
-- RainViewer UI: `apps/web/src/components/RainviewerLayer.tsx`
+// RainViewer UI removed.
 - Timeline UI (uses `/api/catalog`): `apps/web/src/components/Timeline.tsx`
 - Proxy Lambda (TypeScript): `tiling-services/proxy-api/index.ts`
 - Catalog Lambda (TypeScript): `tiling-services/catalog-api/index.ts`

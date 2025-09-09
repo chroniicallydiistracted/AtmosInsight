@@ -60,7 +60,7 @@ This report summarizes code issues identified in the AtmosInsight repository. Fi
  - **Token build watcher risks** – `packages/tokens/build.mjs` uses `fs.watch` without debouncing, which may trigger redundant rebuilds or miss rapid file changes on some platforms【F:packages/tokens/build.mjs†L106-L109】
 
 ## Performance
-- **RainViewer index cache TTL** – `getRainviewerIndex` uses a fixed 60 s TTL; consider configurability or cache invalidation strategy for high-load scenarios【F:tiling-services/proxy-api/index.ts†L73-L87】
+// RainViewer audit notes removed (service retired)
 - **CloudFront header forwarding** – Wildcard header forwarding (`headers = ["*"]`) in `cloudfront` module prevents effective caching and increases latency【F:infra/modules/cloudfront/main.tf†L53-L56】
 - **Catalog API reads from disk on every call** – `tiling-services/catalog-api/index.ts` performs `fs.readFile` for each request, which may become I/O bound; cache layer metadata in memory【F:tiling-services/catalog-api/index.ts†L9-L32】
 
@@ -76,5 +76,5 @@ This report summarizes code issues identified in the AtmosInsight repository. Fi
 3. **Implement configuration options** – Make forecast units/source user-configurable and integrate Secrets Manager for API keys.
 4. **Harden security** – Restrict CORS origins where possible, remove debug map exposure in production, and avoid logging secret names.
 5. **Add test coverage** – Replace placeholder web tests with meaningful suites and add error handling for NWS alerts fetch.
-6. **Review caching strategy** – Expose RainViewer cache TTL via configuration and handle refresh logic for long-running processes.
+6. **Review caching strategy** – Remove legacy references; consider cache policy docs for remaining providers.
 

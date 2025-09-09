@@ -19,7 +19,7 @@ You are a coding agent working in a monorepo called AtmosInsight. Analyze, fix i
 * **Frontend:** `dashboard-app/` (Vite + React + MapLibre), `apps/web/` (Next.js 15 prototype, shared tokens).
 * **Proxy/gateway:** `proxy-server/` (Express/TypeScript) for dev; `tiling-services/` for Lambda proxies + **GLM TOE FastAPI**.
 * **Infra:** `infra/` (Terraform for **S3**, **CloudFront**, **API Gateway/Lambda**, **DynamoDB**, **RDS/PostGIS**).
-* **Existing env/flags:** `NWS_USER_AGENT`, `OWM_API_KEY`, `RAINVIEWER_ENABLED`, `GIBS_ENABLED`, `GLM_TOE_ENABLED`, `GLM_TOE_PY_URL`, tile cache and playback envs.
+* **Existing env/flags:** `NWS_USER_AGENT`, `OWM_API_KEY`, `GIBS_ENABLED`, `GLM_TOE_ENABLED`, `GLM_TOE_PY_URL`, tile cache and playback envs.
 * **New env/flags to add:** see “Configuration” below.
 
 ---
@@ -125,7 +125,7 @@ Populate this manifest with the following **provider list**, tagging each as `ac
 * **OpenAQ** (REST).
 * **MET Norway Locationforecast** (requires `User-Agent`).
 * **NOAA SWPC** (Kp, solar wind, OVATION aurora feeds; REST/JSON, not S3).
-* **RainViewer** (radar tiles, commercial/free tier).
+
 * **TracesTrack Topo** (hosted tiles with key; attribution required).
 * **OpenWeatherMap** (tiles; API key).
 * **CyclOSM/OSM tiles** (use only per usage policy; do not production-load community tiles).
@@ -166,7 +166,7 @@ Populate this manifest with the following **provider list**, tagging each as `ac
 
 ### 4) Non-S3 providers
 
-* Add `/api/gibs/*`, `/api/air/airnow/*`, `/api/air/openaq/*`, `/api/point/metno`, `/api/space/*`, `/api/radar/rainviewer/*`, `/api/basemap/tracestrack/*`, `/api/owm/*` routes with:
+* Add `/api/gibs/*`, `/api/air/airnow/*`, `/api/air/openaq/*`, `/api/point/metno`, `/api/space/*`, `/api/basemap/tracestrack/*`, `/api/owm/*` routes with:
 
   * Correct headers (e.g., `NWS_USER_AGENT`, Earthdata auth where applicable).
   * Feature flags to enable/disable.
@@ -203,7 +203,7 @@ Add to `.env.example` and document:
 
 * **General:** `PROVIDER_CONFIG_PATH=packages/providers/providers.json`
 * **Keys:** `AIRNOW_API_KEY`, `TRACESTRACK_API_KEY`, `OWM_API_KEY`, any Earthdata credential variables needed for STS/token exchange (do not hard-code).
-* **Flags:** `RAINVIEWER_ENABLED`, `GIBS_ENABLED`, `FIRMS_ENABLED`, `PO_DAAC_ENABLED`, `NSIDC_ENABLED`, `SENTINEL2_ENABLED`, etc.
+* **Flags:** `GIBS_ENABLED`, `FIRMS_ENABLED`, `PO_DAAC_ENABLED`, `NSIDC_ENABLED`, `SENTINEL2_ENABLED`, etc.
 * **S3 options:** `REQUESTER_PAYS_DEFAULT=false|true`, `AWS_S3_FORCE_PATH_STYLE=false`, `AWS_REGION=us-east-1` (and per-provider overrides read from manifest).
 
 ---
@@ -249,7 +249,7 @@ Add to `.env.example` and document:
 
 * **S3 (us-east-1):** `noaa-goes18`, `noaa-goes19`, `noaa-mrms-pds`, `unidata-nexrad-level2`, `noaa-hrrr-bdp-pds`, `noaa-gfs-bdp-pds`, `noaa-nam-pds`, `noaa-nbm-pds`, `noaa-ndfd-pds`, `noaa-nwm-pds`, `noaa-nws-rtofs-pds`, `noaa-gestofs-pds`, `noaa-nos-cora-pds`, `noaa-ghcn-pds`, `noaa-wod-pds`.
 * **S3 (other Regions; mark Region per verification):** `hrrrzarr`, Sentinel-2 COG collections, `copernicus-dem-30m`, `copernicus-dem-90m`, ESA WorldCover, Radiant MLHub, Capella Open SAR, Umbra Open Data, Satellogic samples, HiRISE DTMs/RDRs, LOLA.
-* **non\_s3:** NASA **GIBS** (WMTS/XYZ), AirNow, OpenAQ, MET Norway, NOAA SWPC, RainViewer, TracesTrack Topo, OpenWeatherMap, CyclOSM/OSM tiles (policy-limited).
+* **non\_s3:** NASA **GIBS** (WMTS/XYZ), AirNow, OpenAQ, MET Norway, NOAA SWPC, TracesTrack Topo, OpenWeatherMap, CyclOSM/OSM tiles (policy-limited).
 
 ---
 

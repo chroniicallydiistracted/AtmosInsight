@@ -69,6 +69,794 @@ async function fetchWithRetry(url, options = {}, retries = 3, timeoutMs = 1e4, b
   }
 }
 
+// packages/providers/providers.json
+var providers_default = {
+  providers: [
+    {
+      id: "goes19-abi",
+      name: "GOES-19 ABI",
+      category: "satellite",
+      access: "s3",
+      s3: {
+        bucket: "noaa-goes19",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: [
+          "ABI-L2-CMIPC/2025/09/08/",
+          "ABI-L1b-RadC/2025/09/08/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/NESDIS",
+      notes: "Public S3; prefer same-Region access",
+      costNote: "same-region"
+    },
+    {
+      id: "goes18-abi",
+      name: "GOES-18 ABI",
+      category: "satellite",
+      access: "s3",
+      s3: {
+        bucket: "noaa-goes18",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: [
+          "ABI-L2-CMIPC/2025/09/08/",
+          "ABI-L1b-RadC/2025/09/08/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/NESDIS",
+      notes: "Public S3; prefer same-Region access",
+      costNote: "same-region"
+    },
+    {
+      id: "goes19-glm",
+      name: "GOES-19 GLM Lightning",
+      category: "lightning",
+      access: "s3",
+      s3: {
+        bucket: "noaa-goes19",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: [
+          "GLM-L2-LCFA/2025/09/08/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/NESDIS",
+      notes: "GLM Lightning data for TOE processing",
+      costNote: "same-region"
+    },
+    {
+      id: "hrrr",
+      name: "HRRR Model",
+      category: "weather",
+      access: "s3",
+      s3: {
+        bucket: "noaa-hrrr-bdp-pds",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: [
+          "hrrr.20250908/conus/",
+          "hrrr.20250908/alaska/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/NCEP",
+      notes: "High-resolution rapid refresh model GRIB2 files",
+      costNote: "same-region"
+    },
+    {
+      id: "mrms",
+      name: "MRMS Multi-Radar",
+      category: "radar",
+      access: "s3",
+      s3: {
+        bucket: "noaa-mrms-pds",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: [
+          "CONUS/PrecipRate_00.00/20250908/",
+          "CONUS/ReflectivityAtLowestAltitude_00.00/20250908/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/MRMS",
+      notes: "Multi-radar multi-sensor precipitation and reflectivity",
+      costNote: "same-region"
+    },
+    {
+      id: "nexrad-level2",
+      name: "NEXRAD Level II",
+      category: "radar",
+      access: "s3",
+      s3: {
+        bucket: "unidata-nexrad-level2",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: [
+          "2025/09/08/KAMX/",
+          "2025/09/08/KBMX/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/Unidata",
+      notes: "Raw Level II radar volumes",
+      costNote: "same-region"
+    },
+    {
+      id: "gfs",
+      name: "GFS Global Model",
+      category: "weather",
+      access: "s3",
+      s3: {
+        bucket: "noaa-gfs-bdp-pds",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: [
+          "gfs.20250908/00/atmos/",
+          "gfs.20250908/06/atmos/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/NCEP",
+      notes: "Global Forecast System GRIB2 files",
+      costNote: "same-region"
+    },
+    {
+      id: "nam",
+      name: "NAM Model",
+      category: "weather",
+      access: "s3",
+      s3: {
+        bucket: "noaa-nam-pds",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: [
+          "nam.20250908/",
+          "nam_conusnest.20250908/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/NCEP",
+      notes: "North American Mesoscale model",
+      costNote: "same-region"
+    },
+    {
+      id: "nbm",
+      name: "NBM Blend",
+      category: "weather",
+      access: "s3",
+      s3: {
+        bucket: "noaa-nbm-pds",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: [
+          "blend.20250908/00/",
+          "blend.20250908/12/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/NCEP",
+      notes: "National Blend of Models",
+      costNote: "same-region"
+    },
+    {
+      id: "ndfd",
+      name: "NDFD Forecast",
+      category: "weather",
+      access: "s3",
+      s3: {
+        bucket: "noaa-ndfd-pds",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: [
+          "SL.us008001/ST.opnl/DF.gr2/DC.ndfd/AR.conus/",
+          "SL.us008001/ST.opnl/DF.gr2/DC.ndfd/AR.alaska/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/NWS",
+      notes: "National Digital Forecast Database",
+      costNote: "same-region"
+    },
+    {
+      id: "nwm",
+      name: "National Water Model",
+      category: "hydrology",
+      access: "s3",
+      s3: {
+        bucket: "noaa-nwm-pds",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: [
+          "nwm.20250908/",
+          "nwm.20250908/short_range/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/OWP",
+      notes: "National Water Model forecasts",
+      costNote: "same-region"
+    },
+    {
+      id: "rtofs",
+      name: "RTOFS Ocean Model",
+      category: "ocean",
+      access: "s3",
+      s3: {
+        bucket: "noaa-nws-rtofs-pds",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: [
+          "rtofs.20250908/",
+          "rtofs_da.20250908/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/NCEP",
+      notes: "Real-Time Ocean Forecast System",
+      costNote: "same-region"
+    },
+    {
+      id: "gestofs",
+      name: "GESTOFS Storm Surge",
+      category: "ocean",
+      access: "s3",
+      s3: {
+        bucket: "noaa-gestofs-pds",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: [
+          "gestofs.20250908/",
+          "gestofs_da.20250908/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/NOS",
+      notes: "Global Extratropical Surge and Tide Operational Forecast System",
+      costNote: "same-region"
+    },
+    {
+      id: "landsat-pds",
+      name: "Landsat on AWS",
+      category: "satellite",
+      access: "s3",
+      s3: {
+        bucket: "landsat-pds",
+        region: "us-west-2",
+        requesterPays: false,
+        prefixExamples: [
+          "c1/L8/042/034/LC08_L1TP_042034_20170616_20170629_01_T1/",
+          "collection02/level-1/standard/oli-tirs/2025/042/034/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "USGS open",
+      attribution: "USGS/NASA",
+      notes: "Landsat Collection 1 and 2 imagery",
+      costNote: "cross-region (us-west-2)"
+    },
+    {
+      id: "copernicus-dem-30m",
+      name: "Copernicus DEM 30m",
+      category: "elevation",
+      access: "s3",
+      s3: {
+        bucket: "copernicus-dem-30m",
+        region: "eu-central-1",
+        requesterPays: false,
+        prefixExamples: [
+          "Copernicus_DSM_COG_10_N46_00_E006_00_DEM/",
+          "Copernicus_DSM_COG_10_N45_00_E005_00_DEM/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "CC-BY-4.0",
+      attribution: "ESA/Copernicus",
+      notes: "Global 30m elevation model",
+      costNote: "cross-region (eu-central-1)"
+    },
+    {
+      id: "copernicus-dem-90m",
+      name: "Copernicus DEM 90m",
+      category: "elevation",
+      access: "s3",
+      s3: {
+        bucket: "copernicus-dem-90m",
+        region: "eu-central-1",
+        requesterPays: false,
+        prefixExamples: [
+          "Copernicus_DSM_COG_30_N46_00_E006_00_DEM/",
+          "Copernicus_DSM_COG_30_N45_00_E005_00_DEM/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "CC-BY-4.0",
+      attribution: "ESA/Copernicus",
+      notes: "Global 90m elevation model",
+      costNote: "cross-region (eu-central-1)"
+    },
+    {
+      id: "nasa-gibs",
+      name: "NASA GIBS",
+      category: "satellite",
+      access: "non_s3",
+      s3: null,
+      wmts: {
+        baseUrl: "https://gibs.earthdata.nasa.gov/wmts-geo/1.0.0",
+        layers: [
+          "MODIS_Terra_CorrectedReflectance_TrueColor",
+          "MODIS_Aqua_CorrectedReflectance_TrueColor",
+          "VIIRS_SNPP_CorrectedReflectance_TrueColor"
+        ]
+      },
+      auth: "none",
+      license: "NASA open",
+      attribution: "NASA/GIBS",
+      notes: "Global Imagery Browse Services - WMTS tiles only, not S3",
+      costNote: "external-service"
+    },
+    {
+      id: "airnow",
+      name: "AirNow API",
+      category: "air-quality",
+      access: "non_s3",
+      s3: null,
+      rest: {
+        baseUrl: "https://www.airnowapi.org",
+        apiKeyRequired: true,
+        endpoints: [
+          "/aq/current/",
+          "/aq/forecast/",
+          "/aq/observations/"
+        ]
+      },
+      auth: "api_key",
+      license: "EPA open with registration",
+      attribution: "U.S. EPA AirNow",
+      notes: "Real-time air quality data - requires API key",
+      costNote: "external-service"
+    },
+    {
+      id: "openaq",
+      name: "OpenAQ API",
+      category: "air-quality",
+      access: "non_s3",
+      s3: null,
+      rest: {
+        baseUrl: "https://api.openaq.org/v3",
+        apiKeyRequired: false,
+        endpoints: [
+          "/locations",
+          "/measurements",
+          "/averages"
+        ]
+      },
+      auth: "none",
+      license: "CC-BY-4.0",
+      attribution: "OpenAQ",
+      notes: "Global air quality measurements from community",
+      costNote: "external-service"
+    },
+    {
+      id: "met-norway",
+      name: "MET Norway Locationforecast",
+      category: "weather",
+      access: "non_s3",
+      s3: null,
+      rest: {
+        baseUrl: "https://api.met.no/weatherapi/locationforecast/2.0",
+        apiKeyRequired: false,
+        userAgentRequired: true,
+        endpoints: [
+          "/complete",
+          "/compact"
+        ]
+      },
+      auth: "user_agent",
+      license: "Norwegian Licence for Open Government Data",
+      attribution: "MET Norway",
+      notes: "Requires proper User-Agent header",
+      costNote: "external-service"
+    },
+    {
+      id: "noaa-swpc",
+      name: "NOAA Space Weather",
+      category: "space-weather",
+      access: "non_s3",
+      s3: null,
+      rest: {
+        baseUrl: "https://services.swpc.noaa.gov",
+        apiKeyRequired: false,
+        endpoints: [
+          "/products/solar-wind/",
+          "/products/geomag-indices/",
+          "/products/auroral-activity/"
+        ]
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/SWPC",
+      notes: "Space weather alerts and indices",
+      costNote: "external-service"
+    },
+    {
+      id: "tracestrack-topo",
+      name: "TracesTrack Topographic",
+      category: "basemap",
+      access: "non_s3",
+      s3: null,
+      tiles: {
+        baseUrl: "https://tile.tracestrack.com",
+        apiKeyRequired: true,
+        tileFormat: "/topo__/{z}/{x}/{y}.png",
+        attribution: "\xA9 TracesTrack, \xA9 OpenStreetMap contributors"
+      },
+      auth: "api_key",
+      license: "Commercial with attribution",
+      attribution: "TracesTrack, OpenStreetMap contributors",
+      notes: "High-quality topographic basemap - requires API key and attribution",
+      costNote: "external-service"
+    },
+    {
+      id: "openweather-tiles",
+      name: "OpenWeatherMap Tiles",
+      category: "weather",
+      access: "non_s3",
+      s3: null,
+      tiles: {
+        baseUrl: "https://tile.openweathermap.org/map",
+        apiKeyRequired: true,
+        layers: [
+          "precipitation_new",
+          "clouds_new",
+          "temp_new",
+          "wind_new"
+        ],
+        tileFormat: "/{layer}/{z}/{x}/{y}.png"
+      },
+      auth: "api_key",
+      license: "OWM Commercial",
+      attribution: "OpenWeatherMap",
+      notes: "Weather overlay tiles - requires API key",
+      costNote: "external-service"
+    },
+    {
+      id: "cyclosm",
+      name: "CyclOSM",
+      category: "basemap",
+      access: "non_s3",
+      s3: null,
+      tiles: {
+        baseUrl: "https://a.tile-cyclosm.openstreetmap.fr/cyclosm",
+        apiKeyRequired: false,
+        tileFormat: "/{z}/{x}/{y}.png",
+        attribution: "\xA9 OpenStreetMap contributors"
+      },
+      auth: "none",
+      license: "ODbL",
+      attribution: "OpenStreetMap contributors",
+      notes: "Community tiles - use sparingly per usage policy",
+      costNote: "external-service"
+    },
+    {
+      id: "hrrrzarr",
+      name: "HRRR Zarr Analysis-Ready",
+      category: "weather",
+      access: "s3",
+      s3: {
+        bucket: "hrrrzarr",
+        region: "us-west-1",
+        requesterPays: false,
+        prefixExamples: [
+          "sfc/20250908/20250908_00z_anl.zarr",
+          "prs/20250908/20250908_00z_anl.zarr"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "NOAA open",
+      attribution: "NOAA/NCEP, University of Utah",
+      notes: "Near-real time HRRR analysis-ready Zarr data managed by University of Utah",
+      costNote: "cross-region (us-west-1)"
+    },
+    {
+      id: "sentinel2-cog",
+      name: "Sentinel-2 L2A COG",
+      category: "satellite",
+      access: "s3",
+      s3: {
+        bucket: "sentinel-cogs",
+        region: "us-west-2",
+        requesterPays: false,
+        prefixExamples: [
+          "sentinel-s2-l2a-cogs/32/T/MM/2025/1/S2A_32TMM_20250109_0_L2A/",
+          "sentinel-s2-l2a-cogs/33/T/UF/2025/1/S2B_33TUF_20250109_0_L2A/"
+        ],
+        snsTopic: "arn:aws:sns:us-west-2:608149789419:cirrus-v0-publish"
+      },
+      auth: "none",
+      license: "ESA open (CC-BY-4.0)",
+      attribution: "ESA/Copernicus, Element84",
+      notes: "Sentinel-2 L2A Cloud-Optimized GeoTIFFs with SNS notifications for new scenes",
+      costNote: "cross-region (us-west-2)"
+    },
+    {
+      id: "nsf-ncar-era5",
+      name: "NCAR ERA5 Reanalysis",
+      category: "climate",
+      access: "s3",
+      s3: {
+        bucket: "nsf-ncar-era5",
+        region: "us-west-2",
+        requesterPays: false,
+        prefixExamples: [
+          "",
+          "atmos/"
+        ],
+        snsTopic: "arn:aws:sns:us-west-2:891377163634:nsf-ncar-era5-object_created"
+      },
+      auth: "none",
+      license: "CC-BY-4.0",
+      attribution: "NSF NCAR",
+      notes: "Global atmospheric reanalysis (1979\u2013present)",
+      costNote: "cross-region (us-west-2)"
+    },
+    {
+      id: "ncar-cesm-lens",
+      name: "NCAR CESM Large Ensemble",
+      category: "climate",
+      access: "s3",
+      s3: {
+        bucket: "ncar-cesm-lens",
+        region: "us-west-2",
+        requesterPays: false,
+        prefixExamples: [
+          "atm/monthly/",
+          "atm/monthly/cesmLE-20C-TEMP.zarr"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "CC-BY-4.0",
+      attribution: "NCAR/UCAR",
+      notes: "40-member ensemble climate simulations (1920\u20132100)",
+      costNote: "cross-region (us-west-2)"
+    },
+    {
+      id: "nasanex",
+      name: "NASA Earth Exchange (NEX)",
+      category: "climate",
+      access: "s3",
+      s3: {
+        bucket: "nasanex",
+        region: "us-west-2",
+        requesterPays: false,
+        prefixExamples: [
+          "NEX-DCP30/",
+          "NEX-GDDP/",
+          "LOCA/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "US Government work (public domain)",
+      attribution: "NASA NEX",
+      notes: "Downscaled climate projections and related datasets",
+      costNote: "cross-region (us-west-2)"
+    },
+    {
+      id: "omi-no2-nasa",
+      name: "NASA OMI NO2",
+      category: "atmospheric-chemistry",
+      access: "s3",
+      s3: {
+        bucket: "omi-no2-nasa",
+        region: "us-west-2",
+        requesterPays: false,
+        prefixExamples: [
+          "",
+          "daily/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "Public domain",
+      attribution: "NASA GSFC",
+      notes: "Global NO2 tropospheric column composites (0.25\xB0)",
+      costNote: "cross-region (us-west-2)"
+    },
+    {
+      id: "epa-rsei-pds",
+      name: "EPA RSEI",
+      category: "air-quality",
+      access: "s3",
+      s3: {
+        bucket: "epa-rsei-pds",
+        region: "us-east-1",
+        requesterPays: false,
+        prefixExamples: [
+          "",
+          "rsei/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "US Government (public domain)",
+      attribution: "U.S. EPA",
+      notes: "Risk-Screening Environmental Indicators",
+      costNote: "same-region"
+    },
+    {
+      id: "ncar-na-cordex",
+      name: "NCAR NA-CORDEX",
+      category: "climate",
+      access: "s3",
+      s3: {
+        bucket: "ncar-na-cordex",
+        region: "us-west-2",
+        requesterPays: false,
+        prefixExamples: [
+          "",
+          "zarr/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "CC-BY-4.0",
+      attribution: "NSF NCAR",
+      notes: "Regional climate simulations over North America",
+      costNote: "cross-region (us-west-2)"
+    },
+    {
+      id: "usgs-lidar",
+      name: "USGS 3DEP Lidar",
+      category: "elevation",
+      access: "s3",
+      s3: {
+        bucket: "usgs-lidar",
+        region: "us-west-2",
+        requesterPays: true,
+        prefixExamples: [
+          "",
+          "laz/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "Public domain",
+      attribution: "USGS",
+      notes: "High-resolution elevation point clouds (ASPRS LAS/LAZ)",
+      costNote: "requester-pays"
+    },
+    {
+      id: "ecmwf-forecasts",
+      name: "ECMWF Forecasts",
+      category: "weather",
+      access: "s3",
+      s3: {
+        bucket: "ecmwf-forecasts",
+        region: "eu-central-1",
+        requesterPays: false,
+        prefixExamples: [
+          "",
+          "grib2/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "CC-BY-4.0",
+      attribution: "ECMWF",
+      notes: "Real-time global forecasts (0.4\xB0 GRIB2)",
+      costNote: "cross-region (eu-central-1)"
+    },
+    {
+      id: "met-office-radar-obs",
+      name: "UK Met Office Radar",
+      category: "radar",
+      access: "s3",
+      s3: {
+        bucket: "met-office-radar-obs-data",
+        region: "eu-west-2",
+        requesterPays: false,
+        prefixExamples: [
+          "",
+          "radar/"
+        ],
+        snsTopic: "arn:aws:sns:eu-west-2:633885181284:met-office-radar-obs-data-object_created"
+      },
+      auth: "none",
+      license: "CC BY-SA",
+      attribution: "UK Met Office",
+      notes: "UK radar composites (15-min cadence)",
+      costNote: "cross-region (eu-west-2)"
+    },
+    {
+      id: "fmi-radar-geotiff",
+      name: "FMI Radar GeoTIFF",
+      category: "radar",
+      access: "s3",
+      s3: {
+        bucket: "fmi-opendata-radar-geotiff",
+        region: "eu-west-1",
+        requesterPays: false,
+        prefixExamples: [
+          "",
+          "composites/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "CC-BY-4.0",
+      attribution: "Finnish Meteorological Institute",
+      notes: "Weather radar composites and volumes",
+      costNote: "cross-region (eu-west-1)"
+    },
+    {
+      id: "jaxa-alos2",
+      name: "JAXA ALOS/PALSAR-2",
+      category: "satellite",
+      access: "s3",
+      s3: {
+        bucket: "jaxaalos2",
+        region: "us-west-2",
+        requesterPays: false,
+        prefixExamples: [
+          "palsar2/",
+          "palsar2/L2.2/"
+        ],
+        snsTopic: null
+      },
+      auth: "none",
+      license: "JAXA open terms",
+      attribution: "JAXA",
+      notes: "L-band SAR imagery (25m) for land and disaster applications",
+      costNote: "cross-region (us-west-2)"
+    }
+  ],
+  meta: {
+    version: "1.0.0",
+    updated: "2025-09-09T00:00:00Z",
+    schema: "https://github.com/chroniicallydiistracted/AtmosInsight/schemas/providers-v1.json",
+    notes: "Provider manifest following AGENTS.md S3-first specification"
+  }
+};
+
+// packages/providers/index.js
+var providersManifest = providers_default;
+var providers = providersManifest.providers;
+
 // tiling-services/proxy-api/index.ts
 async function getApiKey(envVarName, secretEnvVar) {
   const secretName = secretEnvVar ? process.env[secretEnvVar] : null;
@@ -79,11 +867,13 @@ async function getApiKey(envVarName, secretEnvVar) {
 }
 async function getProvidersManifest() {
   try {
-    return getEmbeddedProviders();
-  } catch (error) {
-    console.error("Failed to load providers manifest:", error);
-    return getEmbeddedProviders();
+    if (Array.isArray(providers) && providers.length > 0) {
+      return providers;
+    }
+  } catch (err) {
+    console.warn("Falling back to embedded providers. Reason:", err);
   }
+  return getEmbeddedProviders();
 }
 function getEmbeddedProviders() {
   return [
@@ -164,10 +954,24 @@ var CORS_HEADERS = {
   "Access-Control-Allow-Origin": getAllowedOrigins().split(",")[0],
   // Use first origin as default
   "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, X-Requested-With",
+  "Access-Control-Allow-Headers": "Content-Type, X-Requested-With, Authorization",
   "Access-Control-Max-Age": "86400",
   "Access-Control-Expose-Headers": "x-cost-note, x-provider-id, cache-control"
 };
+function buildCorsHeaders(event) {
+  const allowed = getAllowedOrigins().split(",").map((s) => s.trim()).filter(Boolean);
+  const reqOrigin = event.headers?.origin || event.headers?.Origin;
+  let origin = allowed[0] || "*";
+  if (allowed.includes("*")) origin = "*";
+  else if (reqOrigin && allowed.includes(reqOrigin)) origin = reqOrigin;
+  const requestedHeaders = event.headers?.["access-control-request-headers"] || event.headers?.["Access-Control-Request-Headers"];
+  return {
+    ...CORS_HEADERS,
+    "Access-Control-Allow-Origin": origin,
+    ...requestedHeaders ? { "Access-Control-Allow-Headers": requestedHeaders } : {},
+    "Vary": "Origin"
+  };
+}
 function json(status, obj, extra = {}) {
   return {
     statusCode: status,
@@ -193,46 +997,6 @@ function bin(status, bodyBuf, contentType, headers = {}) {
 function buildOwmTileUrl({ layer, z, x, y, apiKey }) {
   return `${OWM_BASE}/${layer}/${z}/${x}/${y}.png?appid=${encodeURIComponent(apiKey)}`;
 }
-var rvCache = null;
-var rvAt = 0;
-var RV_TTL = 6e4;
-async function getRainviewerIndex() {
-  const now = Date.now();
-  if (rvCache && now - rvAt < RV_TTL) return rvCache;
-  const res = await fetchWithRetry(
-    "https://api.rainviewer.com/public/weather-maps.json"
-  );
-  if (!res.ok) throw new Error(`rainviewer index ${res.status}`);
-  rvCache = await res.json();
-  rvAt = now;
-  return rvCache;
-}
-function buildRainviewerTileUrl({
-  index,
-  ts,
-  size,
-  z,
-  x,
-  y,
-  color,
-  options
-}) {
-  const sizeVal = size === "512" ? "512" : "256";
-  const tsNum = Number(ts);
-  if (!Number.isFinite(tsNum)) return null;
-  const frames = [
-    ...index?.radar?.past || [],
-    ...index?.radar?.nowcast || []
-  ];
-  if (!frames.length) return null;
-  let match = frames.find((f) => f.time === tsNum);
-  if (!match) {
-    const pastOrEqual = frames.filter((f) => f.time <= tsNum).sort((a, b) => b.time - a.time);
-    match = pastOrEqual[0] || frames.sort((a, b) => b.time - a.time)[0];
-  }
-  if (!match) return null;
-  return `${index.host}${match.path}/${sizeVal}/${z}/${x}/${y}/${color}/${options}.png`;
-}
 function withShortCache(h = {}) {
   return { "Cache-Control": "public, max-age=60", ...h };
 }
@@ -243,12 +1007,30 @@ var handler = async (event) => {
   const path = event.rawPath || "/";
   const qs = event.rawQueryString ? `?${event.rawQueryString}` : "";
   const method = event.requestContext?.http?.method || "GET";
+  const DYNAMIC_CORS = buildCorsHeaders(event);
   try {
     if (method === "OPTIONS") {
       return {
         statusCode: 200,
-        headers: CORS_HEADERS,
+        headers: DYNAMIC_CORS,
         body: ""
+      };
+    }
+    if (path === "/api/health") {
+      if (method === "HEAD") {
+        return { statusCode: 200, headers: DYNAMIC_CORS, body: "" };
+      }
+      return {
+        statusCode: 200,
+        headers: { ...JSON_HEADERS, ...DYNAMIC_CORS, ...withShortCache() },
+        body: JSON.stringify({
+          status: "ok",
+          service: "weather-proxy-api",
+          time: (/* @__PURE__ */ new Date()).toISOString(),
+          features: {
+            gibs: process.env.GIBS_ENABLED === "true"
+          }
+        })
       };
     }
     if (path.startsWith("/api/catalog/")) {
@@ -267,8 +1049,8 @@ var handler = async (event) => {
     }
     if (path === "/api/providers") {
       try {
-        const providers = await getProvidersManifest();
-        return json(200, { providers }, withShortCache());
+        const providers2 = await getProvidersManifest();
+        return json(200, { providers: providers2 }, withShortCache());
       } catch (error) {
         return json(503, { error: "Failed to load providers manifest", detail: String(error) });
       }
@@ -279,8 +1061,8 @@ var handler = async (event) => {
       const prefix = new URLSearchParams(qs.slice(1)).get("prefix") || "";
       const maxKeys = parseInt(new URLSearchParams(qs.slice(1)).get("max-keys") || "1000", 10);
       try {
-        const providers = await getProvidersManifest();
-        const provider = providers.find((p) => p.id === providerId && p.access === "s3");
+        const providers2 = await getProvidersManifest();
+        const provider = providers2.find((p) => p.id === providerId && p.access === "s3");
         if (!provider) {
           return json(404, { error: `S3 provider '${providerId}' not found` });
         }
@@ -322,8 +1104,8 @@ var handler = async (event) => {
     if (s3Match) {
       const [, providerId, objectKey] = s3Match;
       try {
-        const providers = await getProvidersManifest();
-        const provider = providers.find((p) => p.id === providerId && p.access === "s3");
+        const providers2 = await getProvidersManifest();
+        const provider = providers2.find((p) => p.id === providerId && p.access === "s3");
         if (!provider) {
           return json(404, { error: `S3 provider '${providerId}' not found` });
         }
@@ -530,98 +1312,6 @@ var handler = async (event) => {
         withMediumCache()
       );
     }
-    if (path === "/api/rainviewer/index.json") {
-      const idx = await getRainviewerIndex();
-      return json(200, idx, withShortCache());
-    }
-    m = path.match(
-      /^\/api\/rainviewer\/(\d+)\/(256|512)\/(\d+)\/(\d+)\/(\d+)\/([^/]+)\/([^/]+)\.png$/
-    );
-    if (m) {
-      const [, ts, size, z, x, y, color, options] = m;
-      const idx = await getRainviewerIndex();
-      const url = buildRainviewerTileUrl({
-        index: idx,
-        ts,
-        size,
-        z,
-        x,
-        y,
-        color,
-        options
-      });
-      if (!url) return json(404, { error: "frame not found" });
-      const upstream = await fetchWithRetry(url, {});
-      const buf = Buffer.from(await upstream.arrayBuffer());
-      return bin(
-        upstream.status,
-        buf,
-        upstream.headers.get("content-type") || "image/png",
-        withShortCache()
-      );
-    }
-    m = path.match(
-      /^\/api\/rainviewer\/(\d+)\/(\d+)\/(\d+)\/(256|512)\/([^/]+)\/([^/]+)\.png$/
-    );
-    if (m) {
-      const [, z, x, y, size, color, options] = m;
-      const idx = await getRainviewerIndex();
-      const frames = [
-        ...idx?.radar?.past || [],
-        ...idx?.radar?.nowcast || []
-      ].sort((a, b) => b.time - a.time);
-      const ts = frames[0]?.time;
-      if (!ts) return json(404, { error: "no frames" });
-      const url = buildRainviewerTileUrl({
-        index: idx,
-        ts: String(ts),
-        size,
-        z,
-        x,
-        y,
-        color,
-        options
-      });
-      if (!url) return json(404, { error: "frame not found" });
-      const upstream = await fetchWithRetry(url, {});
-      const buf = Buffer.from(await upstream.arrayBuffer());
-      return bin(
-        upstream.status,
-        buf,
-        upstream.headers.get("content-type") || "image/png",
-        withShortCache()
-      );
-    }
-    m = path.match(/^\/api\/rainviewer\/(\d+)\/(\d+)\/(\d+)\.png$/);
-    if (m) {
-      const [, z, x, y] = m;
-      const idx = await getRainviewerIndex();
-      const frames = [
-        ...idx?.radar?.past || [],
-        ...idx?.radar?.nowcast || []
-      ].sort((a, b) => b.time - a.time);
-      const ts = frames[0]?.time;
-      if (!ts) return json(404, { error: "no frames" });
-      const url = buildRainviewerTileUrl({
-        index: idx,
-        ts: String(ts),
-        size: "256",
-        z,
-        x,
-        y,
-        color: "0",
-        options: "1_0"
-      });
-      if (!url) return json(404, { error: "frame not found" });
-      const upstream = await fetchWithRetry(url, {});
-      const buf = Buffer.from(await upstream.arrayBuffer());
-      return bin(
-        upstream.status,
-        buf,
-        upstream.headers.get("content-type") || "image/png",
-        withShortCache()
-      );
-    }
     if (path === "/api/gibs/redirect") {
       const params = new URLSearchParams(event.rawQueryString || "");
       const layer = params.get("layer");
@@ -748,7 +1438,7 @@ var handler = async (event) => {
     if (m) {
       const glmBaseUrl = process.env.GLM_TOE_PY_URL;
       if (!glmBaseUrl) {
-        return json(503, { error: "GLM_TOE_PY_URL not configured" });
+        return json(404, { error: "GLM TOE not enabled" }, withShortCache());
       }
       const [, z, x, y] = m;
       const url = `${glmBaseUrl.replace(/\/$/, "")}/${z}/${x}/${y}.png${qs}`;

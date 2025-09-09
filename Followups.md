@@ -146,7 +146,6 @@ The following environment variables need to be configured for full functionality
 
 #### Weather Data Provider API Keys
 - `OPENWEATHER_API_KEY` - OpenWeatherMap API key for weather tiles
-- `RAINVIEWER_ENABLED` - Set to `true` to enable RainViewer radar (default: true)
 - `TRACESTRACK_API_KEY` - Tracestrack basemap API key
 - `WEATHERKIT_TEAM_ID`, `WEATHERKIT_SERVICE_ID`, `WEATHERKIT_KEY_ID`, `WEATHERKIT_PRIVATE_KEY` - Apple WeatherKit credentials
 - `METEOMATICS_USER`, `METEOMATICS_PASSWORD` - Meteomatics API credentials
@@ -184,7 +183,6 @@ The application requires access to these external data sources:
 #### Weather Services
 - **National Weather Service API** (`api.weather.gov`) - No API key required, but needs proper User-Agent
 - **OpenWeatherMap** (`openweathermap.org`) - Requires API key for tile access
-- **RainViewer** (`api.rainviewer.com`) - Public API for radar data
 - **Meteomatics** (`api.meteomatics.com`) - Premium weather data service
 
 #### Government & Scientific Data

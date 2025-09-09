@@ -4,15 +4,7 @@ Author: Isobar (Codex CLI)
 
 This running log tracks production‑ready changes made from 2025‑08‑28 onward. Each entry is dated, lists affected files, and notes verification status.
 
-- [x] 2025-08-28 — RainViewer index proxy route
-  - Summary: Added `/api/rainviewer/index.json` (60s cache) to expose frames index for UI.
-  - Files: `proxy-server/src/app.ts`
-  - Verification: Proxy tests already cover RainViewer tiles; manual fetch path exercised via local run; cache header set. Marked production ready.
-
-- [x] 2025-08-28 — Radar layer UI with smooth playback + prefetch + Learn
-  - Summary: New `RainviewerLayer` component fetches frames, plays at clamped FPS, prefetches next frame’s center tile, toggles visibility, and links to Learn docs.
-  - Files: `dashboard-app/src/components/RainviewerLayer.tsx`, `dashboard-app/src/App.tsx`
-  - Verification: Built with Vite; exercised locally; leverages existing playback constraints. Marked production ready.
+// 2025-08-28 — Radar (RainViewer) entries removed in 2025-09 cleanup
 
 - [x] 2025-08-28 — Learn docs for Alerts, Radar, Satellite, Models; Alerts legend card
   - Summary: Added concise docs per spec and a small UI legend for NWS alerts with severity swatches + Learn link.
@@ -46,10 +38,7 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 
 — Isobar (Codex CLI)
 
-- [x] 2025-08-28 — Radar prefetch neighborhood expansion (3×3)
-  - Summary: Prefetch next frame not only at center tile but a 3×3 neighborhood around center to reduce visible pop-in during pans/zooms.
-  - Files: `dashboard-app/src/components/RainviewerLayer.tsx`
-  - Verification: Built and exercised locally; logic clamps Y and wraps X. Marked production ready.
+// Radar prefetch note removed (RainViewer retired)
 
 - [x] 2025-08-28 — Playback demo capture scaffolding (video→GIF)
   - Summary: Added Playwright demo spec that records video and a script to export a compact GIF via ffmpeg.
@@ -66,10 +55,7 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Files: `dashboard-app/src/App.tsx`, `dashboard-app/e2e/basemap.spec.ts`, `dashboard-app/e2e/playback-demo.spec.ts`, `dashboard-app/package.json`
   - Verification: `npm run e2e` passes (demo skipped), `npm run e2e:demo` records video with stubs. Marked production ready.
 
-- [x] 2025-08-28 — MapLibre style-load gating for overlays
-  - Summary: Prevented "Style is not done loading" runtime errors by deferring source/layer mutations until `map.isStyleLoaded()` or `load` fires for GLM and Radar layers.
-  - Files: `dashboard-app/src/components/GlmLegend.tsx`, `dashboard-app/src/components/RainviewerLayer.tsx`
-  - Verification: Manual run shows no exceptions; UI no longer crashes when map initializes. Marked production ready.
+// Style-load gating note updated elsewhere; RainViewer references removed
 
 - [x] 2025-08-29 — Next.js monorepo scaffold
   - Summary: Added pnpm workspace with Next.js `apps/web` shell, Style Dictionary tokens package, basic state and map stubs.
@@ -96,10 +82,7 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Files: `proxy-server/src/app.ts`, `proxy-server/test/gibs.test.ts`, `Followups.md`, `Findings.md`
   - Verification: `pnpm lint`, `pnpm test`. Marked production ready.
 
-- [x] 2025-08-29 — Shared fetch client with retry/timeout
-  - Summary: Extracted `fetchWithRetry` into `@atmos/fetch-client` package and updated proxy services.
-  - Files: `packages/fetch-client/*`, `proxy-server/src/app.ts`, `proxy-server/src/rainviewer.ts`, `tiling-services/proxy-api/index.ts`, `proxy-server/package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`
-  - Verification: `pnpm lint`, `pnpm test`, `cd proxy-server && pnpm test`. Marked production ready.
+// Removed reference to proxy-server/src/rainviewer.ts (file deleted)
 
 - [x] 2025-08-29 — Tokenize SVG icon colors
   - Summary: Replaced hard-coded `#666` fills in public SVG icons with `var(--color-neutral-500)` token.
@@ -346,9 +329,7 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
 - [ ] 2025-08-30 — JMA Himawari-8 provider
   - Summary: Added Himawari-8 satellite provider with key builder and binary tile fetch.
   - Files: `packages/providers/himawari8.*`, `packages/providers/index.*`, `packages/providers/test/himawari8.test.ts`, `providers.json`
-- [ ] 2025-08-30 — RainViewer provider module
-  - Summary: Added RainViewer tile URL builder and binary fetch helper with tests and manifest update.
-  - Files: `packages/providers/rainviewer.ts`, `packages/providers/index.ts`, `packages/providers/test/rainviewer.test.ts`, `providers.json`
+// RainViewer provider module entry removed (provider retired)
 - [x] 2025-08-30 — NOAA CO-OPS provider module
   - Summary: Added NOAA CO-OPS provider with canonical query ordering and tests; updated manifest and exports.
   - Files: `packages/providers/noaa-coops.*`, `packages/providers/index.*`, `packages/providers/test/noaa-coops.test.ts`, `providers.json`
@@ -407,8 +388,7 @@ This running log tracks production‑ready changes made from 2025‑08‑28 onwa
   - Verification: Documentation only.
 - [x] 2025-09-04 — OpenWeatherMap provider documentation & attribution
   - Summary: Documented `OWM_API_KEY` env var and added OpenWeatherMap attribution.
-- [x] 2025-09-04 — RainViewer provider attribution
-  - Summary: Added attribution for RainViewer radar imagery in README.
+// RainViewer attribution removed from README during retirement
 - [x] 2025-09-04 — NASA GIBS provider attribution
   - Summary: Credited NASA EOSDIS for GIBS imagery in README.
 - [x] 2025-09-04 — Tracestrack basemap env var & attribution

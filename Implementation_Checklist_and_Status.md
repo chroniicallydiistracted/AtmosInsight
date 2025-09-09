@@ -174,7 +174,6 @@
 - `NWS_USER_AGENT` (required by NWS)
 - `OPENWEATHER_API_KEY` (for OWM tiles)
 - `TRACESTRACK_API_KEY` (for Tracestrack tiles)
-- `RAINVIEWER_ENABLED=true`
 - `GIBS_ENABLED=true` 
 - `GLM_TOE_PY_URL` (optional)
 - `CATALOG_API_BASE` (catalog API URL)

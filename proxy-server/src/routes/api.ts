@@ -196,46 +196,7 @@ export function createApiRouter(): Router {
     }
   });
 
-  // RainViewer proxy
-  router.get('/radar/rainviewer/*', async (req, res, next) => {
-    try {
-      const rainviewerPath = (req.params as any)[0];
-      const queryString = req.url.split('?')[1];
-      
-      const rainviewerProvider = getProvider('rainviewer');
-      if (!rainviewerProvider || !rainviewerProvider.tiles) {
-        throw new Error('RainViewer provider not configured');
-      }
-
-      const url = `${rainviewerProvider.tiles.baseUrl}/${rainviewerPath}${queryString ? `?${queryString}` : ''}`;
-      
-      const response = await fetchWithRetry(url);
-      
-      if (!response.ok) {
-        throw new Error(`RainViewer request failed: ${response.status} ${response.statusText}`);
-      }
-
-      const contentType = response.headers.get('content-type');
-      if (contentType) {
-        res.setHeader('Content-Type', contentType);
-      }
-
-      res.setHeader('Cache-Control', 'public, max-age=600'); // 10 minute cache for radar
-      
-      if (contentType?.includes('json')) {
-        const data = await response.json();
-        res.json(data);
-      } else {
-        const buffer = await response.arrayBuffer();
-        res.send(Buffer.from(buffer));
-      }
-
-    } catch (error) {
-      const appError: AppError = new Error(`RainViewer proxy error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      appError.status = 500;
-      next(appError);
-    }
-  });
+  // RainViewer proxy removed
 
   // TracesTrack basemap proxy
   router.get('/basemap/tracestrack/*', async (req, res, next) => {

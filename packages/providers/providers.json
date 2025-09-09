@@ -438,25 +438,7 @@
       "attribution": "NOAA/SWPC",
       "notes": "Space weather alerts and indices",
       "costNote": "external-service"
-    },
-    {
-      "id": "rainviewer",
-      "name": "RainViewer Radar",
-      "category": "radar",
-      "access": "non_s3",
-      "s3": null,
-      "tiles": {
-        "baseUrl": "https://api.rainviewer.com",
-        "apiKeyRequired": false,
-        "tileFormat": "/{z}/{x}/{y}/2/1_1.png",
-        "indexEndpoint": "/public/weather-maps.json"
-      },
-      "auth": "none",
-      "license": "Commercial/free tier",
-      "attribution": "RainViewer",
-      "notes": "Global precipitation radar tiles with animation",
-      "costNote": "external-service"
-    },
+  },
     {
       "id": "tracestrack-topo",
       "name": "TracesTrack Topographic",
@@ -556,6 +538,238 @@
       "license": "ESA open (CC-BY-4.0)",
       "attribution": "ESA/Copernicus, Element84",
       "notes": "Sentinel-2 L2A Cloud-Optimized GeoTIFFs with SNS notifications for new scenes",
+      "costNote": "cross-region (us-west-2)"
+    },
+    {
+      "id": "nsf-ncar-era5",
+      "name": "NCAR ERA5 Reanalysis",
+      "category": "climate",
+      "access": "s3",
+      "s3": {
+        "bucket": "nsf-ncar-era5",
+        "region": "us-west-2",
+        "requesterPays": false,
+        "prefixExamples": [
+          "",
+          "atmos/"
+        ],
+        "snsTopic": "arn:aws:sns:us-west-2:891377163634:nsf-ncar-era5-object_created"
+      },
+      "auth": "none",
+      "license": "CC-BY-4.0",
+      "attribution": "NSF NCAR",
+      "notes": "Global atmospheric reanalysis (1979–present)",
+      "costNote": "cross-region (us-west-2)"
+    },
+    {
+      "id": "ncar-cesm-lens",
+      "name": "NCAR CESM Large Ensemble",
+      "category": "climate",
+      "access": "s3",
+      "s3": {
+        "bucket": "ncar-cesm-lens",
+        "region": "us-west-2",
+        "requesterPays": false,
+        "prefixExamples": [
+          "atm/monthly/",
+          "atm/monthly/cesmLE-20C-TEMP.zarr"
+        ],
+        "snsTopic": null
+      },
+      "auth": "none",
+      "license": "CC-BY-4.0",
+      "attribution": "NCAR/UCAR",
+      "notes": "40-member ensemble climate simulations (1920–2100)",
+      "costNote": "cross-region (us-west-2)"
+    },
+    {
+      "id": "nasanex",
+      "name": "NASA Earth Exchange (NEX)",
+      "category": "climate",
+      "access": "s3",
+      "s3": {
+        "bucket": "nasanex",
+        "region": "us-west-2",
+        "requesterPays": false,
+        "prefixExamples": [
+          "NEX-DCP30/",
+          "NEX-GDDP/",
+          "LOCA/"
+        ],
+        "snsTopic": null
+      },
+      "auth": "none",
+      "license": "US Government work (public domain)",
+      "attribution": "NASA NEX",
+      "notes": "Downscaled climate projections and related datasets",
+      "costNote": "cross-region (us-west-2)"
+    },
+    {
+      "id": "omi-no2-nasa",
+      "name": "NASA OMI NO2",
+      "category": "atmospheric-chemistry",
+      "access": "s3",
+      "s3": {
+        "bucket": "omi-no2-nasa",
+        "region": "us-west-2",
+        "requesterPays": false,
+        "prefixExamples": [
+          "",
+          "daily/"
+        ],
+        "snsTopic": null
+      },
+      "auth": "none",
+      "license": "Public domain",
+      "attribution": "NASA GSFC",
+      "notes": "Global NO2 tropospheric column composites (0.25°)",
+      "costNote": "cross-region (us-west-2)"
+    },
+    {
+      "id": "epa-rsei-pds",
+      "name": "EPA RSEI",
+      "category": "air-quality",
+      "access": "s3",
+      "s3": {
+        "bucket": "epa-rsei-pds",
+        "region": "us-east-1",
+        "requesterPays": false,
+        "prefixExamples": [
+          "",
+          "rsei/"
+        ],
+        "snsTopic": null
+      },
+      "auth": "none",
+      "license": "US Government (public domain)",
+      "attribution": "U.S. EPA",
+      "notes": "Risk-Screening Environmental Indicators",
+      "costNote": "same-region"
+    },
+    {
+      "id": "ncar-na-cordex",
+      "name": "NCAR NA-CORDEX",
+      "category": "climate",
+      "access": "s3",
+      "s3": {
+        "bucket": "ncar-na-cordex",
+        "region": "us-west-2",
+        "requesterPays": false,
+        "prefixExamples": [
+          "",
+          "zarr/"
+        ],
+        "snsTopic": null
+      },
+      "auth": "none",
+      "license": "CC-BY-4.0",
+      "attribution": "NSF NCAR",
+      "notes": "Regional climate simulations over North America",
+      "costNote": "cross-region (us-west-2)"
+    },
+    {
+      "id": "usgs-lidar",
+      "name": "USGS 3DEP Lidar",
+      "category": "elevation",
+      "access": "s3",
+      "s3": {
+        "bucket": "usgs-lidar",
+        "region": "us-west-2",
+        "requesterPays": true,
+        "prefixExamples": [
+          "",
+          "laz/"
+        ],
+        "snsTopic": null
+      },
+      "auth": "none",
+      "license": "Public domain",
+      "attribution": "USGS",
+      "notes": "High-resolution elevation point clouds (ASPRS LAS/LAZ)",
+      "costNote": "requester-pays"
+    },
+    {
+      "id": "ecmwf-forecasts",
+      "name": "ECMWF Forecasts",
+      "category": "weather",
+      "access": "s3",
+      "s3": {
+        "bucket": "ecmwf-forecasts",
+        "region": "eu-central-1",
+        "requesterPays": false,
+        "prefixExamples": [
+          "",
+          "grib2/"
+        ],
+        "snsTopic": null
+      },
+      "auth": "none",
+      "license": "CC-BY-4.0",
+      "attribution": "ECMWF",
+      "notes": "Real-time global forecasts (0.4° GRIB2)",
+      "costNote": "cross-region (eu-central-1)"
+    },
+    {
+      "id": "met-office-radar-obs",
+      "name": "UK Met Office Radar",
+      "category": "radar",
+      "access": "s3",
+      "s3": {
+        "bucket": "met-office-radar-obs-data",
+        "region": "eu-west-2",
+        "requesterPays": false,
+        "prefixExamples": [
+          "",
+          "radar/"
+        ],
+        "snsTopic": "arn:aws:sns:eu-west-2:633885181284:met-office-radar-obs-data-object_created"
+      },
+      "auth": "none",
+      "license": "CC BY-SA",
+      "attribution": "UK Met Office",
+      "notes": "UK radar composites (15-min cadence)",
+      "costNote": "cross-region (eu-west-2)"
+    },
+    {
+      "id": "fmi-radar-geotiff",
+      "name": "FMI Radar GeoTIFF",
+      "category": "radar",
+      "access": "s3",
+      "s3": {
+        "bucket": "fmi-opendata-radar-geotiff",
+        "region": "eu-west-1",
+        "requesterPays": false,
+        "prefixExamples": [
+          "",
+          "composites/"
+        ],
+        "snsTopic": null
+      },
+      "auth": "none",
+      "license": "CC-BY-4.0",
+      "attribution": "Finnish Meteorological Institute",
+      "notes": "Weather radar composites and volumes",
+      "costNote": "cross-region (eu-west-1)"
+    },
+    {
+      "id": "jaxa-alos2",
+      "name": "JAXA ALOS/PALSAR-2",
+      "category": "satellite",
+      "access": "s3",
+      "s3": {
+        "bucket": "jaxaalos2",
+        "region": "us-west-2",
+        "requesterPays": false,
+        "prefixExamples": [
+          "palsar2/",
+          "palsar2/L2.2/"
+        ],
+        "snsTopic": null
+      },
+      "auth": "none",
+      "license": "JAXA open terms",
+      "attribution": "JAXA",
+      "notes": "L-band SAR imagery (25m) for land and disaster applications",
       "costNote": "cross-region (us-west-2)"
     }
   ],

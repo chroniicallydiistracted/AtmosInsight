@@ -21,10 +21,13 @@ if [[ -f "$ENV_LOCAL" ]] && grep -qE '^NEXT_PUBLIC_API_BASE_URL=.*localhost' "$E
   note "Warning: $ENV_LOCAL contains a localhost API base; ignoring it for production build."
 fi
 
-# Force relative API base at build time
-export NEXT_PUBLIC_API_BASE_URL=
+if [[ -z "${NEXT_PUBLIC_API_BASE_URL:-}" ]]; then
+  note "NEXT_PUBLIC_API_BASE_URL is not set; site will use relative /api paths behind CloudFront."
+else
+  ok "Using API base: $NEXT_PUBLIC_API_BASE_URL"
+fi
 
-note "Building web app (Next.js static export)"
+note "Building web app (Next.js build with output: export)"
 pnpm --filter web build
 ok "Build complete"
 

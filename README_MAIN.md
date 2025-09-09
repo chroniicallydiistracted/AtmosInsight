@@ -37,7 +37,6 @@ Common environment variables used by services in this repo:
 - `NWS_USER_AGENT` — User-Agent string for National Weather Service API requests (e.g. "AtmosInsight/v0.1.0 (you@example.com)").
 - `OPENWEATHER_API_KEY` — OpenWeatherMap tile API key used by the proxy.
 - `NEXT_PUBLIC_API_BASE_URL` — Base URL for frontend requests to the proxy.
-- `RAINVIEWER_ENABLED` — `true|false` to enable/disable RainViewer proxy (default: true).
 - `GIBS_ENABLED` — `true|false` to enable/disable GIBS proxy (if implemented).
 - `WEATHERKIT_TEAM_ID` — Apple Developer team ID for WeatherKit JWTs.
 - `WEATHERKIT_SERVICE_ID` — WeatherKit service identifier.
@@ -100,7 +99,6 @@ Common environment variables used by services in this repo:
 
 # Feature Toggles
 
-- `RAINVIEWER_ENABLED` — `true|false`
 - `GIBS_ENABLED` — `true|false`
 - `GLM_TOE_ENABLED` — `true|false`
 - `OPENAQ_ENABLED` — `true|false`
@@ -114,7 +112,6 @@ The included demo basemap uses Protomaps’ public style and PMTiles and does no
 - National Weather Service API: https://api.weather.gov
 - OpenWeatherMap Weather Maps: https://openweathermap.org/api/weathermaps
 - NASA GIBS WMTS/XYZ access: https://gibs.earthdata.nasa.gov
-- RainViewer Weather Maps: https://www.rainviewer.com/api.html
 - GLM TOE details and endpoints: see `docs/glm-toe.md`
   - GOES-East GLM L2 (AWS Open Data): https://noaa-goes16.s3.amazonaws.com/index.html
   - GOES-West GLM L2 (AWS Open Data): https://noaa-goes17.s3.amazonaws.com/index.html
@@ -149,7 +146,6 @@ CloudFront propagation (5–20 min), then test via your domain:
 
 - `curl -I https://<your-domain>/api/healthz` → 200
 - `curl -I "https://<your-domain>/api/nws/alerts/active?area=AZ"` → 200
-- `curl -I https://<your-domain>/api/rainviewer/index.json` → 200
 - OWM tiles (key configured): `curl -I https://<your-domain>/api/owm/clouds_new/0/0/0.png` → 200
 - GIBS redirect sample: `curl -I "https://<your-domain>/api/gibs/redirect?layer=BlueMarble_ShadedRelief_Bathymetry&epsg=3857&tms=GoogleMapsCompatible_Level6&z=3&x=2&y=1&ext=jpg"` → 302
 
@@ -196,7 +192,6 @@ Tokens are built with Style Dictionary in `packages/tokens` and emitted as CSS v
 
 - National Weather Service data courtesy of NOAA/NWS.
 - OpenWeatherMap layers © OpenWeatherMap.
-- RainViewer radar imagery © RainViewer.
 - NASA GIBS imagery courtesy of NASA EOSDIS.
 - Basemap tiles by Tracestrack and CyclOSM © OpenStreetMap contributors.
 - Air quality data from AirNow (U.S. EPA) and OpenAQ.
@@ -206,7 +201,6 @@ Tokens are built with Style Dictionary in `packages/tokens` and emitted as CSS v
 
 - National Weather Service data courtesy of NOAA/NWS.
 - OpenWeatherMap layers © OpenWeatherMap.
-- RainViewer radar imagery © RainViewer.
 - NASA GIBS imagery courtesy of NASA EOSDIS.
 - Basemap tiles by Tracestrack and CyclOSM © OpenStreetMap contributors.
 - Air quality data from AirNow (U.S. EPA) and OpenAQ.

@@ -53,7 +53,6 @@ Both proxy implementations:
 - `/api/air/airnow`, `/api/air/openaq` - Air quality data
 - `/api/gibs/tile/*` - NASA GIBS satellite tiles (non-S3)
 - `/api/glm-toe/{z}/{x}/{y}.png` - GLM lightning Total Optical Energy tiles
-- `/api/rainviewer/*` - RainViewer radar frames and indices
 - `/api/point/metno` - MET Norway location forecasts
 - `/api/space/*` - NOAA Space Weather data
 
@@ -64,7 +63,6 @@ The apps/web dashboard implements:
 - Dual basemap sources (CyclOSM and Tracestrack) via proxy
 - NWS alerts overlay with severity-based styling and popups
 - GLM lightning raster tiles with color-mapped energy intensity
-- RainViewer radar with frame animation and prefetching
 - Configurable opacity and visibility controls
 
 **Interactive Controls:**
@@ -163,7 +161,7 @@ The application uses environment variables for provider APIs, AWS services, and 
 
 - **Provider APIs**: `NWS_USER_AGENT`, `OPENWEATHER_API_KEY`, `AIRNOW_API_KEY`, `TRACESTRACK_API_KEY`, `FIRMS_MAP_KEY`
 - **AWS Services**: `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `LAMBDA_FUNCTION_NAME`
-- **Feature Toggles**: `RAINVIEWER_ENABLED`, `GIBS_ENABLED`, `GLM_TOE_ENABLED`, `FIRMS_ENABLED` 
+- **Feature Toggles**: `GIBS_ENABLED`, `GLM_TOE_ENABLED`, `FIRMS_ENABLED` 
 - **Service URLs**: `GLM_TOE_PY_URL`, `CATALOG_API_BASE`, `NEXT_PUBLIC_API_BASE_URL`
 - **Security**: `ALLOWED_ORIGINS`, `NODE_ENV`
 - **S3 Configuration**: `REQUESTER_PAYS_DEFAULT`, `AWS_S3_FORCE_PATH_STYLE`, `PROVIDER_CONFIG_PATH`
@@ -185,7 +183,7 @@ The system implements an **S3-first policy** with machine-readable provider mani
 - **NASA GIBS** - WMTS/XYZ tiles (not available on S3)
 - **Air Quality**: AirNow (API key), OpenAQ (free)
 - **Weather Services**: MET Norway (User-Agent required), NOAA SWPC
-- **Commercial**: RainViewer radar, TracesTrack topographic tiles, OpenWeatherMap
+- **Commercial**: TracesTrack topographic tiles, OpenWeatherMap
 - **Community**: CyclOSM (development only)
 
 **Provider Categorization:**

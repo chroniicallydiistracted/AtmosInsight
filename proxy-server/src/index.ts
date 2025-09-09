@@ -67,7 +67,6 @@ app.use('*', (req, res) => {
       'GET /api/air/openaq/*',
       'GET /api/point/metno',
       'GET /api/space/*',
-      'GET /api/radar/rainviewer/*',
       'GET /api/basemap/*',
       'GET /api/owm/*'
     ]

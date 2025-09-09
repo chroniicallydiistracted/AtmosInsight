@@ -4,7 +4,7 @@
 
 What’s included:
 
-- Proxy services: GIBS WMTS/DescribeDomains + redirect, OWM tiles (allowlist, 60s cache), RainViewer frames (index-driven, fallback, 60s cache), NWS alerts proxy with required headers.
+- Proxy services: GIBS WMTS/DescribeDomains + redirect, OWM tiles (allowlist, 60s cache), NWS alerts proxy with required headers.
 - Web app: Playback utilities with FPS clamp (2–8, default 4), play gating, prefetch next frame, and optional tile cache; Timeline wired with accessible controls.
 - Alerts layer: Severity styling (fill/line/point) and click popovers rendered on the map.
 - Basemap E2E: Playwright test ensures style loads, tiles paint, and no stray `/cesium` fetches.

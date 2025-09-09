@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react';
 
 interface Layer {
@@ -20,9 +21,10 @@ interface LayersPanelProps {
   onLayerToggle?: (layerId: string, active: boolean) => void;
   onLayerSettingsChange?: (layerId: string, settings: LayerSettings) => void;
   onAddCustomLayer?: () => void;
+  lightningEnabled?: boolean;
 }
 
-export function LayersPanel({ onLayerToggle, onLayerSettingsChange, onAddCustomLayer }: LayersPanelProps) {
+export function LayersPanel({ onLayerToggle, onLayerSettingsChange, onAddCustomLayer, lightningEnabled = false }: LayersPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedLayers, setExpandedLayers] = useState<Set<string>>(new Set(['lightning']));
   
@@ -41,7 +43,7 @@ export function LayersPanel({ onLayerToggle, onLayerSettingsChange, onAddCustomL
       active: true,
       hasSettings: false
     },
-    {
+  lightningEnabled ? {
       id: 'lightning',
       name: 'Lightning (GLM)',
       description: 'Total Optical Energy',
@@ -56,21 +58,23 @@ export function LayersPanel({ onLayerToggle, onLayerSettingsChange, onAddCustomL
       settings: {
         timeWindow: '5m',
         opacity: 85
-      }
-    },
+    }
+  } : undefined as unknown as Layer,
     {
       id: 'radar',
-      name: 'Precipitation Radar',
-  description: 'Global radar (retired)',
+      name: 'Radar (Precip)',
+      description: 'Global precipitation overlay',
       icon: (
-        <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-            d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+        <svg className="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
         </svg>
       ),
-      iconBgColor: 'bg-blue-500/20',
+      iconBgColor: 'bg-sky-500/20',
       active: false,
-      hasSettings: false
+      hasSettings: true,
+      settings: {
+        opacity: 70
+      }
     },
     {
       id: 'satellite',
@@ -86,7 +90,7 @@ export function LayersPanel({ onLayerToggle, onLayerSettingsChange, onAddCustomL
       active: false,
       hasSettings: false
     }
-  ]);
+  ].filter(Boolean) as Layer[]);
 
   const toggleLayer = (layerId: string) => {
     setLayers(prev => prev.map(layer => {
@@ -168,18 +172,20 @@ export function LayersPanel({ onLayerToggle, onLayerSettingsChange, onAddCustomL
               {/* Layer Settings */}
               {layer.hasSettings && layer.settings && expandedLayers.has(layer.id) && (
                 <div className="mt-2 p-3 rounded-lg bg-white/5 space-y-2 animate-slide-in-bottom">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-400">Time Window</span>
-                    <select 
-                      value={layer.settings.timeWindow}
-                      onChange={(e) => updateLayerSettings(layer.id, { timeWindow: e.target.value })}
-                      className="px-2 py-1 rounded bg-white/10 text-xs focus:outline-none"
-                    >
-                      <option value="1m">1 min</option>
-                      <option value="5m">5 min</option>
-                      <option value="10m">10 min</option>
-                    </select>
-                  </div>
+                  {layer.settings.timeWindow !== undefined && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-400">Time Window</span>
+                      <select 
+                        value={layer.settings.timeWindow}
+                        onChange={(e) => updateLayerSettings(layer.id, { timeWindow: e.target.value })}
+                        className="px-2 py-1 rounded bg-white/10 text-xs focus:outline-none"
+                      >
+                        <option value="1m">1 min</option>
+                        <option value="5m">5 min</option>
+                        <option value="10m">10 min</option>
+                      </select>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-400">Opacity</span>
                     <input 

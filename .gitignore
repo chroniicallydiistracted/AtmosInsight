@@ -1,9 +1,23 @@
 # Node
 node_modules
 *.log
+**/*.log
+web-app.log
+proxy-server.log
+catalog-api.log
+cf.json
+dist.json
+dist.patched.json
 
 # Build outputs
 dist
+apps/web/.next/
+apps/web/out/
+tiling-services/proxy-api/index.mjs
+tiling-services/proxy-api/function.zip
+tiling-services/proxy-api/index.js
+tiling-services/proxy-api/index.d.ts
+apps/web/.next/cache/
 *.zip
 
 # Playwright

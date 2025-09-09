@@ -37,7 +37,10 @@
     "build:proxy": "npx esbuild tiling-services/proxy-api/index.ts --bundle --platform=node --format=esm --outfile=tiling-services/proxy-api/index.mjs --packages=bundle --external:fs --external:path",
     "deploy:proxy": "./scripts/deploy-proxy-api.sh",
   "deploy:web": "./scripts/deploy-web.sh",
-  "e2e:tile": "node scripts/e2e/check_tile_fetch.mjs"
+  "e2e:tile": "node scripts/e2e/check_tile_fetch.mjs",
+  "e2e:devtools": "node scripts/e2e/devtools_console.mjs",
+  "puppeteer:install:chrome": "pnpm exec puppeteer browsers install chrome",
+  "puppeteer:install:chromium": "pnpm exec puppeteer browsers install chromium"
   },
   "dependencies": {
     "prettier": "^3.6.2"

@@ -5,7 +5,7 @@ Author: Codex CLI Assistant
 
 ## Executive Summary
 
-Today’s work delivers a production‑ready proxy layer (GIBS/OWM/RainViewer/NWS), playback smoothness controls, a Sun/Moon module, a Playwright E2E for the basemap, and a high‑quality GLM TOE backend with a Python FastAPI service, real GLM L2 ingestion from NOAA S3, and windowed tile rendering. CI is wired for unit/integration/E2E across projects. A v0.1.0 release PR is open.
+Today’s work delivers a production‑ready proxy layer (GIBS/OWM/NWS), playback smoothness controls, a Sun/Moon module, a Playwright E2E for the basemap, and a high‑quality GLM TOE backend with a Python FastAPI service, real GLM L2 ingestion from NOAA S3, and windowed tile rendering. CI is wired for unit/integration/E2E across projects. A v0.1.0 release PR is open.
 
 ## Completed Today
 
@@ -18,10 +18,7 @@ Today’s work delivers a production‑ready proxy layer (GIBS/OWM/RainViewer/NW
     - Endpoint: `/api/owm/:layer/:z/:x/:y.png`
     - Files: `proxy-server/src/owm.ts`
     - Tests: `proxy-server/test/owm.test.ts` (skips if `OPENWEATHER_API_KEY` unset)
-  - RainViewer frames proxy + fallback + 60s cache
-    - Endpoint: `/api/rainviewer/:ts/:size/:z/:x/:y/:color/:options.png`
-    - Files: `proxy-server/src/rainviewer.ts`
-    - Tests: `proxy-server/test/rainviewer.test.ts`
+  - Radar proxy removed
   - NWS alerts proxy (required User‑Agent + Accept) — map styling wired in app
     - Endpoint: `/api/nws/alerts/*`
     - Files: `proxy-server/src/app.ts`

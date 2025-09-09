@@ -64,7 +64,6 @@ resource "aws_lambda_function" "proxy_api" {
       NWS_USER_AGENT     = var.nws_user_agent
       OPENWEATHER_API_KEY = var.openweather_api_key
       TRACESTRACK_API_KEY = var.tracestrack_api_key
-      RAINVIEWER_ENABLED = "true"
       GIBS_ENABLED       = "true"
       GLM_TOE_PY_URL     = var.glm_toe_py_url
       CATALOG_API_BASE   = var.catalog_api_base

@@ -13,7 +13,7 @@ const PROVIDERS_TO_MIGRATE = [
   'fmi', 'gibs', 'goes', 'google-air', 'himawari8', 'iem', 'meteomatics',
   'metno', 'mrms', 'msc', 'nexrad', 'noaa-coops', 'noaa-ndbc', 'nwm',
   'nws-alerts', 'nws-radar-tiles', 'openaq', 'openmeteo', 'openweather',
-  'openweather-air', 'planetary-computer', 'rainviewer', 'smhi', 'tomorrowio',
+  'openweather-air', 'planetary-computer', 'smhi', 'tomorrowio',
   'ukmet', 'usgs', 'visualcrossing', 'waqi', 'weatherbit', 'weatherkit',
   'wfigs', 'xweather'
 ];

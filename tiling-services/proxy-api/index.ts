@@ -7,6 +7,7 @@ import {
   buildGibsDomainsUrl,
 } from '@atmos/proxy-constants';
 import { fetchWithRetry } from '@atmos/fetch-client';
+import { providers as sharedProviders } from '@atmos/providers';
 
 // Lightweight Lambda proxy for /api/* endpoints.
 // Runtime: nodejs20.x (fetch available)
@@ -25,15 +26,16 @@ async function getApiKey(envVarName: string, secretEnvVar?: string): Promise<str
   return process.env[envVarName] || '';
 }
 
-// Load providers manifest
+// Load providers manifest (prefer shared package, fallback to embedded subset)
 async function getProvidersManifest(): Promise<any[]> {
   try {
-    // Use embedded providers directly
-    return getEmbeddedProviders();
-  } catch (error) {
-    console.error('Failed to load providers manifest:', error);
-    return getEmbeddedProviders();
+    if (Array.isArray(sharedProviders) && sharedProviders.length > 0) {
+      return sharedProviders as any[];
+    }
+  } catch (err) {
+    console.warn('Falling back to embedded providers. Reason:', err);
   }
+  return getEmbeddedProviders();
 }
 
 // Embedded fallback providers (key S3 providers only)
@@ -134,16 +136,7 @@ interface OwmTileParams {
   apiKey: string;
 }
 
-interface RainviewerTileParams {
-  index: any;
-  ts: string;
-  size: string;
-  z: string;
-  x: string;
-  y: string;
-  color: string;
-  options: string;
-}
+// RainViewer removed
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
@@ -160,10 +153,29 @@ const getAllowedOrigins = (): string => {
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': getAllowedOrigins().split(',')[0], // Use first origin as default
   'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-Requested-With',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Requested-With, Authorization',
   'Access-Control-Max-Age': '86400',
   'Access-Control-Expose-Headers': 'x-cost-note, x-provider-id, cache-control'
 };
+
+function buildCorsHeaders(event: LambdaEvent): Record<string, string> {
+  const allowed = getAllowedOrigins()
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  const reqOrigin = event.headers?.origin || event.headers?.Origin;
+  let origin = allowed[0] || '*';
+  if (allowed.includes('*')) origin = '*';
+  else if (reqOrigin && allowed.includes(reqOrigin)) origin = reqOrigin;
+
+  const requestedHeaders = event.headers?.['access-control-request-headers'] || event.headers?.['Access-Control-Request-Headers'];
+  return {
+    ...CORS_HEADERS,
+    'Access-Control-Allow-Origin': origin,
+    ...(requestedHeaders ? { 'Access-Control-Allow-Headers': requestedHeaders } : {}),
+    'Vary': 'Origin',
+  };
+}
 
 function json(
   status: number,
@@ -210,54 +222,7 @@ function buildOwmTileUrl({ layer, z, x, y, apiKey }: OwmTileParams): string {
   return `${OWM_BASE}/${layer}/${z}/${x}/${y}.png?appid=${encodeURIComponent(apiKey)}`;
 }
 
-// -----------------
-// RainViewer helpers
-// -----------------
-let rvCache: any = null;
-let rvAt = 0;
-const RV_TTL = 60_000;
-
-async function getRainviewerIndex(): Promise<any> {
-  const now = Date.now();
-  if (rvCache && now - rvAt < RV_TTL) return rvCache;
-  const res = await fetchWithRetry(
-    'https://api.rainviewer.com/public/weather-maps.json'
-  );
-  if (!res.ok) throw new Error(`rainviewer index ${res.status}`);
-  rvCache = await res.json();
-  rvAt = now;
-  return rvCache;
-}
-
-function buildRainviewerTileUrl({
-  index,
-  ts,
-  size,
-  z,
-  x,
-  y,
-  color,
-  options,
-}: RainviewerTileParams): string | null {
-  const sizeVal = size === '512' ? '512' : '256';
-  const tsNum = Number(ts);
-  if (!Number.isFinite(tsNum)) return null;
-  const frames = [
-    ...(index?.radar?.past || []),
-    ...(index?.radar?.nowcast || []),
-  ];
-  if (!frames.length) return null;
-  let match = frames.find((f: any) => f.time === tsNum);
-  if (!match) {
-    const pastOrEqual = frames
-      .filter((f: any) => f.time <= tsNum)
-      .sort((a: any, b: any) => b.time - a.time);
-    match =
-      pastOrEqual[0] || frames.sort((a: any, b: any) => b.time - a.time)[0];
-  }
-  if (!match) return null;
-  return `${index.host}${match.path}/${sizeVal}/${z}/${x}/${y}/${color}/${options}.png`;
-}
+// RainViewer helpers removed
 
 // Util
 function withShortCache(
@@ -276,14 +241,34 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
   const path = event.rawPath || '/';
   const qs = event.rawQueryString ? `?${event.rawQueryString}` : '';
   const method = event.requestContext?.http?.method || 'GET';
+  const DYNAMIC_CORS = buildCorsHeaders(event);
 
   try {
     // Handle CORS preflight requests
     if (method === 'OPTIONS') {
       return {
         statusCode: 200,
-        headers: CORS_HEADERS,
+        headers: DYNAMIC_CORS,
         body: '',
+      };
+    }
+
+    // Health check
+    if (path === '/api/health') {
+      if (method === 'HEAD') {
+        return { statusCode: 200, headers: DYNAMIC_CORS, body: '' };
+      }
+      return {
+        statusCode: 200,
+        headers: { ...JSON_HEADERS, ...DYNAMIC_CORS, ...withShortCache() },
+        body: JSON.stringify({
+          status: 'ok',
+          service: 'weather-proxy-api',
+          time: new Date().toISOString(),
+          features: {
+            gibs: process.env.GIBS_ENABLED === 'true',
+          },
+        }),
       };
     }
     // Catalog forwarder (keep a single API origin)
@@ -620,106 +605,7 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
       );
     }
 
-    // RainViewer index
-    if (path === '/api/rainviewer/index.json') {
-      const idx = await getRainviewerIndex();
-      return json(200, idx, withShortCache());
-    }
-
-    // RainViewer tile
-    m = path.match(
-      /^\/api\/rainviewer\/(\d+)\/(256|512)\/(\d+)\/(\d+)\/(\d+)\/([^/]+)\/([^/]+)\.png$/
-    );
-    if (m) {
-      const [, ts, size, z, x, y, color, options] = m;
-      const idx = await getRainviewerIndex();
-      const url = buildRainviewerTileUrl({
-        index: idx,
-        ts,
-        size,
-        z,
-        x,
-        y,
-        color,
-        options,
-      });
-      if (!url) return json(404, { error: 'frame not found' });
-      const upstream = await fetchWithRetry(url, {});
-      const buf = Buffer.from(await upstream.arrayBuffer());
-      return bin(
-        upstream.status,
-        buf,
-        upstream.headers.get('content-type') || 'image/png',
-        withShortCache()
-      );
-    }
-
-    // RainViewer tile (latest frame) variant: /api/rainviewer/:z/:x/:y/:size/:color/:options.png
-    m = path.match(
-      /^\/api\/rainviewer\/(\d+)\/(\d+)\/(\d+)\/(256|512)\/([^/]+)\/([^/]+)\.png$/
-    );
-    if (m) {
-      const [, z, x, y, size, color, options] = m;
-      const idx = await getRainviewerIndex();
-      // choose the most recent frame
-      const frames = [
-        ...(idx?.radar?.past || []),
-        ...(idx?.radar?.nowcast || []),
-      ].sort((a: any, b: any) => b.time - a.time);
-      const ts = frames[0]?.time;
-      if (!ts) return json(404, { error: 'no frames' });
-      const url = buildRainviewerTileUrl({
-        index: idx,
-        ts: String(ts),
-        size,
-        z,
-        x,
-        y,
-        color,
-        options,
-      });
-      if (!url) return json(404, { error: 'frame not found' });
-      const upstream = await fetchWithRetry(url, {});
-      const buf = Buffer.from(await upstream.arrayBuffer());
-      return bin(
-        upstream.status,
-        buf,
-        upstream.headers.get('content-type') || 'image/png',
-        withShortCache()
-      );
-    }
-
-    // RainViewer tile (minimal variant): /api/rainviewer/:z/:x/:y.png (defaults size=256,color=0,options=1_0)
-    m = path.match(/^\/api\/rainviewer\/(\d+)\/(\d+)\/(\d+)\.png$/);
-    if (m) {
-      const [, z, x, y] = m;
-      const idx = await getRainviewerIndex();
-      const frames = [
-        ...(idx?.radar?.past || []),
-        ...(idx?.radar?.nowcast || []),
-      ].sort((a: any, b: any) => b.time - a.time);
-      const ts = frames[0]?.time;
-      if (!ts) return json(404, { error: 'no frames' });
-      const url = buildRainviewerTileUrl({
-        index: idx,
-        ts: String(ts),
-        size: '256',
-        z,
-        x,
-        y,
-        color: '0',
-        options: '1_0',
-      });
-      if (!url) return json(404, { error: 'frame not found' });
-      const upstream = await fetchWithRetry(url, {});
-      const buf = Buffer.from(await upstream.arrayBuffer());
-      return bin(
-        upstream.status,
-        buf,
-        upstream.headers.get('content-type') || 'image/png',
-        withShortCache()
-      );
-    }
+  // RainViewer endpoints removed
 
     // GIBS redirect helper
     if (path === '/api/gibs/redirect') {
@@ -867,7 +753,8 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
     if (m) {
       const glmBaseUrl = process.env.GLM_TOE_PY_URL;
       if (!glmBaseUrl) {
-        return json(503, { error: 'GLM_TOE_PY_URL not configured' });
+  // Return 404 when GLM is not enabled to reduce error noise in monitors
+  return json(404, { error: 'GLM TOE not enabled' }, withShortCache());
       }
       const [, z, x, y] = m;
       const url = `${glmBaseUrl.replace(/\/$/, '')}/${z}/${x}/${y}.png${qs}`;

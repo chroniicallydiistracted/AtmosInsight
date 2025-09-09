@@ -4,7 +4,7 @@ Describe the scope of this PR and which checklist items from `AGENTS.md` it impl
 
 ## URLs / Upstreams Touched
 
-- List any upstreams (GIBS, OWM, RainViewer, NWS) you touched
+- List any upstreams (GIBS, OWM, NWS, others) you touched
 
 ## Screenshots / GIFs
 

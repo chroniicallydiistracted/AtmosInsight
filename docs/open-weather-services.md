@@ -39,7 +39,6 @@ This document catalogs freely accessible, non-proprietary weather and space-data
 | **NOAA Radar Viewer** | U.S. radar loops & alerts | Government data; free |
 | **Windy** | Global model visualizations | Free client, mixes proprietary & open sources |
 | **Ventusky** | Radar/satellite + model comparisons | Primarily public data; ads support |
-| **RainViewer** | Global radar aggregation | Free tiles with attribution |
 | **LightningMaps** | Real‑time lightning strikes | Community network; public tiles |
 | **earth.nullschool.net** | Animated wind/ocean currents | Uses open forecast models |
 | **Open‑Meteo** | Free forecast API | Backend proxies public model data |
