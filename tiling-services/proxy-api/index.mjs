@@ -1016,6 +1016,32 @@ var handler = async (event) => {
         body: ""
       };
     }
+    if (path === "/api/search") {
+      const q = new URLSearchParams(qs.slice(1)).get("q") || "";
+      const limit = new URLSearchParams(qs.slice(1)).get("limit") || "5";
+      if (!q) return json(400, { error: "missing q" });
+      const nominatim = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=${encodeURIComponent(limit)}`;
+      try {
+        const upstream = await fetchWithRetry(nominatim, {
+          headers: {
+            "User-Agent": process.env.NWS_USER_AGENT || DEFAULT_NWS_USER_AGENT,
+            "Accept": "application/json",
+            "Referer": "https://weather.westfam.media"
+          }
+        });
+        const data = await upstream.json().catch(async () => JSON.parse(await upstream.text()));
+        const normalized = Array.isArray(data) ? data.map((r) => ({
+          display_name: r.display_name,
+          lat: parseFloat(r.lat),
+          lon: parseFloat(r.lon),
+          type: r.type,
+          class: r.class
+        })) : [];
+        return json(200, { results: normalized }, withShortCache());
+      } catch (e) {
+        return json(503, { error: "geocoding failed", detail: String(e) });
+      }
+    }
     if (path === "/api/health") {
       if (method === "HEAD") {
         return { statusCode: 200, headers: DYNAMIC_CORS, body: "" };

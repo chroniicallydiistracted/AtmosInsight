@@ -50,7 +50,7 @@ function getEmbeddedProviders(): any[] {
         bucket: "noaa-goes19",
         region: "us-east-1",
         requesterPays: false,
-        prefixExamples: ["ABI-L2-CMIPC/2025/09/08/"]
+  prefixExamples: ["ABI-L2-CMIPC/2025/251/"]
       },
       auth: "none",
       license: "NOAA open",
@@ -66,7 +66,7 @@ function getEmbeddedProviders(): any[] {
         bucket: "noaa-goes18",
         region: "us-east-1",
         requesterPays: false,
-        prefixExamples: ["ABI-L2-CMIPC/2025/09/08/"]
+  prefixExamples: ["ABI-L2-CMIPC/2025/251/"]
       },
       auth: "none",
       license: "NOAA open",
@@ -252,6 +252,34 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
         body: '',
       };
     }
+      // Simple geocoding proxy (Nominatim)
+      if (path === '/api/search') {
+        const q = new URLSearchParams(qs.slice(1)).get('q') || '';
+        const limit = new URLSearchParams(qs.slice(1)).get('limit') || '5';
+        if (!q) return json(400, { error: 'missing q' });
+        const nominatim = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=${encodeURIComponent(limit)}`;
+        try {
+          const upstream = await fetchWithRetry(nominatim, {
+            headers: {
+              'User-Agent': process.env.NWS_USER_AGENT || DEFAULT_NWS_USER_AGENT,
+              'Accept': 'application/json',
+              'Referer': 'https://weather.westfam.media'
+            },
+          });
+          const data = await upstream.json().catch(async () => JSON.parse(await upstream.text()));
+          const normalized = Array.isArray(data) ? data.map((r: any) => ({
+            display_name: r.display_name,
+            lat: parseFloat(r.lat),
+            lon: parseFloat(r.lon),
+            type: r.type,
+            class: r.class
+          })) : [];
+          return json(200, { results: normalized }, withShortCache());
+        } catch (e) {
+          return json(503, { error: 'geocoding failed', detail: String(e) });
+        }
+      }
+
 
     // Health check
     if (path === '/api/health') {

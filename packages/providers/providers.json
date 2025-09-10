@@ -10,8 +10,8 @@
         "region": "us-east-1",
         "requesterPays": false,
         "prefixExamples": [
-          "ABI-L2-CMIPC/2025/09/08/",
-          "ABI-L1b-RadC/2025/09/08/"
+          "ABI-L2-CMIPC/2025/251/",
+          "ABI-L1b-RadC/2025/251/"
         ],
         "snsTopic": null
       },
@@ -31,8 +31,8 @@
         "region": "us-east-1",
         "requesterPays": false,
         "prefixExamples": [
-          "ABI-L2-CMIPC/2025/09/08/",
-          "ABI-L1b-RadC/2025/09/08/"
+          "ABI-L2-CMIPC/2025/251/",
+          "ABI-L1b-RadC/2025/251/"
         ],
         "snsTopic": null
       },
@@ -52,7 +52,7 @@
         "region": "us-east-1",
         "requesterPays": false,
         "prefixExamples": [
-          "GLM-L2-LCFA/2025/09/08/"
+          "GLM-L2-LCFA/2025/251/"
         ],
         "snsTopic": null
       },
@@ -281,16 +281,13 @@
         "bucket": "landsat-pds",
         "region": "us-west-2",
         "requesterPays": false,
-        "prefixExamples": [
-          "c1/L8/042/034/LC08_L1TP_042034_20170616_20170629_01_T1/",
-          "collection02/level-1/standard/oli-tirs/2025/042/034/"
-        ],
+        "prefixExamples": null,
         "snsTopic": null
       },
       "auth": "none",
       "license": "USGS open",
       "attribution": "USGS/NASA",
-      "notes": "Landsat Collection 1 and 2 imagery",
+  "notes": "Landsat Collection 1 and 2 imagery. Anonymous ListBucket is disabled (403); object GET works with known keys or via external indexes (e.g., STAC/CMR).",
       "costNote": "cross-region (us-west-2)"
     },
     {

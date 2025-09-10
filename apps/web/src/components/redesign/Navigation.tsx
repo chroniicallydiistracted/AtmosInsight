@@ -5,11 +5,18 @@ interface NavigationProps {
   onSearchClick?: () => void;
   onSettingsClick?: () => void;
   onModeChange?: (mode: 'live' | 'forecast' | 'historical') => void;
+  activeMode?: 'live' | 'forecast' | 'historical';
 }
-
-export function Navigation({ onSearchClick, onSettingsClick, onModeChange }: NavigationProps) {
-  const [activeMode, setActiveMode] = useState<'live' | 'forecast' | 'historical'>('live');
+export function Navigation({ onSearchClick, onSettingsClick, onModeChange, activeMode: controlledMode }: NavigationProps) {
+  const [activeMode, setActiveMode] = useState<'live' | 'forecast' | 'historical'>(controlledMode || 'live');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Keep internal state in sync if parent controls it
+  React.useEffect(() => {
+    if (controlledMode && controlledMode !== activeMode) {
+      setActiveMode(controlledMode);
+    }
+  }, [controlledMode, activeMode]);
 
   const handleModeChange = (mode: 'live' | 'forecast' | 'historical') => {
     setActiveMode(mode);

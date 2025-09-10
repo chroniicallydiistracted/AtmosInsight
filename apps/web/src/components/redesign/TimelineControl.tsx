@@ -5,12 +5,14 @@ interface TimelineControlProps {
   onTimeChange?: (time: Date) => void;
   onPlaybackSpeedChange?: (speed: number) => void;
   duration?: number; // in minutes
+  disabled?: boolean; // when true, UI is visible but inert
 }
 
 export function TimelineControl({ 
   onTimeChange, 
   onPlaybackSpeedChange,
-  duration = 120 // default 2 hours
+  duration = 120, // default 2 hours
+  disabled = false
 }: TimelineControlProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(70);
@@ -27,6 +29,14 @@ export function TimelineControl({
   }, []);
 
   useEffect(() => {
+    if (disabled) {
+      // Stop any animation if disabled
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+      }
+      return;
+    }
     if (isPlaying) {
       const animate = () => {
         setProgress(prev => {
@@ -53,9 +63,10 @@ export function TimelineControl({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isPlaying, playbackSpeed]);
+  }, [isPlaying, playbackSpeed, disabled]);
 
   const handleProgressChange = (value: number) => {
+    if (disabled) return;
     setProgress(value);
     const minutesFromStart = (value / 100) * duration - duration;
     if (currentTime) {
@@ -65,15 +76,18 @@ export function TimelineControl({
   };
 
   const handleSpeedChange = (speed: number) => {
+    if (disabled) return;
     setPlaybackSpeed(speed);
     onPlaybackSpeedChange?.(speed);
   };
 
   const handleStepBackward = () => {
+    if (disabled) return;
     setProgress(Math.max(0, progress - 5));
   };
 
   const handleStepForward = () => {
+    if (disabled) return;
     setProgress(Math.min(100, progress + 5));
   };
 
@@ -101,17 +115,19 @@ export function TimelineControl({
           <div className="flex items-center space-x-2">
             <button 
               onClick={handleStepBackward}
-              className="p-2 rounded-lg hover:bg-white/10 smooth-transition"
+              className={`p-2 rounded-lg hover:bg-white/10 smooth-transition ${disabled ? 'opacity-50 cursor-not-allowed hover:bg-transparent' : ''}`}
               aria-label="Step backward"
+              disabled={disabled}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             <button 
-              onClick={() => setIsPlaying(!isPlaying)}
-              className="p-2 rounded-lg hover:bg-white/10 smooth-transition"
+              onClick={() => !disabled && setIsPlaying(!isPlaying)}
+              className={`p-2 rounded-lg hover:bg-white/10 smooth-transition ${disabled ? 'opacity-50 cursor-not-allowed hover:bg-transparent' : ''}`}
               aria-label={isPlaying ? "Pause" : "Play"}
+              disabled={disabled}
             >
               {isPlaying ? (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,8 +141,9 @@ export function TimelineControl({
             </button>
             <button 
               onClick={handleStepForward}
-              className="p-2 rounded-lg hover:bg-white/10 smooth-transition"
+              className={`p-2 rounded-lg hover:bg-white/10 smooth-transition ${disabled ? 'opacity-50 cursor-not-allowed hover:bg-transparent' : ''}`}
               aria-label="Step forward"
+              disabled={disabled}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -144,7 +161,8 @@ export function TimelineControl({
                 max="100" 
                 value={progress}
                 onChange={(e) => handleProgressChange(Number(e.target.value))}
-                className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                className={`w-full h-2 bg-white/10 rounded-lg appearance-none ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                disabled={disabled}
                 style={{
                   background: `linear-gradient(to right, 
                     rgb(14 165 233) 0%, 
@@ -169,7 +187,8 @@ export function TimelineControl({
             <select 
               value={playbackSpeed}
               onChange={(e) => handleSpeedChange(Number(e.target.value))}
-              className="px-2 py-1 rounded-lg bg-white/10 text-xs focus:outline-none"
+              className={`px-2 py-1 rounded-lg bg-white/10 text-xs focus:outline-none ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={disabled}
             >
               <option value={0.5}>0.5x</option>
               <option value={1}>1x</option>

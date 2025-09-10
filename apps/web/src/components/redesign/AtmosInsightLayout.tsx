@@ -18,14 +18,39 @@ export function AtmosInsightLayout() {
   const [precipVisible, setPrecipVisible] = useState(false);
   const [precipOpacity, setPrecipOpacity] = useState(70);
   const [showProviders, setShowProviders] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [mode, setMode] = useState<'live' | 'forecast' | 'historical'>('live');
+  const [basemap, setBasemap] = useState<'tracestrack' | 'carto'>('tracestrack');
+  // Historical satellite overlay (GIBS) and forecast indicator
+  const [gibsTime, setGibsTime] = useState<string | null>(null);
+  const [gibsVisible, setGibsVisible] = useState(false);
+  const [forecastHours, setForecastHours] = useState(0);
+  const errorCountRef = useRef<{[k: string]: { count: number; firstAt: number }}>({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [searchResults, setSearchResults] = useState<Array<{ display_name: string; lat: number; lon: number }>>([]);
+  const [searchActiveIndex, setSearchActiveIndex] = useState(-1);
   const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+
+  // Build GIBS GOES-East tile URL (time-aware). timeISO=null selects default latest.
+  const buildGibsGoesTileUrl = (timeISO: string | null) => {
+    const base = apiBase ? `${apiBase}` : '';
+    if (!timeISO) {
+      // No time -> "default" best layer
+      return `${base}/api/gibs/tile/3857/GOES-East_ABI_GeoColor/GoogleMapsCompatible/{z}/{y}/{x}.png`;
+    }
+    return `${base}/api/gibs/tile/3857/GOES-East_ABI_GeoColor/${encodeURIComponent(timeISO)}/GoogleMapsCompatible/{z}/{y}/{x}.png`;
+  };
 
   // Initialize map
   useEffect(() => {
     if (!mapRef.current) return;
 
-  // Build basemap tile URL: use Tracestrack via our proxy (relative path works behind CloudFront)
-  const basemapTileUrl = (apiBase ? `${apiBase}` : '') + '/api/tracestrack/topo_en/{z}/{x}/{y}.webp';
+  // Build basemap tile URLs: primary Tracestrack via proxy; fallback Carto via proxy
+  const tracesTileUrl = (apiBase ? `${apiBase}` : '') + '/api/tracestrack/topo_en/{z}/{x}/{y}.webp';
+  const cartoTileUrl = (apiBase ? `${apiBase}` : '') + '/api/basemap/carto/light_all/{z}/{x}/{y}.png';
 
     const map = new maplibregl.Map({
       container: mapRef.current,
@@ -34,19 +59,50 @@ export function AtmosInsightLayout() {
         sources: {
           'tracestrack-topo': {
             type: 'raster',
-      // Always go through our proxy API (relative works in production via CloudFront path routing)
-      tiles: [basemapTileUrl],
+            // Always go through our proxy API (relative works in production via CloudFront path routing)
+            tiles: [tracesTileUrl],
             tileSize: 256,
             attribution: '© Tracestrack, © OpenStreetMap contributors'
+          },
+          'carto-light': {
+            type: 'raster',
+            tiles: [cartoTileUrl],
+            tileSize: 256,
+            attribution: '© CARTO, © OpenStreetMap contributors'
+          },
+          'gibs-goes-east': {
+            type: 'raster',
+            tiles: [buildGibsGoesTileUrl(gibsTime)],
+            tileSize: 256,
+            attribution: 'Imagery © NASA GIBS/NOAA'
           }
         },
-        layers: [{
-          id: 'tracestrack-topo-layer',
-          type: 'raster',
-          source: 'tracestrack-topo',
-          minzoom: 0,
-          maxzoom: 20
-        }]
+        layers: [
+          {
+            id: 'tracestrack-topo-layer',
+            type: 'raster',
+            source: 'tracestrack-topo',
+            minzoom: 0,
+            maxzoom: 20,
+            layout: { visibility: 'visible' }
+          },
+          {
+            id: 'carto-light-layer',
+            type: 'raster',
+            source: 'carto-light',
+            minzoom: 0,
+            maxzoom: 20,
+            layout: { visibility: 'none' }
+          },
+          {
+            id: 'gibs-goes-east-layer',
+            type: 'raster',
+            source: 'gibs-goes-east',
+            minzoom: 0,
+            maxzoom: 10,
+            layout: { visibility: 'none' }
+          }
+        ]
       },
       center: [-112.074037, 33.448376], // Phoenix, AZ
       zoom: 8,
@@ -67,6 +123,26 @@ export function AtmosInsightLayout() {
       setLoading(false);
     });
 
+  // Count tile errors per source and fallback basemap if needed
+    map.on('error', (e) => {
+      // We only care about tile load errors on the tracestrack source
+      const sourceId = (e as { sourceId?: string } | undefined)?.sourceId ?? '';
+      if (sourceId !== 'tracestrack-topo') return;
+      const now = Date.now();
+      const slot = errorCountRef.current[sourceId] || { count: 0, firstAt: now };
+  // Reset the window if > 3s passed
+  if (now - slot.firstAt > 3000) {
+        slot.count = 0;
+        slot.firstAt = now;
+      }
+      slot.count += 1;
+      errorCountRef.current[sourceId] = slot;
+  if (slot.count >= 4 && basemap === 'tracestrack') {
+        console.warn('[basemap] Too many tile errors for Tracestrack; switching to Carto fallback');
+        setBasemap('carto');
+      }
+    });
+
     // Handle map clicks
     map.on('click', (e) => {
       setCurrentLocation({ lat: e.lngLat.lat, lon: e.lngLat.lng });
@@ -77,7 +153,52 @@ export function AtmosInsightLayout() {
     return () => {
       map.remove();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // React to basemap changes by toggling layer visibility
+  useEffect(() => {
+    if (!mapObj) return;
+    const showTraces = basemap === 'tracestrack' ? 'visible' : 'none';
+    const showCarto = basemap === 'carto' ? 'visible' : 'none';
+    if (mapObj.getLayer('tracestrack-topo-layer')) {
+      mapObj.setLayoutProperty('tracestrack-topo-layer', 'visibility', showTraces);
+    }
+    if (mapObj.getLayer('carto-light-layer')) {
+      mapObj.setLayoutProperty('carto-light-layer', 'visibility', showCarto);
+    }
+  }, [basemap, mapObj]);
+
+  // Toggle GIBS overlay visibility
+  useEffect(() => {
+    if (!mapObj) return;
+    if (mapObj.getLayer('gibs-goes-east-layer')) {
+      mapObj.setLayoutProperty('gibs-goes-east-layer', 'visibility', gibsVisible ? 'visible' : 'none');
+    }
+  }, [gibsVisible, mapObj]);
+
+  // Refresh GIBS tiles on time change
+  const refreshGibsTiles = (timeISO: string | null) => {
+    if (!mapObj) return;
+    const sourceId = 'gibs-goes-east';
+    const layerId = 'gibs-goes-east-layer';
+    try {
+      if (mapObj.getLayer(layerId)) mapObj.removeLayer(layerId);
+    } catch {}
+    try {
+      if (mapObj.getSource(sourceId)) mapObj.removeSource(sourceId);
+    } catch {}
+    mapObj.addSource(
+      sourceId,
+      {
+        type: 'raster',
+        tiles: [buildGibsGoesTileUrl(timeISO)],
+        tileSize: 256,
+        attribution: 'Imagery © NASA GIBS/NOAA'
+      } as unknown as maplibregl.RasterSourceSpecification
+    );
+    mapObj.addLayer({ id: layerId, type: 'raster', source: sourceId, minzoom: 0, maxzoom: 10, layout: { visibility: gibsVisible ? 'visible' : 'none' } });
+  };
 
   // Get user location
   useEffect(() => {
@@ -116,14 +237,72 @@ export function AtmosInsightLayout() {
     }
   };
 
-  const handleModeChange = (mode: 'live' | 'forecast' | 'historical') => {
-    console.log('Mode changed to:', mode);
-    // Handle mode change logic
+  const handleModeChange = (m: 'live' | 'forecast' | 'historical') => {
+    setMode(m);
+    console.log('Mode changed to:', m);
+    if (m === 'historical') {
+      setPrecipVisible(false);
+      setGibsVisible(true);
+      setGibsTime(null);
+      refreshGibsTiles(null);
+    } else if (m === 'forecast') {
+      setGibsVisible(false);
+      setPrecipVisible(true);
+      setForecastHours(0);
+    } else {
+      // live
+      setGibsVisible(false);
+      setPrecipVisible(true);
+    }
+  };
+
+  // Debounced search to /api/search
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const q = searchQuery.trim();
+    if (!showSearch) return;
+    if (!q) {
+      setSearchResults([]);
+      setSearchError(null);
+      setSearchLoading(false);
+  setSearchActiveIndex(-1);
+      return;
+    }
+    setSearchLoading(true);
+    setSearchError(null);
+    timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`${apiBase ? apiBase : ''}/api/search?q=${encodeURIComponent(q)}`);
+  const data = await res.json();
+  type SearchResult = { display_name: string; lat: number; lon: number };
+  const results = Array.isArray((data as { results?: unknown })?.results) ? (data as { results: SearchResult[] }).results : [];
+  const mapped: SearchResult[] = results.map((r) => ({ display_name: r.display_name, lat: Number(r.lat), lon: Number(r.lon) }));
+  setSearchResults(mapped);
+  setSearchActiveIndex(mapped.length > 0 ? 0 : -1);
+      } catch (e) {
+        setSearchError(String(e));
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+    return () => { if (timer) clearTimeout(timer); };
+  }, [searchQuery, showSearch, apiBase]);
+
+  const handleSelectSearch = (lat: number, lon: number) => {
+    if (!mapObj) return;
+    mapObj.flyTo({ center: [lon, lat], zoom: 10, duration: 900 });
   };
 
   const handleTimeChange = (time: Date) => {
-    console.log('Time changed to:', time);
-    // Handle time change logic
+    if (mode === 'historical') {
+      const iso = time.toISOString();
+      setGibsTime(iso);
+      refreshGibsTiles(iso);
+    } else if (mode === 'forecast') {
+      const diffMs = time.getTime() - Date.now();
+      const hrs = Math.round(diffMs / 3600000);
+      setForecastHours(Math.max(0, hrs));
+    }
   };
 
   const handleMyLocation = () => {
@@ -160,9 +339,10 @@ export function AtmosInsightLayout() {
 
       {/* Top Navigation */}
       <Navigation 
+        activeMode={mode}
         onModeChange={handleModeChange}
-        onSearchClick={() => console.log('Search clicked')}
-        onSettingsClick={() => console.log('Settings clicked')}
+        onSearchClick={() => setShowSearch(true)}
+        onSettingsClick={() => setShowSettings(true)}
       />
 
       {/* Left Sidebar - Layers Panel */}
@@ -182,6 +362,7 @@ export function AtmosInsightLayout() {
       <TimelineControl 
         onTimeChange={handleTimeChange}
         onPlaybackSpeedChange={(speed) => console.log('Speed changed:', speed)}
+        disabled={mode === 'live'}
       />
 
       {/* Mobile Bottom Navigation */}
@@ -266,6 +447,109 @@ export function AtmosInsightLayout() {
       )}
       {showProviders && (
         <ProvidersPanel onClose={() => setShowProviders(false)} />
+      )}
+      {showSearch && (
+        <aside className="absolute right-4 top-24 bottom-24 w-[26rem] z-30 animate-slide-in-right">
+          <div className="glass rounded-xl h-full flex flex-col">
+            <div className="p-4 border-b border-white/10 flex items-center justify-between">
+              <h2 data-testid="search-header" className="text-sm font-semibold">Search</h2>
+              <button onClick={() => setShowSearch(false)} className="px-2 py-1 rounded hairline hover:bg-white/10 text-xs">Close</button>
+            </div>
+            <div className="p-3 flex-1 flex flex-col overflow-hidden">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const q = searchQuery.trim();
+                const m = q.match(/^\s*(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/);
+                if (m) {
+                  const lat = parseFloat(m[1]);
+                  const lon = parseFloat(m[2]);
+                  if (!Number.isNaN(lat) && !Number.isNaN(lon)) handleSelectSearch(lat, lon);
+                } else if (searchActiveIndex >= 0 && searchResults[searchActiveIndex]) {
+                  const sel = searchResults[searchActiveIndex];
+                  handleSelectSearch(sel.lat, sel.lon);
+                }
+              }}>
+                <input
+                  name="q"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowDown') {
+                      e.preventDefault();
+                      setSearchActiveIndex((i) => Math.min(searchResults.length - 1, (i < 0 ? 0 : i + 1)));
+                    } else if (e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      setSearchActiveIndex((i) => Math.max(0, (i <= 0 ? 0 : i - 1)));
+                    }
+                  }}
+                  placeholder="Search places or enter lat,lon (33.45,-112.07)"
+                  className="w-full px-3 py-2 rounded bg-white/5 border border-white/10 text-sm focus:outline-none"
+                />
+              </form>
+              <div className="mt-2 text-xs text-gray-400">Type to search. Enter a coordinate pair to jump directly.</div>
+              <div className="mt-3 flex-1 overflow-auto custom-scrollbar">
+                {searchLoading && <div className="text-xs text-gray-400">Searching…</div>}
+                {searchError && <div className="text-xs text-red-400">{searchError}</div>}
+                {!searchLoading && !searchError && searchResults.length > 0 && (
+                  <ul className="space-y-2">
+        {searchResults.map((r, idx) => (
+                      <li key={`${r.display_name}-${idx}`}>
+                        <button
+                          data-testid="search-result"
+          className={`w-full text-left p-2 rounded hover:bg-white/10 ${idx === searchActiveIndex ? 'bg-white/10 ring-1 ring-white/20' : ''}`}
+                          onClick={() => handleSelectSearch(r.lat, r.lon)}
+                        >
+                          <div className="text-sm">{r.display_name}</div>
+                          <div className="text-[11px] text-gray-400">{r.lat.toFixed(4)}, {r.lon.toFixed(4)}</div>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {!searchLoading && !searchError && searchQuery && searchResults.length === 0 && (
+                  <div className="text-xs text-gray-500">No results</div>
+                )}
+              </div>
+            </div>
+          </div>
+        </aside>
+      )}
+      {mode === 'forecast' && (
+        <div className="absolute top-4 left-4 z-20">
+          <div className="glass rounded-full px-3 py-1 text-xs">Forecast: T+{forecastHours}h</div>
+        </div>
+      )}
+      {showSettings && (
+        <aside className="absolute right-4 top-24 bottom-24 w-[26rem] z-30 animate-slide-in-right">
+          <div className="glass rounded-xl h-full flex flex-col">
+            <div className="p-4 border-b border-white/10 flex items-center justify-between">
+              <h2 data-testid="settings-header" className="text-sm font-semibold">Settings</h2>
+              <button onClick={() => setShowSettings(false)} className="px-2 py-1 rounded hairline hover:bg-white/10 text-xs">Close</button>
+            </div>
+            <div className="p-3 space-y-3 text-sm text-gray-300">
+              <div className="flex items-center justify-between">
+                <span>Units</span>
+                <select className="px-2 py-1 rounded bg-white/10 text-xs" defaultValue={(typeof window !== 'undefined' && localStorage.getItem('units')) || 'Imperial'} onChange={(e) => {
+                  try { localStorage.setItem('units', e.target.value); } catch {}
+                }}>
+                  <option>Imperial</option>
+                  <option>Metric</option>
+                </select>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Theme</span>
+                <select className="px-2 py-1 rounded bg-white/10 text-xs" defaultValue={(typeof window !== 'undefined' && localStorage.getItem('theme')) || 'System'} onChange={(e) => {
+                  try { localStorage.setItem('theme', e.target.value); } catch {}
+                }}>
+                  <option>System</option>
+                  <option>Dark</option>
+                  <option>Light</option>
+                </select>
+              </div>
+              <p className="text-xs text-gray-500">More settings soon.</p>
+            </div>
+          </div>
+        </aside>
       )}
     </div>
   );

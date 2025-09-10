@@ -27,7 +27,7 @@ interface InfoPanelProps {
 }
 
 export function InfoPanel({ location, onDetailsClick }: InfoPanelProps) {
-  const [conditions, setConditions] = useState<WeatherConditions>({
+  const [conditions] = useState<WeatherConditions>({
     temperature: 72,
     humidity: 65,
     windSpeed: 12,
@@ -35,12 +35,12 @@ export function InfoPanel({ location, onDetailsClick }: InfoPanelProps) {
     location: 'Phoenix, AZ'
   });
 
-  const [astronomy, setAstronomy] = useState<AstronomyData>({
+  const [astronomy] = useState<AstronomyData>({
     sun: { azimuth: 245, elevation: 35 },
     moon: { azimuth: 120, elevation: 45, phase: 67 }
   });
 
-  const [alerts, setAlerts] = useState<Alert[]>([
+  const [alerts] = useState<Alert[]>([
     {
       id: '1',
       type: 'severe',

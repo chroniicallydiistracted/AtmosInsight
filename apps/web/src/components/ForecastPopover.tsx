@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface ForecastData {
   current: {
@@ -55,14 +55,7 @@ export function ForecastPopover() {
     }
   }, [isOpen, location]);
 
-  // Fetch forecast when location is available
-  useEffect(() => {
-    if (location && isOpen && !forecast) {
-      fetchForecast();
-    }
-  }, [location, isOpen, forecast]);
-
-  const fetchForecast = async () => {
+  const fetchForecast = useCallback(async () => {
     if (!location) return;
 
     setLoading(true);
@@ -88,7 +81,14 @@ export function ForecastPopover() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [location]);
+
+  // Fetch forecast when location is available
+  useEffect(() => {
+    if (location && isOpen && !forecast) {
+      fetchForecast();
+    }
+  }, [location, isOpen, forecast, fetchForecast]);
 
   const formatTemperature = (temp?: number) => {
     if (temp === undefined) return 'N/A';
